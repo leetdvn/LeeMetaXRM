@@ -32,14 +32,15 @@ public class LeeMetaXRM : ModuleRules
             "GameplayTasks",
             "AIModule",
             "NavigationSystem",
-            "HeadMountedDisplay"
-
+            "HeadMountedDisplay",
+            "XRBase"
 
         });
 
         //PrivateIncludePaths.AddRange(new string[] {
         //    "Slate",
         //    "SlateCore",
+
         //});
 
 
