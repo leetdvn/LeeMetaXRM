@@ -32,6 +32,8 @@ public class LeeMetaXRM : ModuleRules
             "GameplayTasks",
             "AIModule",
             "NavigationSystem",
+            "HeadMountedDisplay"
+
 
         });
 
