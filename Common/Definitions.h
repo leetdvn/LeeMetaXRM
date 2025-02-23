@@ -15,6 +15,9 @@
 #define LEE_PROFILE_LEVEL 1
 #endif //!UE_BUILD_SHIPPING
 
+
+DEFINE_LOG_CATEGORY_STATIC(LeeXRMacro, Log, All);
+
 #if WITH_EDITOR
 #define LEE_CHECK(expr) checkSlow((expr))
 #else
@@ -55,3 +58,7 @@ FPlatformMemory::EMemoryCounterRegion::MCR_Invalid);
 #else
 #define LEE_CHECK(expr) check((expr)) 
 #endif
+
+#define LEE_LOG(Verbosity, Format, ...) UE_LOG(LeeXRMacro, Verbosity, TEXT(Format), ##__VA_ARGS__)
+
+#define LeeScreenLog(Format,Color, ...) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, Color, FString::Printf(TEXT(Format), ##__VA_ARGS__))

@@ -16,6 +16,9 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 class UVRNotificationsComponent;
+class UWidgetComponent;
+class ULeeXRSphereComponent;
+class ULeeXRGrabComponent;
 
 UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
 class LEEMETAXRM_API ALeeXRPawn : public APawn
@@ -33,34 +36,83 @@ class LEEMETAXRM_API ALeeXRPawn : public APawn
 	TObjectPtr<UVRNotificationsComponent> Notify;
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input", meta = (AllowPrivateAccess = "true"))
-	UInputMappingContext* DefaultMappingContext;
+	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
-	// Input Actions
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* IA_Move;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputMappingContext> HandMappingContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* IA_Turn;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* IA_GrabLeft;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* IA_GrabRight;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* IA_LMenuToogle;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* IA_RMenuToogle;
+	/*HeadMountedDisiplay And Components */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UStaticMeshComponent> HeadMountedDisplayMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UStaticMeshComponent> XRDeviceLeft;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UStaticMeshComponent> XRDeviceRight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UMotionControllerComponent> LeftGrip;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UMotionControllerComponent> RightGrip;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UOculusXRHandComponent> HandTrackRight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UOculusXRHandComponent> HandTrackLeft;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UMotionControllerComponent> LeftAim;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UMotionControllerComponent> RightAim;
+
+	/**Collision Sphere**/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<ULeeXRSphereComponent> IndexLeftCollison;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<ULeeXRSphereComponent> ThumbLeftCollison;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<ULeeXRSphereComponent> IndexRightCollison;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<ULeeXRSphereComponent> ThumbRightCollison;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UWidgetComponent> WidgetInteractionLeft;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UWidgetComponent> WidgetInteractionRight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<ULeeXRGrabComponent> HeldComponentLeft;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<ULeeXRGrabComponent> HeldComponentRight;
+
+	// Input Actions
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Move;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_Turn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_GrabLeft;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_GrabRight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_LMenuToogle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* IA_RMenuToogle;
+
 
 public:
 	// Sets default values for this pawn's properties
@@ -79,16 +131,31 @@ public:
 	void IAMoveComplete();
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
-	void IATurn();
+	void IATurnStart();
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
-	void IAGrabLeft();
+	void IATurnCompleted();
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void IAGrabLeftStart();
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void IAGrabLeftCompleted();
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void IAGrabRight();
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
-	void IALMenuToogle();
+	void IALMenuToogle(const FInputActionInstance& ActionInstance);
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void IARMenuToogle();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	ULeeXRGrabComponent* GetGrapComponentNearController(UMotionControllerComponent* MotionController);
+
+	UFUNCTION()
+	void OnHitComponent(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 protected:
 	// Called when the game starts or when spawned
@@ -122,4 +189,12 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+private:
+	
+	void ToogleMenu(bool isLeft);
+
+	void InitializeComponents();
+	
+	FVector bStartLine;
+	FVector bEndLine;
 };

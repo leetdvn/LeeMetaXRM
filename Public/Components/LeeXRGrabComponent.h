@@ -20,7 +20,7 @@ enum class ELeeXRGrabType : uint8
 
 
 
-UCLASS(BlueprintType,Blueprintable, meta=(BlueprintSpawnableComponent) )
+UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
 class LEEMETAXRM_API ULeeXRGrabComponent : public USceneComponent
 {
 	GENERATED_BODY()
@@ -48,22 +48,27 @@ public:
 	/// Should simulate on drop
 	/// </summary>
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings")
-	bool bShouldSimulateOnDrop = false;
+	ELeeXRGrabType GrabType = ELeeXRGrabType::LNONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
+	TObjectPtr<UHapticFeedbackEffect_Base> OnGrabHapticEffect;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings")
 	bool bIsHeld = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings")
-	FRotator PrimitiveGrabRotation;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings")
-	ELeeXRGrabType GrabType = ELeeXRGrabType::LNONE;
+	bool bShouldSimulateOnDrop = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<UMotionControllerComponent> MotionControllerRef;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
-	TObjectPtr<UHapticFeedbackEffect_Base> OnGrabHapticEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings")
+	FRotator PrimitiveGrabRotation;
+
+
+
+
 
 protected:
 	// Called when the game starts

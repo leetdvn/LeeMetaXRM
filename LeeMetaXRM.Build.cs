@@ -33,8 +33,8 @@ public class LeeMetaXRM : ModuleRules
             "AIModule",
             "NavigationSystem",
             "HeadMountedDisplay",
-            "XRBase"
-
+            "XRBase",
+            "OculusXRInput"
         });
 
         //PrivateIncludePaths.AddRange(new string[] {
@@ -67,16 +67,20 @@ public class LeeMetaXRM : ModuleRules
                 "AnimationBlueprintEditor",
                 "IKRigEditor",
                 "AIGraph",
-                "AIModule"
+                "AIModule",
             });
 
 
         }
 
 
+
+
         if (Target.Platform == UnrealTargetPlatform.Android) 
 		{
-
+            PublicDependencyModuleNames.AddRange(new string[] {
+                "MetaXR"
+            });
 		}
 	
 
@@ -90,6 +94,6 @@ public class LeeMetaXRM : ModuleRules
 
         }
 
-
+        // Fix for CS0103: The name 'bCanContainContent' does not exist in the current context
     }
 }

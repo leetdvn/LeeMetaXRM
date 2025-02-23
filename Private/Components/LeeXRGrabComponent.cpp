@@ -35,11 +35,14 @@ void ULeeXRGrabComponent::SetPrimitiveComPhysics(bool bShouldSimulate)
 
 void ULeeXRGrabComponent::AttachParentToMotionController(UMotionControllerComponent* MotionController)
 {
-	if (AttachToComponent(GetAttachParent(), FAttachmentTransformRules::KeepWorldTransform, MotionController->GetAttachSocketName()))
+	
+	if (!GetAttachParent()->AttachToComponent(MotionController, FAttachmentTransformRules::KeepWorldTransform, NAME_None))
 	{
 		FString displayName = GetAttachParent()->GetName();
 
 		UE_LOG(LogTemp, Warning, TEXT("Attaching %s to %s"), *displayName,*MotionController->GetName());
+
+		LeeScreenLog("Attaching %s to %s", FColor::Green, *displayName, *MotionController->GetName());
 	}
 }
 
@@ -91,11 +94,10 @@ bool ULeeXRGrabComponent::TryGrab(UMotionControllerComponent* MotionController)
 
 	if (Controller)
 	{
-		EControllerHand Select = MotionController->MotionSource == "LeftGrip" ? EControllerHand::Left : EControllerHand::Right;
+		EControllerHand Select = MotionController->MotionSource == "Left" ? EControllerHand::Left : EControllerHand::Right;
 		///Play Haptic Effect
-		if (OnGrabHapticEffect !=nullptr)
-			Controller->PlayHapticEffect(OnGrabHapticEffect, Select);
-		return true;
+		Controller->PlayHapticEffect(OnGrabHapticEffect, Select);
+		return bIsHeld = true;
 	}
 	return false;
 }
