@@ -34,7 +34,8 @@ public class LeeMetaXRM : ModuleRules
             "NavigationSystem",
             "HeadMountedDisplay",
             "XRBase",
-            "OculusXRInput"
+            "OculusXRInput",
+            "Niagara"
         });
 
         //PrivateIncludePaths.AddRange(new string[] {
@@ -46,7 +47,6 @@ public class LeeMetaXRM : ModuleRules
 
         PublicIncludePaths.AddRange(new string[] {
             "LeeMetaXRM/Common",
-            "LeeMetaXRM/Ultils",
             "LeeMetaXRM/",
             "LeeMetaXRM/Shaders",
         });
@@ -68,6 +68,8 @@ public class LeeMetaXRM : ModuleRules
                 "IKRigEditor",
                 "AIGraph",
                 "AIModule",
+                "Niagara"
+
             });
 
 
@@ -78,9 +80,7 @@ public class LeeMetaXRM : ModuleRules
 
         if (Target.Platform == UnrealTargetPlatform.Android) 
 		{
-            PublicDependencyModuleNames.AddRange(new string[] {
-                "MetaXR"
-            });
+
 		}
 	
 

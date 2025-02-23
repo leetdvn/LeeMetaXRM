@@ -18,6 +18,8 @@ ULeeXRGrabComponent::ULeeXRGrabComponent(const FObjectInitializer& ObjectInitial
 
 void ULeeXRGrabComponent::SetSholdSimulationOnDrop()
 {
+	LeeScreenLog("Set Should Simulation On Drop", FColor::Green);
+
 	UPrimitiveComponent* PrimComp = Cast<UPrimitiveComponent>(GetAttachParent());
 	if (PrimComp && PrimComp->IsAnySimulatingPhysics())
 	{
@@ -36,7 +38,8 @@ void ULeeXRGrabComponent::SetPrimitiveComPhysics(bool bShouldSimulate)
 void ULeeXRGrabComponent::AttachParentToMotionController(UMotionControllerComponent* MotionController)
 {
 	
-	if (!GetAttachParent()->AttachToComponent(MotionController, FAttachmentTransformRules::KeepWorldTransform, NAME_None))
+	bool isAttach = GetAttachParent()->AttachToComponent(MotionController, FAttachmentTransformRules::KeepWorldTransform, NAME_None);
+	if (!isAttach)
 	{
 		FString displayName = GetAttachParent()->GetName();
 
@@ -48,6 +51,8 @@ void ULeeXRGrabComponent::AttachParentToMotionController(UMotionControllerCompon
 
 bool ULeeXRGrabComponent::TryGrab(UMotionControllerComponent* MotionController)
 {
+	LeeScreenLog("Try Grab", FColor::Green);
+
 	switch (GrabType)
 	{
 		case ELeeXRGrabType::LNONE: {
@@ -94,7 +99,7 @@ bool ULeeXRGrabComponent::TryGrab(UMotionControllerComponent* MotionController)
 
 	if (Controller)
 	{
-		EControllerHand Select = MotionController->MotionSource == "Left" ? EControllerHand::Left : EControllerHand::Right;
+		EControllerHand Select = MotionController->MotionSource == "LeftGrip" ? EControllerHand::Left : EControllerHand::Right;
 		///Play Haptic Effect
 		Controller->PlayHapticEffect(OnGrabHapticEffect, Select);
 		return bIsHeld = true;

@@ -38,10 +38,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void AttachParentToMotionController(UMotionControllerComponent* MotionController);
 
-	UFUNCTION(BlueprintCallable,BlueprintPure,Category = "LeeXR|Func",meta=(BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable,Category = "LeeXR|Func")
 	bool TryGrab(UMotionControllerComponent* MotionController);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure,Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable,Category = "LeeXR|Func")
 	bool TryRelease();
 
 	/// <summary>

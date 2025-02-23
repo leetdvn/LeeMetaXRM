@@ -17,6 +17,12 @@
 #include <SphereComponent.h>
 #include "Components/LeeXRSphereComponent.h"
 #include "Components/LeeXRGrabComponent.h"
+#include <EnhancedInputSubsystems.h>
+#include <NiagaraComponent.h>
+#include <NavigationSystem.h>
+#include "NiagaraFunctionLibrary.h"
+#include <NiagaraDataInterfaceArrayFunctionLibrary.h>
+#include "../../../../../../Program Files/Epic Games/UE_5.4/Engine/Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraDataInterfaceArrayFunctionLibrary.h"
 
 // Sets default values
 ALeeXRPawn::ALeeXRPawn(const FObjectInitializer& ObjectInitializer)
@@ -42,8 +48,8 @@ ALeeXRPawn::ALeeXRPawn(const FObjectInitializer& ObjectInitializer)
 	XRDeviceLeft = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("XR_LeftDevice"));
 	XRDeviceLeft->SetupAttachment(LeftGrip);
 
-	HandTrackLeft = CreateDefaultSubobject<UOculusXRHandComponent>(TEXT("HandTrackLeft"));
-	HandTrackLeft->SetupAttachment(LeftGrip);
+	//HandTrackLeft = CreateDefaultSubobject<UOculusXRHandComponent>(TEXT("HandTrackLeft"));
+	//HandTrackLeft->SetupAttachment(LeftGrip);
 	/*Right Grip*/
 	RightGrip = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("MC_RightGrip"));
 	RightGrip->SetupAttachment(RootComponent);
@@ -51,8 +57,8 @@ ALeeXRPawn::ALeeXRPawn(const FObjectInitializer& ObjectInitializer)
 	XRDeviceRight = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("XR_RightDevice"));
 	XRDeviceRight->SetupAttachment(RightGrip);
 
-	HandTrackRight = CreateDefaultSubobject<UOculusXRHandComponent>(TEXT("HandTrackRight"));
-	HandTrackRight->SetupAttachment(RightGrip);
+	//HandTrackRight = CreateDefaultSubobject<UOculusXRHandComponent>(TEXT("HandTrackRight"));
+	//HandTrackRight->SetupAttachment(RightGrip);
 
 	LeftAim = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("MC_LeftAim"));
 	LeftAim->SetupAttachment(RootComponent);
@@ -69,20 +75,23 @@ ALeeXRPawn::ALeeXRPawn(const FObjectInitializer& ObjectInitializer)
 	Notify = CreateDefaultSubobject<UVRNotificationsComponent>(TEXT("VRNotification"));
 
 
-	IndexLeftCollison = CreateDefaultSubobject<ULeeXRSphereComponent>(TEXT("IndexLeftCollison"));
+	//IndexLeftCollison = CreateDefaultSubobject<ULeeXRSphereComponent>(TEXT("IndexLeftCollison"));
 
-	IndexLeftCollison->AttachToComponent(HandTrackLeft.Get(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Index3"));
+	//IndexLeftCollison->AttachToComponent(HandTrackLeft.Get(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Index3"));
 
-	ThumbLeftCollison = CreateDefaultSubobject<ULeeXRSphereComponent>(TEXT("ThumbLeftCollison"));
-	ThumbLeftCollison->AttachToComponent(HandTrackLeft.Get(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Thumb3"));
+	//ThumbLeftCollison = CreateDefaultSubobject<ULeeXRSphereComponent>(TEXT("ThumbLeftCollison"));
+	//ThumbLeftCollison->AttachToComponent(HandTrackLeft.Get(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Thumb3"));
 
 
-	IndexRightCollison = CreateDefaultSubobject<ULeeXRSphereComponent>(TEXT("IndexRightCollison"));
+	//IndexRightCollison = CreateDefaultSubobject<ULeeXRSphereComponent>(TEXT("IndexRightCollison"));
 
-	IndexRightCollison->AttachToComponent(HandTrackRight.Get(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Index3"));
+	//IndexRightCollison->AttachToComponent(HandTrackRight.Get(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Index3"));
 
-	ThumbRightCollison = CreateDefaultSubobject<ULeeXRSphereComponent>(TEXT("ThumbRightCollison"));
-	ThumbRightCollison->AttachToComponent(HandTrackRight.Get(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Thumb3"));
+	//ThumbRightCollison = CreateDefaultSubobject<ULeeXRSphereComponent>(TEXT("ThumbRightCollison"));
+	//ThumbRightCollison->AttachToComponent(HandTrackRight.Get(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("Thumb3"));
+
+	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
+	NiagaraComponent->SetupAttachment(RootComponent);
 
 	InitializeComponents();
 }
@@ -91,12 +100,105 @@ void ALeeXRPawn::StartTeleportTrace()
 {
 	UE_LOG(LeeXRCharacters, Warning, TEXT("Teleport Trace Started"));
 
+	bTeleportTraceActive = true;
+
+	NiagaraComponent->SetVisibility(true);
+
+	if (ActorToSpawn == nullptr) return;
+
+	AActor* ActorSpawn= GetWorld()->SpawnActor<AActor>(ActorToSpawn->StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+	
+	//if (ActorSpawn !=nullptr)
+	//{
+	//	ActorToSpawn = ActorSpawn->GetClass();
+	//}
+
+}
+
+bool ALeeXRPawn::IsValidTeleportLocation(FHitResult Hit, FVector& ProjectedLocation)
+{
+	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	if (!NavSys) return false;
+
+
+	return  NavSys->K2_ProjectPointToNavigation(
+		GetWorld(),
+		Hit.Location,
+		ProjectedLocation,
+		NavSys->GetAbstractNavData(),
+		NULL,
+		TeleportProjectPointToNavigationQueryExtent);
+}
+
+void ALeeXRPawn::TeleportTrace(FVector StartPos, FVector ForwardVec)
+{
+	//Trace Teleport
+	LEE_LOG(LeeXRCharacters, Log, "Trace Teleport");
+	LeeScreenLog("Trace Teleport", FColor::Green);
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>();
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
+
+	float teleportSpped = 650.0f;
+	float TeleportRadius = 3.6f;
+	float LocalNavMeshCellHeight = 8.0f;
+	FHitResult OutHit{};
+	TArray<FVector> PathPositions = TArray<FVector>();
+	FVector LastTraceDestination = FVector::ZeroVector;
+
+	UGameplayStatics::Blueprint_PredictProjectilePath_ByObjectType(
+		GetWorld(),
+		OutHit,
+		PathPositions,
+		LastTraceDestination,
+		StartPos,
+		teleportSpped * ForwardVec,
+		true,
+		TeleportRadius,
+		ObjectTypes,
+		false,
+		TArray<AActor*>(),
+		EDrawDebugTrace::None,
+		0.0f,
+		15.0f,
+		2.0f,
+		0.0f
+		);
+
+
+	//Update TeleportVisualizer Location
+	PathPositions.Insert(StartPos, 0);
+	FVector ProjectedLocation{};
+	bool isTeleportValid = IsValidTeleportLocation(OutHit, ProjectedLocation);
+
+	ProjectedTeleportLocation = FVector(ProjectedLocation.X, ProjectedLocation.Y, ProjectedLocation.Z- 8.0f);
+
+	if (bValidTeleportLocation != isTeleportValid)
+	{
+		bValidTeleportLocation = isTeleportValid;
+		ActorToSpawn.GetDefaultObject()->GetRootComponent()->SetVisibility(bValidTeleportLocation);
+	}
+
+	//**Then Update Sequence 2*//
+	//ActorToSpawn.GetDefaultObject()->SetActorLocation(ProjectedTeleportLocation);
+	//Nagra
+	/*UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(NiagaraComponent,
+		TEXT("User.PointArray"),
+		PathPositions);*/
+}
+
+void ALeeXRPawn::EndTeleportTrace()
+{
+}
+
+void ALeeXRPawn::TryTeleport()
+{
 }
 
 void ALeeXRPawn::IAMove()
 {
 	///Trace Teleport
-
+	LeeScreenLog("Move %s", FColor::Cyan);
+	StartTeleportTrace();
 
 }
 
@@ -168,9 +270,14 @@ void ALeeXRPawn::IAGrabLeftCompleted()
 	//TryRelease();
 }
 
-void ALeeXRPawn::IAGrabRight()
+void ALeeXRPawn::IAGrabRightStart()
 {
 	LeeScreenLog("Grab Right", FColor::Green);
+}
+
+void ALeeXRPawn::IAGrabRightCompleted()
+{
+	LeeScreenLog("Grab Right Completed", FColor::Green);
 }
 
 void ALeeXRPawn::IALMenuToogle(const FInputActionInstance& ActionInstance)
@@ -180,8 +287,8 @@ void ALeeXRPawn::IALMenuToogle(const FInputActionInstance& ActionInstance)
 	bool isLeft = SourceAction->GetName().EndsWith("Left") ?
 		true : false;
 	//LeeScreenLog<FString>(SourceAction->GetName(), FColor::Green);
-	if (isLeft) LeeScreenLog("Menu Toogle Left", FColor::Green);
-	else LeeScreenLog("Menu Toogle Right", FColor::Green);
+	if (isLeft) { LeeScreenLog("Menu Toogle Left", FColor::Green); }
+	else { LeeScreenLog("Menu Toogle Right", FColor::Green); }
 
 	ToogleMenu(isLeft);
 
@@ -269,11 +376,12 @@ void ALeeXRPawn::BeginPlay()
 		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::Stage);
 
 		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
+		InitializeMappingContext();
 	}
 
 
-	IndexLeftCollison->OnComponentHit.AddDynamic(this, &ALeeXRPawn::OnHitComponent);
-	ThumbLeftCollison->OnComponentHit.AddDynamic(this, &ALeeXRPawn::OnHitComponent);
+	//IndexLeftCollison->OnComponentHit.AddDynamic(this, &ALeeXRPawn::OnHitComponent);
+	//ThumbLeftCollison->OnComponentHit.AddDynamic(this, &ALeeXRPawn::OnHitComponent);
 
 }
 
@@ -293,11 +401,11 @@ void ALeeXRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) 
 	{
 		// Bind the action to the delegate
-		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ALeeXRPawn::IAMove);
+		//EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Started, this, &ALeeXRPawn::IAMove);
 
-		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Started, this, &ALeeXRPawn::IAMoveStart);
+		//EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Started, this, &ALeeXRPawn::IAMoveStart);
 
-		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Completed, this, &ALeeXRPawn::IAMoveComplete);
+		//EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Completed, this, &ALeeXRPawn::IAMoveComplete);
 
 		EnhancedInputComponent->BindAction(IA_Turn, ETriggerEvent::Started, this, &ALeeXRPawn::IATurnStart);
 
@@ -307,7 +415,9 @@ void ALeeXRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 		
 		EnhancedInputComponent->BindAction(IA_GrabLeft, ETriggerEvent::Completed, this, &ALeeXRPawn::IAGrabLeftCompleted);
 
-		EnhancedInputComponent->BindAction(IA_GrabRight, ETriggerEvent::Started, this, &ALeeXRPawn::IAGrabRight);
+		EnhancedInputComponent->BindAction(IA_GrabRight, ETriggerEvent::Started, this, &ALeeXRPawn::IAGrabRightStart);
+
+		EnhancedInputComponent->BindAction(IA_GrabRight, ETriggerEvent::Completed, this, &ALeeXRPawn::IAGrabRightCompleted);
 
 		EnhancedInputComponent->BindAction(IA_LMenuToogle, ETriggerEvent::Started, this, &ALeeXRPawn::IALMenuToogle);
 
@@ -324,9 +434,19 @@ void ALeeXRPawn::InitializeComponents()
 	LeftGrip->MotionSource = TEXT("Left");
 	RightGrip->MotionSource = TEXT("Right");
 
-	HandTrackLeft->SkeletonType = HandTrackLeft->MeshType = EOculusXRHandType::HandLeft;
-	//HandTrackLeft->MeshType = EOculusXRHandType::HandLeft;
-	HandTrackRight->SkeletonType = HandTrackRight->MeshType = EOculusXRHandType::HandRight;
-	//HandTrackRight->MeshType = EOculusXRHandType::HandRight;
+	//HandTrackLeft->SkeletonType = HandTrackLeft->MeshType = EOculusXRHandType::HandLeft;
+	//HandTrackRight->SkeletonType = HandTrackRight->MeshType = EOculusXRHandType::HandRight;
+}
+
+void ALeeXRPawn::InitializeMappingContext()
+{
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			Subsystem->AddMappingContext(HandMappingContext, 0);
+		}
+	}
 }
 

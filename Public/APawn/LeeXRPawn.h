@@ -19,6 +19,7 @@ class UVRNotificationsComponent;
 class UWidgetComponent;
 class ULeeXRSphereComponent;
 class ULeeXRGrabComponent;
+class UNiagaraComponent;
 
 UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
 class LEEMETAXRM_API ALeeXRPawn : public APawn
@@ -94,6 +95,12 @@ class LEEMETAXRM_API ALeeXRPawn : public APawn
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<ULeeXRGrabComponent> HeldComponentRight;
 
+	/*Niagara*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UNiagaraComponent> NiagaraComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Actors", meta = (AllowPrivateAccess="true"))
+	TSubclassOf<AActor> ActorToSpawn;
 	// Input Actions
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input", meta = (AllowPrivateAccess = "true"))
 	UInputAction* IA_Move;
@@ -122,6 +129,15 @@ public:
 	void StartTeleportTrace();
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void TeleportTrace(FVector StartPos,FVector ForwardVec);
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void EndTeleportTrace();
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void TryTeleport();
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void IAMove();
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
@@ -143,7 +159,10 @@ public:
 	void IAGrabLeftCompleted();
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
-	void IAGrabRight();
+	void IAGrabRightStart();
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void IAGrabRightCompleted();
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void IALMenuToogle(const FInputActionInstance& ActionInstance);
@@ -182,6 +201,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Varibles")
 	FVector TeleportProjectPointToNavigationQueryExtent;
 
+	bool IsValidTeleportLocation(FHitResult Hit,FVector &ProjectedLocation);
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -195,6 +215,8 @@ private:
 
 	void InitializeComponents();
 	
+	void InitializeMappingContext();
+
 	FVector bStartLine;
 	FVector bEndLine;
 };

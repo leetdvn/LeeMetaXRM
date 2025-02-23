@@ -59,6 +59,6 @@ FPlatformMemory::EMemoryCounterRegion::MCR_Invalid);
 #define LEE_CHECK(expr) check((expr)) 
 #endif
 
-#define LEE_LOG(Verbosity, Format, ...) UE_LOG(LeeXRMacro, Verbosity, TEXT(Format), ##__VA_ARGS__)
+#define LEE_LOG(Category,Verbosity, Format, ...) UE_LOG(Category, Verbosity, TEXT(Format), ##__VA_ARGS__)
 
-#define LeeScreenLog(Format,Color, ...) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, Color, FString::Printf(TEXT(Format), ##__VA_ARGS__))
+#define LeeScreenLog(Format,Color, ...) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, Color, FString::Printf(TEXT(Format), ##__VA_ARGS__),true,FVector2D(5,5))
