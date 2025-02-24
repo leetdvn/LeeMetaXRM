@@ -30,6 +30,38 @@ ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 
 }
 
+void ALeeXRHandBase::GrabObject()
+{
+	TArray<AActor*> OverlappingActors;
+	GrabSphere->GetOverlappingActors(OverlappingActors);
+
+	if (!OverlappingActors.IsEmpty())
+	{
+		AActor* OverlappingActor = OverlappingActors[0];
+		if (OverlappingActor)
+		{
+			
+			AActor* GrabAct= FindActorToGrab(OverlappingActors, "Grabbable");
+
+			CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(GrabAct);
+			//LeeScreenLog("Grabbing Object %s", FColor::Green, *OverlappingActor->GetName());
+			if (CurrentGrabObject) {
+				FVector GrabLocation = HandMesh->GetComponentLocation();
+				CurrentGrabObject->OnGrab(HandMesh, GrabLocation);
+			}
+		}
+	}
+}
+
+void ALeeXRHandBase::ReleaseObject()
+{
+	if (CurrentGrabObject)
+	{
+		CurrentGrabObject->OnRelease(HandMesh);
+		CurrentGrabObject = nullptr;
+	}
+}
+
 // Called when the game starts or when spawned
 void ALeeXRHandBase::BeginPlay()
 {
@@ -59,5 +91,18 @@ void ALeeXRHandBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+AActor* ALeeXRHandBase::FindActorToGrab(TArray<AActor*> &inActors, FString inTag)
+{
+	for (auto Actor : inActors)
+	{
+		if (Actor->ActorHasTag(*inTag))
+		{
+			LeeScreenLog("Grabbing Object %s", FColor::Green, *Actor->GetName());
+			return Actor;
+		}
+	}
+	return nullptr;
 }
 

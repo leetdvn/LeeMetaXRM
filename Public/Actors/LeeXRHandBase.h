@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <Interfaces/LeeXRInteraction.h>
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "LeeXRHandBase.generated.h"
@@ -22,6 +23,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
 	UAnimInstance* GetHandAnimInstance() { return this->HandMesh->GetAnimInstance(); }
+
+	UFUNCTION(BlueprintCallable)
+	void GrabObject();
+	UFUNCTION(BlueprintCallable)
+	void ReleaseObject();
 
 protected:
 	// Called when the game starts or when spawned
@@ -59,4 +65,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+private:
+	TScriptInterface<ILeeXRInteraction> CurrentGrabObject;
+
+	AActor* FindActorToGrab(TArray<AActor*> &inActors, FString inTag);
 };
