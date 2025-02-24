@@ -37,10 +37,10 @@ class LEEMETAXRM_API ALeeXRPawn : public APawn
 	TObjectPtr<UVRNotificationsComponent> Notify;
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputMappingContext> DefaultMappingContext;
+	UInputMappingContext* DefaultMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UInputMappingContext> HandMappingContext;
+	UInputMappingContext* HandMappingContext;
 
 	/*HeadMountedDisiplay And Components */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
@@ -123,7 +123,7 @@ class LEEMETAXRM_API ALeeXRPawn : public APawn
 
 public:
 	// Sets default values for this pawn's properties
-	ALeeXRPawn(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	ALeeXRPawn();
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void StartTeleportTrace();
@@ -138,13 +138,13 @@ public:
 	void TryTeleport();
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
-	void IAMove();
+	void IAMove(const FInputActionInstance& ActionInstance);
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
-	void IAMoveStart();
+	void IAMoveStart(const FInputActionInstance& ActionInstance);
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
-	void IAMoveComplete();
+	void IAMoveComplete(const FInputActionInstance& ActionInstance);
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void IATurnStart();

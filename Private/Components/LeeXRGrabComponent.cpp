@@ -18,8 +18,6 @@ ULeeXRGrabComponent::ULeeXRGrabComponent(const FObjectInitializer& ObjectInitial
 
 void ULeeXRGrabComponent::SetSholdSimulationOnDrop()
 {
-	LeeScreenLog("Set Should Simulation On Drop", FColor::Green);
-
 	UPrimitiveComponent* PrimComp = Cast<UPrimitiveComponent>(GetAttachParent());
 	if (PrimComp && PrimComp->IsAnySimulatingPhysics())
 	{
@@ -45,13 +43,13 @@ void ULeeXRGrabComponent::AttachParentToMotionController(UMotionControllerCompon
 
 		UE_LOG(LogTemp, Warning, TEXT("Attaching %s to %s"), *displayName,*MotionController->GetName());
 
-		LeeScreenLog("Attaching %s to %s", FColor::Green, *displayName, *MotionController->GetName());
+		LeeScreenLog("Attaching %s to %s", FColor::Green,3, *displayName, *MotionController->GetName());
 	}
 }
 
 bool ULeeXRGrabComponent::TryGrab(UMotionControllerComponent* MotionController)
 {
-	LeeScreenLog("Try Grab", FColor::Green);
+	LeeScreenLog("Try Grab", FColor::Green,3);
 
 	switch (GrabType)
 	{

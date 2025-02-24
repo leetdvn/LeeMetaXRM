@@ -11,7 +11,7 @@ ULeeXRSphereComponent::ULeeXRSphereComponent(const FObjectInitializer& ObjectIni
 
 void ULeeXRSphereComponent::OnHitComp(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	LeeScreenLog("Hit Info : %s", FColor::Green,*HitComponent->GetName());
+	LeeScreenLog("Hit Info : %s", FColor::Green,3,*HitComponent->GetName());
 }
 
 void ULeeXRSphereComponent::BeginPlay()
@@ -27,5 +27,5 @@ void ULeeXRSphereComponent::OnBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	if (OtherActor->GetName() == GetAttachParentActor()->GetName()) return;
 	TArray<AActor*> IgnoreActor{};
 	//if(OtherActor->GetName() == ParentAc)
-	LeeScreenLog("Overlap Info : %s", FColor::Green, *OtherActor->GetName());
+	LeeScreenLog("Overlap Info : %s", FColor::Green,3, *OtherActor->GetName());
 }

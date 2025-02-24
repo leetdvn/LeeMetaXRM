@@ -21,12 +21,9 @@
 #include <NiagaraComponent.h>
 #include <NavigationSystem.h>
 #include "NiagaraFunctionLibrary.h"
-#include <NiagaraDataInterfaceArrayFunctionLibrary.h>
-#include "../../../../../../Program Files/Epic Games/UE_5.4/Engine/Plugins/FX/Niagara/Source/Niagara/Classes/NiagaraDataInterfaceArrayFunctionLibrary.h"
 
-// Sets default values
-ALeeXRPawn::ALeeXRPawn(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+// Sets default valuess
+ALeeXRPawn::ALeeXRPawn()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -188,37 +185,46 @@ void ALeeXRPawn::TeleportTrace(FVector StartPos, FVector ForwardVec)
 
 void ALeeXRPawn::EndTeleportTrace()
 {
+	LeeScreenLog("End Trace Teleport", FColor::Green);
 }
 
 void ALeeXRPawn::TryTeleport()
 {
+	LeeScreenLog("Try Teleport", FColor::Green);
 }
 
-void ALeeXRPawn::IAMove()
+void ALeeXRPawn::IAMove(const FInputActionInstance& ActionInstance)
 {
 	///Trace Teleport
-	LeeScreenLog("Move %s", FColor::Cyan);
+	LeeScreenLog("Move Trigger %s", FColor::Cyan);
+	
+	FVector StartPos = RightAim->K2_GetComponentToWorld().GetLocation();
+	FVector ForwardVec= RightAim->GetForwardVector();
+	TeleportTrace(StartPos, ForwardVec);
+
+}
+
+void ALeeXRPawn::IAMoveStart(const FInputActionInstance& ActionInstance)
+{
+
+	LeeScreenLog("Move Start", FColor::Green);
+
 	StartTeleportTrace();
 
 }
 
-void ALeeXRPawn::IAMoveStart()
+void ALeeXRPawn::IAMoveComplete(const FInputActionInstance& ActionInstance)
 {
+	LeeScreenLog("End Trace Teleport", FColor::Green);
 
-	LeeScreenLog("Move Start", FColor::Green);
-}
-
-void ALeeXRPawn::IAMoveComplete()
-{
-	LeeScreenLog("Move Complete", FColor::Green);
-
+	EndTeleportTrace();
 }
 
 void ALeeXRPawn::IATurnStart()
 {
-	LeeScreenLog("Turn", FColor::Green);
+	/*Turn Start*/
+	LeeScreenLog("Turn Start", FColor::Green);
 
-	LeeScreenLog("Grab Left", FColor::Green);
 	bStartLine=  IndexLeftCollison->K2_GetComponentToWorld().GetLocation();
 
 
@@ -226,6 +232,7 @@ void ALeeXRPawn::IATurnStart()
 
 void ALeeXRPawn::IATurnCompleted()
 {
+	/*Turn Compoleted*/
 	LeeScreenLog("Turn Completed", FColor::Green);
 
 	bEndLine = IndexLeftCollison->K2_GetComponentToWorld().GetLocation();
@@ -379,7 +386,6 @@ void ALeeXRPawn::BeginPlay()
 		InitializeMappingContext();
 	}
 
-
 	//IndexLeftCollison->OnComponentHit.AddDynamic(this, &ALeeXRPawn::OnHitComponent);
 	//ThumbLeftCollison->OnComponentHit.AddDynamic(this, &ALeeXRPawn::OnHitComponent);
 
@@ -396,16 +402,17 @@ void ALeeXRPawn::Tick(float DeltaTime)
 void ALeeXRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	
 
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) 
 	{
 		// Bind the action to the delegate
-		//EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Started, this, &ALeeXRPawn::IAMove);
+		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ALeeXRPawn::IAMove);
 
-		//EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Started, this, &ALeeXRPawn::IAMoveStart);
+		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Started, this, &ALeeXRPawn::IAMoveStart);
 
-		//EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Completed, this, &ALeeXRPawn::IAMoveComplete);
+		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Completed, this, &ALeeXRPawn::IAMoveComplete);
 
 		EnhancedInputComponent->BindAction(IA_Turn, ETriggerEvent::Started, this, &ALeeXRPawn::IATurnStart);
 
@@ -422,6 +429,9 @@ void ALeeXRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 		EnhancedInputComponent->BindAction(IA_LMenuToogle, ETriggerEvent::Started, this, &ALeeXRPawn::IALMenuToogle);
 
 		EnhancedInputComponent->BindAction(IA_RMenuToogle, ETriggerEvent::Started, this, &ALeeXRPawn::IALMenuToogle);
+
+		LeeScreenLog("Setup Player Input", FColor::Green);
+
 	}
 }
 
@@ -445,7 +455,7 @@ void ALeeXRPawn::InitializeMappingContext()
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-			Subsystem->AddMappingContext(HandMappingContext, 0);
+			//Subsystem->AddMappingContext(HandMappingContext.LoadSynchronous(), 0);
 		}
 	}
 }
