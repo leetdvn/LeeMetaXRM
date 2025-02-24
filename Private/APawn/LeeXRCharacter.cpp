@@ -8,6 +8,9 @@
 #include "Definitions.h"
 #include <InputAction.h>
 #include <EnhancedInputSubsystems.h>
+#include <HeadMountedDisplayFunctionLibrary.h>
+#include "Actors/LeeXRHandBase.h"
+#include <Kismet/KismetSystemLibrary.h>
 
 // Sets default values
 ALeeXRCharacter::ALeeXRCharacter()
@@ -25,11 +28,29 @@ ALeeXRCharacter::ALeeXRCharacter()
 
 }
 
+
+UAnimInstance* ALeeXRCharacter::GetHandAnimInstance(bool isLeft)
+{
+	return isLeft ? XRHandLeft->GetHandAnimInstance() : XRHandRight->GetHandAnimInstance();
+}
+
 // Called when the game starts or when spawned
 void ALeeXRCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	InitContext();
+
+	//Set Tracking Origin to FLoor
+	bool isEnable = UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled();
+
+	if (isEnable)
+	{
+		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::Stage);
+
+		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
+	}
+
 }
 
 // Called every frame
@@ -76,8 +97,10 @@ void ALeeXRCharacter::InitContext()
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			Subsystem->AddMappingContext(HandMappingContext, 0);
 			//Subsystem->AddMappingContext(HandMappingContext.LoadSynchronous(), 0);
 		}
 	}
+
 }
 

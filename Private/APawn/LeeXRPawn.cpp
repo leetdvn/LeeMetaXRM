@@ -383,7 +383,6 @@ void ALeeXRPawn::BeginPlay()
 		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::Stage);
 
 		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
-		InitializeMappingContext();
 	}
 
 	//IndexLeftCollison->OnComponentHit.AddDynamic(this, &ALeeXRPawn::OnHitComponent);

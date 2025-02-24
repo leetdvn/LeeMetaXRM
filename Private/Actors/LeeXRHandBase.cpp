@@ -25,8 +25,8 @@ ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 	WidgetInteraction = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("WidgetInteraction"));
 	WidgetInteraction->SetupAttachment(HandMesh);
 
-	GrabSphereCollison = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphereCollison"));
-	GrabSphereCollison->SetupAttachment(MotionController);
+	GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphereCollison"));
+	GrabSphere->SetupAttachment(MotionController);
 
 }
 
@@ -36,6 +36,22 @@ void ALeeXRHandBase::BeginPlay()
 	Super::BeginPlay();
 	
 	LeeScreenLog("Hand %s Checking", FColor::Green,*GetName());
+}
+
+void ALeeXRHandBase::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	switch (HandType)
+	{
+	case EControllerHand::Left: {
+		MotionController->MotionSource = TEXT("Left");
+		break;
+	}
+	case EControllerHand::Right:
+		MotionController->MotionSource = TEXT("Right");
+		break;
+	}
 }
 
 // Called every frame

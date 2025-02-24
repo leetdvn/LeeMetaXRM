@@ -17,21 +17,48 @@ public:
 	// Sets default values for this character's properties
 	ALeeXRCharacter();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UAnimInstance* GetHandAnimInstance(bool isLeft);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings | Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UCameraComponent> Camera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings | Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<class USceneComponent> XROrigin;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
 	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputMappingContext> HandMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
 	TObjectPtr<class UInputAction> IA_Move;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputAction> IA_Turn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputAction> IA_GrabLeft;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputAction> IA_GrabRight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputAction> IA_LMenuToogle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputAction> IA_RMenuToogle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Hand")
+	TObjectPtr<class ALeeXRHandBase> XRHandLeft;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Hand")
+	TObjectPtr<class ALeeXRHandBase> XRHandRight;
 
 public:	
 	// Called every frame
@@ -44,5 +71,7 @@ public:
 	void OnMoving();
 
 private:
+
+	//Init Context
 	void InitContext();
 };

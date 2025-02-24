@@ -17,14 +17,21 @@ public:
 	// Sets default values for this actor's properties
 	ALeeXRHandBase(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	USkeletalMeshComponent* GetHandMesh() { return HandMesh.Get(); }
+	UFUNCTION(BlueprintCallable,BlueprintPure ,Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
+	USkeletalMeshComponent* GetHandMesh() { return this->HandMesh.Get(); }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
+	UAnimInstance* GetHandAnimInstance() { return this->HandMesh->GetAnimInstance(); }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+
+	virtual void OnConstruction(const FTransform& Transform) override;
+
+
 #pragma region Components
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
-	EControllerHand HandType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
 	TObjectPtr<class UMotionControllerComponent> MotionController;
@@ -37,8 +44,15 @@ protected:
 
 	/**Collision Sphere**/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
-	TObjectPtr<class USphereComponent> GrabSphereCollison;
+	TObjectPtr<class USphereComponent> GrabSphere;
+#pragma endregion
 
+#pragma region HandData
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings")
+	EControllerHand HandType;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings")
+	bool bMirrorAnimation = false;
 
 #pragma endregion
 public:	
