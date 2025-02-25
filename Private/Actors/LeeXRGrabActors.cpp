@@ -33,30 +33,25 @@ void ALeeXRGrabActors::OnGrab(USkeletalMeshComponent* inComponent,const FVector&
 	/*
 	Need Setup Collision Profileing and Custom Edit Collision Presets
 	*/
-
 	if (inComponent == nullptr) return;
 
-
-	EAttachLocation::Type AttachType = GrabType == EGrabType::EGT_Free ?
-		EAttachLocation::KeepWorldPosition :
-		EAttachLocation::SnapToTarget;
+	FAttachmentTransformRules AttachRules = GrabType == EGrabType::EGT_Free ?
+		FAttachmentTransformRules::KeepWorldTransform : 
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale;
 
 	if (ActorMesh->IsSimulatingPhysics()) {
 		ActorMesh->SetSimulatePhysics(false);
 	}
 
-	bIsheld = ActorMesh->K2_AttachTo(inComponent,NAME_None, AttachType, false);
+	bIsheld = ActorMesh->AttachToComponent(inComponent, AttachRules, NAME_None);
 	if (bIsheld) {
 		GrabBodySkeletal = inComponent;
 	}
-
-
 }
 
 void ALeeXRGrabActors::OnRelease(USkeletalMeshComponent* inComponent)
 {
 	if (inComponent == nullptr) return;
-
 
 	if (bIsheld)
 	{

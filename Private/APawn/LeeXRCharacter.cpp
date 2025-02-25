@@ -11,6 +11,9 @@
 #include <HeadMountedDisplayFunctionLibrary.h>
 #include "Actors/LeeXRHandBase.h"
 #include <Kismet/KismetSystemLibrary.h>
+#include <LeeXRUltils.h>
+
+using namespace LeeXRUltils;
 
 // Sets default values
 ALeeXRCharacter::ALeeXRCharacter()
@@ -28,16 +31,17 @@ ALeeXRCharacter::ALeeXRCharacter()
 
 }
 
-
+// Get the hand animation instance
 UAnimInstance* ALeeXRCharacter::GetHandAnimInstance(bool isLeft)
 {
-
 	return isLeft ? XRHandLeft->GetHandAnimInstance() : XRHandRight->GetHandAnimInstance();
 }
 
 // Called when the game starts or when spawned
 void ALeeXRCharacter::BeginPlay()
 {
+	HandInitialize();
+
 	Super::BeginPlay();
 
 	InitContext();
@@ -52,7 +56,6 @@ void ALeeXRCharacter::BeginPlay()
 		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
 	}
 
-	HandInitialize();
 
 }
 
@@ -73,32 +76,53 @@ void ALeeXRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	{
 		// Bind the action to the delegate
 		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ALeeXRCharacter::OnMoving);
-		EnhancedInputComponent->BindAction(IA_GrabLeft, ETriggerEvent::Started, this, &ALeeXRCharacter::OnActionGrab);
-		EnhancedInputComponent->BindAction(IA_GrabLeft, ETriggerEvent::Completed, this, &ALeeXRCharacter::OnActionGrab);
-		EnhancedInputComponent->BindAction(IA_GrabLeft, ETriggerEvent::Canceled, this, &ALeeXRCharacter::OnActionGrab);
+		EnhancedInputComponent->BindAction(IA_GrabLeft, ETriggerEvent::Started, this, &ALeeXRCharacter::OnHandGrabing);
+		EnhancedInputComponent->BindAction(IA_GrabLeft, ETriggerEvent::Completed, this, &ALeeXRCharacter::OnHandRelease);
+		EnhancedInputComponent->BindAction(IA_GrabLeft, ETriggerEvent::Canceled, this, &ALeeXRCharacter::OnHandRelease);
 
-		EnhancedInputComponent->BindAction(IA_GrabRight, ETriggerEvent::Started, this, &ALeeXRCharacter::OnActionGrab);
-		EnhancedInputComponent->BindAction(IA_GrabRight, ETriggerEvent::Completed, this, &ALeeXRCharacter::OnActionGrab);
-		EnhancedInputComponent->BindAction(IA_GrabRight, ETriggerEvent::Canceled, this, &ALeeXRCharacter::OnActionGrab);
+		EnhancedInputComponent->BindAction(IA_GrabRight, ETriggerEvent::Started, this, &ALeeXRCharacter::OnHandGrabing);
+		EnhancedInputComponent->BindAction(IA_GrabRight, ETriggerEvent::Completed, this, &ALeeXRCharacter::OnHandRelease);
+		EnhancedInputComponent->BindAction(IA_GrabRight, ETriggerEvent::Canceled, this, &ALeeXRCharacter::OnHandRelease);
 
 	}
 
 }
 
+// Called when the player is moving
 void ALeeXRCharacter::OnMoving()
 {
 	LeeScreenLog("Moving %s",FColor::Cyan,TEXT("TESTTTTT"));
 }
 
-void ALeeXRCharacter::OnActionGrab(const FInputActionInstance& ActionInstance)
+// Called when the player is grabbing
+void ALeeXRCharacter::OnHandGrabing(const FInputActionInstance& ActionInstance)
 {
 	FString ActName = ActionInstance.GetSourceAction()->GetName();
+	bool isLeft = ActName.EndsWith("Left"); 
+	TObjectPtr<ALeeXRHandBase> Hand = isLeft ?
+		XRHandLeft :
+		XRHandRight;
 
-	LeeScreenLog("Hand %s", FColor::Magenta, *ActName);
-
-	return OnGrabObjects(ActionInstance, ActName.EndsWith("Right"));
+	if (Hand) {
+		Hand->GrabObject();
+	}
 }
 
+// Called when the player is releasing
+void ALeeXRCharacter::OnHandRelease(const FInputActionInstance& ActionInstance)
+{
+	FString ActName = ActionInstance.GetSourceAction()->GetName();
+	bool isLeft = ActName.EndsWith("Left");
+	TObjectPtr<ALeeXRHandBase> Hand = isLeft ?
+		XRHandLeft :
+		XRHandRight;
+
+	if (Hand) {
+		Hand->ReleaseObject();
+	}
+}
+
+// Initialize the context
 void ALeeXRCharacter::InitContext()
 {
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
@@ -107,93 +131,26 @@ void ALeeXRCharacter::InitContext()
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 			Subsystem->AddMappingContext(HandMappingContext, 0);
-			//Subsystem->AddMappingContext(HandMappingContext.LoadSynchronous(), 0);
 		}
 	}
-
 }
 
-void ALeeXRCharacter::OnGrabObjects(const FInputActionInstance& ActionInstance,bool isLeft)
-{
-	TObjectPtr<ALeeXRHandBase> Hand = isLeft ?
-		XRHandLeft :
-		XRHandRight;
-
-	ETriggerEvent TriggerEvent = ActionInstance.GetTriggerEvent();
-
-	if (TriggerEvent == ETriggerEvent::Canceled ||
-		TriggerEvent == ETriggerEvent::Completed)
-	{
-		Hand->ReleaseObject();
-	}
-	else if (TriggerEvent == ETriggerEvent::Started)
-	{
-		Hand->GrabObject();
-
-	}
-
-	//FString TriggerEventName;
-	//switch (TriggerEvent)
-	//{
-	//case ETriggerEvent::Started:
-	//	TriggerEventName = "Started";
-	//	break;
-	//case ETriggerEvent::Ongoing:
-	//	TriggerEventName = "Ongoing";
-	//	break;
-	//case ETriggerEvent::Canceled:
-	//	TriggerEventName = "Canceled";
-	//	break;
-	//case ETriggerEvent::Completed:
-	//	TriggerEventName = "Completed";
-	//	break;
-	//case ETriggerEvent::Triggered:
-	//	TriggerEventName = "Triggered";
-	//	break;
-	//default:
-	//	TriggerEventName = "None";
-	//	break;
-	//}
-	//XRHandLeft->GrabObject();
-}
-
+// Initialize the hands
 void ALeeXRCharacter::HandInitialize()
 {
 
-	//GetWorld()->SpawnActor<AProjectile>(Location, Rotation, SpawnInfo);
+	// Path Actor Blueprint
+	FString PathRight = TEXT("/Game/BlueprintTemplates/BP_LeeXRHandRight.BP_LeeXRHandRight_C");
+	FString PathLeft = TEXT("/Game/BlueprintTemplates/BP_LeeXRHandLeft.BP_LeeXRHandLeft_C");
+	FAttachmentTransformRules AttachRules = FAttachmentTransformRules::SnapToTargetNotIncludingScale;
+	// Spawn the hands
+	XRHandLeft = LeeXRSPawnActorBP<ALeeXRHandBase>(this, PathLeft);
+	XRHandRight = LeeXRSPawnActorBP<ALeeXRHandBase>(this, PathRight);
 
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.Instigator = GetInstigator();
+	XRHandLeft->AttachToComponent(XROrigin, AttachRules);
+	XRHandRight->AttachToComponent(XROrigin, AttachRules);
 
-	// Define the spawn location and rotation
-	FVector SpawnLocation = FVector::ZeroVector;
-	FRotator SpawnRotation = FRotator::ZeroRotator;
 
-	UClass* HandClass = StaticLoadClass(ALeeXRHandBase::StaticClass(), this, TEXT("/Game/BlueprintTemplates/BP_LeeXRHandRight.BP_LeeXRHandRight_C"));
-	//if (HandClass)
-	//{
-		// Spawn the left hand
-	XRHandRight = GetWorld()->SpawnActor<ALeeXRHandBase>(HandClass, SpawnLocation, SpawnRotation, SpawnParams);
-	if (!XRHandRight) return;
-
-	XRHandRight->AttachToComponent(XROrigin, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	
-	// Spawn the left hand
-	//XRHandLeft = GetWorld()->SpawnActor<ALeeXRHandBase>(ALeeXRHandBase::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
-	//if (XRHandLeft)
-	//{
-	//	XRHandLeft->AttachToComponent(XROrigin, FAttachmentTransformRules::KeepWorldTransform);
-	//}
-
-	//if(
-	//XRHandLeft->AttachToComponent(XROrigin,FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-
-	//XRHandRight = GetWorld()->SpawnActor<ALeeXRHandBase>(SpawnLocation, SpawnRotation, SpawnParams);
-
-	//XRHandRight->AttachToComponent(XROrigin, FAttachmentTransformRules::KeepWorldTransform);
-
-	//LeeScreenLog("Hand Initialize %s", FColor::Cyan, TEXT("Spawn Runing"));	
 }
 
 

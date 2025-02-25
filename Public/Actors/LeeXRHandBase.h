@@ -29,6 +29,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ReleaseObject();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
+	bool IsValidGrab() { return bIsHeld; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -59,6 +62,9 @@ protected:
 	EControllerHand HandType;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings")
 	bool bMirrorAnimation = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings")
+	bool bIsHeld = false;
 
 #pragma endregion
 public:	

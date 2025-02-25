@@ -25,12 +25,22 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+#pragma region Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UCameraComponent> Camera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<class USceneComponent> XROrigin;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Components")
+	TObjectPtr<class ALeeXRHandBase> XRHandLeft;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Components")
+	TObjectPtr<class ALeeXRHandBase> XRHandRight;
+
+#pragma endregion Components
+
+#pragma region Input
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
 	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
 
@@ -54,12 +64,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
 	TObjectPtr<class UInputAction> IA_RMenuToogle;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Hand")
-	TObjectPtr<class ALeeXRHandBase> XRHandLeft;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Hand")
-	TObjectPtr<class ALeeXRHandBase> XRHandRight;
+#pragma endregion Input
 
 public:	
 	// Called every frame
@@ -68,23 +73,36 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	/// <summary>
+	/// Test Moving IA Move
+	/// </summary>
 	UFUNCTION()
 	void OnMoving();
 
-	UFUNCTION()
-	void OnActionGrab(const FInputActionInstance& ActionInstance);
+
 private:
 
-	//Init Context
+	/// <summary>
+	/// Initialize Context
+	/// </summary>
 	void InitContext();
 
 	/// <summary>
-	/// Grab Action 
+	/// Input Action for Grabing
 	/// </summary>
 	/// <param name="ActionInstance"></param>
-	/// <param name="isLeft"></param>
-	void OnGrabObjects(const FInputActionInstance& ActionInstance,bool isLeft);
+	UFUNCTION()
+	void OnHandGrabing(const FInputActionInstance& ActionInstance);
 
+	/// <summary>
+	/// Input Action for Releasing
+	/// </summary>
+	/// <param name="ActionInstance"></param>
+	UFUNCTION()
+	void OnHandRelease(const FInputActionInstance& ActionInstance);
 
+	/// <summary>
+	/// Hand Initialize
+	/// </summary>
 	void HandInitialize();
 };
