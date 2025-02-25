@@ -41,13 +41,14 @@ void ALeeXRHandBase::GrabObject()
 		if (OverlappingActor)
 		{
 			
-			AActor* GrabAct= FindActorToGrab(OverlappingActors, "Grabbable");
+			//AActor* GrabAct= FindActorToGrab(OverlappingActors, "Grabbable");
 
-			CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(GrabAct);
-			//LeeScreenLog("Grabbing Object %s", FColor::Green, *OverlappingActor->GetName());
+			CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(OverlappingActor);
 			if (CurrentGrabObject) {
 				FVector GrabLocation = HandMesh->GetComponentLocation();
 				CurrentGrabObject->OnGrab(HandMesh, GrabLocation);
+				LeeScreenLog("Grabbing Object %s", FColor::Green, *OverlappingActor->GetName());
+
 			}
 		}
 	}
@@ -55,11 +56,12 @@ void ALeeXRHandBase::GrabObject()
 
 void ALeeXRHandBase::ReleaseObject()
 {
-	if (CurrentGrabObject)
-	{
-		CurrentGrabObject->OnRelease(HandMesh);
-		CurrentGrabObject = nullptr;
-	}
+	if (!CurrentGrabObject)	return;
+
+	CurrentGrabObject->OnRelease(HandMesh);
+	CurrentGrabObject = nullptr;
+	UpdateOverlaps(true);
+	UpdateDefaultConfigFile();
 }
 
 // Called when the game starts or when spawned

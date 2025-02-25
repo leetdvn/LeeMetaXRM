@@ -7,6 +7,7 @@
 #include "LeeXRCharacter.generated.h"
 
 
+DEFINE_LOG_CATEGORY_STATIC(LeeXRCharacter,Log,All)
 
 UCLASS()
 class LEEMETAXRM_API ALeeXRCharacter : public ACharacter
@@ -70,8 +71,20 @@ public:
 	UFUNCTION()
 	void OnMoving();
 
+	UFUNCTION()
+	void OnActionGrab(const FInputActionInstance& ActionInstance);
 private:
 
 	//Init Context
 	void InitContext();
+
+	/// <summary>
+	/// Grab Action 
+	/// </summary>
+	/// <param name="ActionInstance"></param>
+	/// <param name="isLeft"></param>
+	void OnGrabObjects(const FInputActionInstance& ActionInstance,bool isLeft);
+
+
+	void HandInitialize();
 };

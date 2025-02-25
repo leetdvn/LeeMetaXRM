@@ -2,21 +2,16 @@
 
 #pragma once
 
+#include "ICTUGrabbableActor.h"
 #include "Interfaces/LeeXRInteraction.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "LeeXRGrabActors.generated.h"
 
-UENUM(BlueprintType)
-enum class EGrabType : uint8
-{
-	EGT_Free UMETA(DisplayName = "Free"),
-	EGT_Snap UMETA(DisplayName = "Snap"),
-	EGT_None UMETA(DisplayName = "None")
-};
+
 
 UCLASS(BlueprintType)
-class LEEMETAXRM_API ALeeXRGrabActors : public AActor, public ILeeXRInteraction
+class LEEMETAXRM_API ALeeXRGrabActors : public AICTUGrabbableActor, public ILeeXRInteraction
 {
 	GENERATED_BODY()
 	
@@ -31,18 +26,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings")
 	EGrabType GrabType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings")
 	bool bIsheld;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings")
-	TObjectPtr<class UStaticMeshComponent> ActorMesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings")
 	TObjectPtr<class UBoxComponent> GrabRegion;
 
-
-
-	virtual void OnGrab(USkeletalMeshComponent* inComponent, FVector& InGrabLocation) override;
+	virtual void OnGrab(USkeletalMeshComponent* inComponent,const FVector& InGrabLocation) override;
 
 	virtual void OnRelease(USkeletalMeshComponent* inComponent) override;
 

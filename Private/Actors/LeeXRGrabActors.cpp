@@ -4,6 +4,7 @@
 #include "Actors/LeeXRGrabActors.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include <Definitions.h>
 
 // Sets default values
 ALeeXRGrabActors::ALeeXRGrabActors()
@@ -11,13 +12,13 @@ ALeeXRGrabActors::ALeeXRGrabActors()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	
-
 	GrabRegion = CreateDefaultSubobject<UBoxComponent>(TEXT("GrabRegion"));
-	SetRootComponent(GrabRegion);
 
-	ActorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ActorMesh"));
-	ActorMesh->SetupAttachment(GrabRegion);
+	//GrabRegion->SetupAttachment(ActorMesh);
+	GrabRegion->SetupAttachment(ActorMesh);
+
+	GrabRegion->SetCollisionProfileName(TEXT("Grabbable"));
+
 }
 
 // Called when the game starts or when spawned
@@ -27,61 +28,58 @@ void ALeeXRGrabActors::BeginPlay()
 	
 }
 
-void ALeeXRGrabActors::OnGrab(USkeletalMeshComponent* inComponent, FVector& InGrabLocation)
+void ALeeXRGrabActors::OnGrab(USkeletalMeshComponent* inComponent,const FVector& InGrabLocation)
 {
-	if (inComponent)
-	{
-		switch (GrabType)
-		{
-		case EGrabType::EGT_Free: {
-			
-			inComponent->SetSimulatePhysics(false);
-			bIsheld = ActorMesh->AttachToComponent(inComponent, FAttachmentTransformRules::KeepWorldTransform, NAME_None);
-			if (bIsheld)
-			{
-				GrabBodySkeletal = inComponent;
-			}
-			break;
-		}
-		case EGrabType::EGT_Snap:
-			break;
-		case EGrabType::EGT_None:
-			break;
-		default:
-			break;
-		}
-		//inComponent->SetSimulatePhysics(false);
-		//inComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	/*
+	Need Setup Collision Profileing and Custom Edit Collision Presets
+	*/
+
+	if (inComponent == nullptr) return;
+
+
+	EAttachLocation::Type AttachType = GrabType == EGrabType::EGT_Free ?
+		EAttachLocation::KeepWorldPosition :
+		EAttachLocation::SnapToTarget;
+
+	if (ActorMesh->IsSimulatingPhysics()) {
+		ActorMesh->SetSimulatePhysics(false);
 	}
+
+	bIsheld = ActorMesh->K2_AttachTo(inComponent,NAME_None, AttachType, false);
+	if (bIsheld) {
+		GrabBodySkeletal = inComponent;
+	}
+
+
 }
 
 void ALeeXRGrabActors::OnRelease(USkeletalMeshComponent* inComponent)
 {
-	if (inComponent)
-	{
-		switch (GrabType)
-		{
-		case EGrabType::EGT_Free: {
+	if (inComponent == nullptr) return;
 
-			if (bIsheld)
-			{
-				if (inComponent== GrabBodySkeletal) {
-					ActorMesh->SetSimulatePhysics(true);
-					bIsheld = false;
-				}
-			}
-			break;
+
+	if (bIsheld)
+	{
+		LeeScreenLog("Releasing Object %s", FColor::Green, *GrabBodySkeletal->GetName());
+		if (inComponent == GrabBodySkeletal) {
+			ActorMesh->SetSimulatePhysics(true);
+			bIsheld = false;
 		}
-		case EGrabType::EGT_Snap:
-			break;
-		case EGrabType::EGT_None:
-			break;
-		default:
-			break;
-		}
-		//inComponent->SetSimulatePhysics(false);
-		//inComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+
+	//switch (GrabType)
+	//{
+	//case EGrabType::EGT_Free: {
+
+	//	break;
+	//}
+	//case EGrabType::EGT_Snap:
+	//	break;
+	//case EGrabType::EGT_None:
+	//	break;
+	//default:
+	//	break;
+	//}
 }
 
 // Called every frame
