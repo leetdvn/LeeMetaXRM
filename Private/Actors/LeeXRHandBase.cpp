@@ -20,9 +20,6 @@ ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 	WidgetInteraction = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("WidgetInteraction"));
 	WidgetInteraction->SetupAttachment(MotionController);
 
-	GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphereCollison"));
-	GrabSphere->SetupAttachment(MotionController);
-
 }
 
 // Called when the game starts or when spawned

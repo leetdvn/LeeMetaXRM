@@ -27,7 +27,6 @@ public class LeeMetaXRM : ModuleRules
             "AnimGraphRuntime",
             "RenderCore",
             "IKRig",
-            "GameplayAbilities",
             "GameplayTags",
             "GameplayTasks",
             "AIModule",

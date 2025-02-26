@@ -87,7 +87,7 @@ protected:
 	TObjectPtr<class USphereComponent> GrabSphere;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
-	TObjectPtr<class UOculusXRHandComponent> HandTrackingComp=nullptr;
+	TObjectPtr<class UOculusXRHandComponent> HandTrackingComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
 	TObjectPtr<class USkeletalMeshComponent> HandSkeletal=nullptr;

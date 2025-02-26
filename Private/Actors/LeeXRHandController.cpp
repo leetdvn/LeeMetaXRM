@@ -8,10 +8,13 @@ ALeeXRHandController::ALeeXRHandController(const FObjectInitializer& ObjectIniti
 	: Super(ObjectInitializer)
 {
 	HandSkeletal = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandSkeletal"));
-	HandSkeletal->SetupAttachment(RootComponent);
+	HandSkeletal->SetupAttachment(MotionController);
 
 	///Reparent the widget interaction to the hand skeletal
 	WidgetInteraction->SetupAttachment(HandSkeletal);
+
+	GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphereCollison"));
+	GrabSphere->SetupAttachment(MotionController);
 
 	//Set Init Hand Left or Right
 	SetHandSwitch(false);

@@ -32,6 +32,8 @@ ALeeXRCharacter::ALeeXRCharacter()
 
 	Camera->SetupAttachment(XROrigin);
 
+	DisplayMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DisplayMesh"));
+	DisplayMesh->SetupAttachment(Camera);
 }
 
 // Get the hand animation instance
@@ -57,7 +59,7 @@ void ALeeXRCharacter::BeginPlay()
 
 	if (isEnable)
 	{
-		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::Stage);
+		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::LocalFloor);
 
 		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
 	}
@@ -83,7 +85,6 @@ void ALeeXRCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChan
 	}
 }
 #endif
-
 
 // Called every frame
 void ALeeXRCharacter::Tick(float DeltaTime)
@@ -199,8 +200,11 @@ void ALeeXRCharacter::HandInitialize()
 {
 	// Path Actor Blueprint
 	///Hand Tracking /Script/Engine.Blueprint'/Game/BlueprintTemplates/Hands/BP_LeeXRHandTracking.BP_LeeXRHandTracking'
-	FString PathRight = TEXT("/Game/BlueprintTemplates/Hands/BP_HandControllerRight.BP_HandControllerRight_C");  ////Script/Engine.Blueprint'/Game/BlueprintTemplates/Testing/BP_LeeXRHandController.BP_LeeXRHandController'
-	FString PathLeft = TEXT("/Game/BlueprintTemplates/Hands/BP_HandControllerLeft.BP_HandControllerLeft_C");
+	FString PathLeft = TEXT("/Game/Blueprints/Actors/BP_HandLeft.BP_HandLeft_C");  ////Script/Engine.Blueprint'/Game/BlueprintTemplates/Testing/BP_LeeXRHandController.BP_LeeXRHandController'
+	FString PathRight = TEXT("/Game/Blueprints/Actors/BP_HandRight.BP_HandRight_C");
+	////Script/Engine.Blueprint'/Game/Blueprints/Actors/BP_HandTrackingRight.BP_HandTrackingRight'
+	FString RightHandTrackingPath = TEXT("/Game/Blueprints/Actors/BP_HandTrackingRight.BP_HandTrackingRight_C");
+	FString LeftHandTrackingPath = TEXT("/Game/Blueprints/Actors/BP_HandTrackingLeft.BP_HandTrackingLeft_C");
 	FAttachmentTransformRules AttachRules = FAttachmentTransformRules::SnapToTargetNotIncludingScale;
 	// Spawn the hands
 	XRHandLeft = LeeXRSPawnActorBP<ALeeXRHandController>(this, PathLeft);

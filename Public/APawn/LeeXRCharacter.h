@@ -32,13 +32,16 @@ protected:
 
 #pragma region Components
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
 	TObjectPtr<class UCameraComponent> Camera;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
+	TObjectPtr<UStaticMeshComponent> DisplayMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
 	ELeeXRHandType HandType;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
 	TObjectPtr<class USceneComponent> XROrigin;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
