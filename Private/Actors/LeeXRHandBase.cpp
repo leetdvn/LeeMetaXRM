@@ -2,12 +2,10 @@
 
 
 #include "Actors/LeeXRHandBase.h"
-#include "MotionControllerComponent.h"
-#include <Components/WidgetInteractionComponent.h>
 #include <Components/SkeletalMeshComponent.h>
 #include <Components/SphereComponent.h>
 #include <Components/ArrowComponent.h>
-#include <LeeMetaXRM/Common/Definitions.h>
+#include <Definitions.h>
 
 // Sets default values
 ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
@@ -19,54 +17,12 @@ ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 	MotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("MotionController"));
 	SetRootComponent(MotionController);
 
-	HandMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandMesh"));
-	HandMesh->SetupAttachment(MotionController);
-
 	WidgetInteraction = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("WidgetInteraction"));
-	WidgetInteraction->SetupAttachment(HandMesh);
+	WidgetInteraction->SetupAttachment(MotionController);
 
 	GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphereCollison"));
 	GrabSphere->SetupAttachment(MotionController);
 
-}
-
-// Grab Object
-void ALeeXRHandBase::GrabObject()
-{
-	LeeScreenLog("Grabbing Object", FColor::Green);
-
-	TArray<AActor*> OverlappingActors;
-	GrabSphere->GetOverlappingActors(OverlappingActors);
-
-	if (!OverlappingActors.IsEmpty())
-	{
-		AActor* OverlappingActor = OverlappingActors[0];
-		if (OverlappingActor)
-		{
-			//AActor* GrabAct= FindActorToGrab(OverlappingActors, "Grabbable");
-
-			CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(OverlappingActor);
-			if (CurrentGrabObject) {
-				bIsHeld = true;
-				FVector GrabLocation = HandMesh->GetComponentLocation();
-				CurrentGrabObject->OnGrab(HandMesh, GrabLocation);
-				LeeScreenLog("Grabbing Object %s", FColor::Green, *OverlappingActor->GetName());
-
-			}
-		}
-	}
-}
-
-// Release Object
-void ALeeXRHandBase::ReleaseObject()
-{
-	if (!CurrentGrabObject)	return;
-
-	CurrentGrabObject->OnRelease(HandMesh);
-	CurrentGrabObject = nullptr;
-	//UpdateOverlaps(true);
-	//UpdateDefaultConfigFile();
-	bIsHeld = false;
 }
 
 // Called when the game starts or when spawned
@@ -92,6 +48,75 @@ void ALeeXRHandBase::OnConstruction(const FTransform& Transform)
 		MotionController->MotionSource = TEXT("Right");
 		break;
 	}
+}
+
+#if WITH_EDITOR
+void ALeeXRHandBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	if (PropertyChangedEvent.Property)
+	{
+		FName PropertyName = PropertyChangedEvent.Property->GetFName();
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(ALeeXRHandBase,ControllerType))
+		{
+			if (ControllerType == ELeeXRHandType::LeeXRHandTracking)
+			{
+				//Do Something With Hand Tracking Editor Mode
+	
+			}
+			else {
+				//Do Something With Hand Controller Editor Mode
+			}
+		}
+	}
+}
+#endif
+
+/// Grab Object
+void ALeeXRHandBase::GraspObject()
+{
+
+	if (HandSkeletal == nullptr || 
+		ControllerType == ELeeXRHandType::LeeXRHandTracking) return;
+
+	TArray<AActor*> OverlappingActors;
+	GrabSphere->GetOverlappingActors(OverlappingActors);
+
+	if (!OverlappingActors.IsEmpty())
+	{
+		AActor* OverlappingActor = OverlappingActors[0];
+		if (OverlappingActor)
+		{
+			LeeScreenLog("Grasp Object :%s", FColor::Green,*OverlappingActor->GetName());
+
+			CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(OverlappingActor);
+			if (CurrentGrabObject) {
+				bIsHeld = true;
+				FVector GrabLocation = HandSkeletal->GetComponentLocation();
+				CurrentGrabObject->OnGrab(HandSkeletal, GrabLocation);
+				LeeScreenLog("Grabbing Object %s", FColor::Green, *OverlappingActor->GetName());
+
+			}
+		}
+	}
+
+}
+
+/// Grab Release
+void ALeeXRHandBase::GraspRelease()
+{
+
+	if (ControllerType == ELeeXRHandType::LeeXRHandTracking) return;
+
+	if (CurrentGrabObject == nullptr ||
+		HandSkeletal == nullptr) {
+		
+		return;
+	}
+
+	CurrentGrabObject->OnRelease(HandSkeletal);
+	CurrentGrabObject = nullptr;
+	bIsHeld = false;
 }
 
 // Called every frame

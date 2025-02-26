@@ -2,18 +2,19 @@
 
 #pragma once
 
+#include "Actors/LeeXRHandBase.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "LeeXRCharacter.generated.h"
 
 
-DEFINE_LOG_CATEGORY_STATIC(LeeXRCharacter,Log,All)
 
-UCLASS()
+DEFINE_LOG_CATEGORY_STATIC(LogLeeXRCharacter,Log,All)
+
+UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
 class LEEMETAXRM_API ALeeXRCharacter : public ACharacter
 {
 	GENERATED_BODY()
-
 public:
 	// Sets default values for this character's properties
 	ALeeXRCharacter();
@@ -25,17 +26,25 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
+
 #pragma region Components
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UCameraComponent> Camera;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
+	ELeeXRHandType HandType;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<class USceneComponent> XROrigin;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
 	TObjectPtr<class ALeeXRHandBase> XRHandLeft;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
 	TObjectPtr<class ALeeXRHandBase> XRHandRight;
 
 #pragma endregion Components
@@ -54,10 +63,10 @@ protected:
 	TObjectPtr<class UInputAction> IA_Turn;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
-	TObjectPtr<class UInputAction> IA_GrabLeft;
+	TObjectPtr<class UInputAction> IA_GraspLeft;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
-	TObjectPtr<class UInputAction> IA_GrabRight;
+	TObjectPtr<class UInputAction> IA_GraspRight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
 	TObjectPtr<class UInputAction> IA_LMenuToogle;
@@ -87,6 +96,8 @@ private:
 	/// </summary>
 	void InitContext();
 
+	UFUNCTION()
+	void OnHandTrigger(const FInputActionInstance& ActionInstance);
 	/// <summary>
 	/// Input Action for Grabing
 	/// </summary>
@@ -105,4 +116,6 @@ private:
 	/// Hand Initialize
 	/// </summary>
 	void HandInitialize();
+
+	void HandTrackingInitialize();
 };

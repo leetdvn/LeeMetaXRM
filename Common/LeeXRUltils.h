@@ -3,6 +3,8 @@
 #include <Async/AsyncWork.h>
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "Definitions.h"
+#include <EnhancedInputSubsystems.h>
 
 namespace LeeXRUltils
 {
@@ -27,5 +29,22 @@ namespace LeeXRUltils
 			return Actor;	
 		}
 		return nullptr;
+	}
+
+	template<class T>
+	FORCEINLINE T* LeeXRGetBaseClass(UObject* inObject) {
+		return Cast<T>(inObject);
+	}
+
+	FORCEINLINE void LeeXRInitMappingContext(const UObject* inContextObject,const UInputMappingContext* inContext,int32 inPriority=0) {
+
+		UWorld* ContextObject = GEngine->GetWorldFromContextObject(inContextObject, EGetWorldErrorMode::LogAndReturnNull);
+		if (APlayerController* PlayerController = ContextObject->GetFirstPlayerController())
+		{
+			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+			{
+				Subsystem->AddMappingContext(inContext, inPriority);
+			}
+		}
 	}
 }
