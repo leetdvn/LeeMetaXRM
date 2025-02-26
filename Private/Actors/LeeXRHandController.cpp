@@ -10,9 +10,6 @@ ALeeXRHandController::ALeeXRHandController(const FObjectInitializer& ObjectIniti
 	HandSkeletal = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandSkeletal"));
 	HandSkeletal->SetupAttachment(MotionController);
 
-	///Reparent the widget interaction to the hand skeletal
-	WidgetInteraction->SetupAttachment(HandSkeletal);
-
 	GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphereCollison"));
 	GrabSphere->SetupAttachment(MotionController);
 
@@ -86,14 +83,12 @@ void ALeeXRHandController::BeginPlay()
 void ALeeXRHandController::InittializeSetup()
 {
 	///Load the hand assets
-	/*
-	if (HandAssets) {
-		if (!HandSkeletal){
-			HandSkeletal->SetSkeletalMesh(HandAssets.LoadSynchronous());
-			LEE_LOG(LogLeeXRHandController,Log,"Hand Assets : %s",*HandAssets.LoadSynchronous()->GetName())
-		}
+	GrabSphere->SetSphereRadius(12.0f);
+#if WITH_EDITOR
+	if (WidgetInteraction) {
+		WidgetInteraction->bShowDebug = true;
+		WidgetInteraction->DebugColor = FColor::Green;
+		WidgetInteraction->TraceChannel = ECollisionChannel::ECC_WorldDynamic;
 	}
-	*/
-	
-
+#endif
 }

@@ -103,7 +103,7 @@ void ALeeXRPawn::StartTeleportTrace()
 
 	if (ActorToSpawn == nullptr) return;
 
-	AActor* ActorSpawn= GetWorld()->SpawnActor<AActor>(ActorToSpawn->StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+	AActor* ActorSpawn= GetWorld()->SpawnActor<AActor>(ActorToSpawn, FVector::ZeroVector, FRotator::ZeroRotator);
 	
 	//if (ActorSpawn !=nullptr)
 	//{

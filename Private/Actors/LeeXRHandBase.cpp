@@ -35,16 +35,6 @@ void ALeeXRHandBase::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	switch (HandType)
-	{
-	case EControllerHand::Left: {
-		MotionController->MotionSource = TEXT("Left");
-		break;
-	}
-	case EControllerHand::Right:
-		MotionController->MotionSource = TEXT("Right");
-		break;
-	}
 }
 
 #if WITH_EDITOR
@@ -64,6 +54,10 @@ void ALeeXRHandBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
 			else {
 				//Do Something With Hand Controller Editor Mode
 			}
+		}
+		else if (PropertyName == GET_MEMBER_NAME_CHECKED(ALeeXRHandBase, HandType))
+		{
+			OnHandTypeChanged();
 		}
 	}
 }
@@ -135,5 +129,19 @@ AActor* ALeeXRHandBase::FindActorToGrab(TArray<AActor*> &inActors, FString inTag
 		}
 	}
 	return nullptr;
+}
+
+void ALeeXRHandBase::OnHandTypeChanged()
+{
+	switch (HandType)
+	{
+	case EControllerHand::Left: {
+		MotionController->MotionSource = TEXT("Left");
+		break;
+	}
+	case EControllerHand::Right:
+		MotionController->MotionSource = TEXT("Right");
+		break;
+	}
 }
 

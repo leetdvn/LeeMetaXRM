@@ -58,6 +58,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
 	bool IsValidControllerType(ELeeXRHandType inType) { return ControllerType == inType; }
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
+	FVector GetMotionControllerLocation() { return MotionController->GetComponentLocation(); }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
+	FVector GetMotionControllerForwardVector() { return MotionController->GetForwardVector(); }
+
 	virtual void GraspObject();
 
 	virtual void GraspRelease();
@@ -89,7 +95,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
 	TObjectPtr<class UOculusXRHandComponent> HandTrackingComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeVR Settings|Components")
 	TObjectPtr<class USkeletalMeshComponent> HandSkeletal=nullptr;
 
 #pragma endregion
@@ -120,4 +126,6 @@ public:
 private:
 
 	AActor* FindActorToGrab(TArray<AActor*> &inActors, FString inTag);
+
+	void OnHandTypeChanged();
 };

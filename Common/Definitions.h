@@ -37,7 +37,7 @@ DECLARE_CYCLE_STAT(TEXT(StatName), STAT_constant, GroupId);
 
 
 #if LEE_PROFILE_LEVEL
-REGISTER_LEESTAT("LeeXR_Profiling", STATGROUP_LEE, STATCAT_LEE);
+REGISTER_LEESTAT("LeeXR_Profiling", STATGROUP_ICTUMV, STATCAT_ICTUMV);
 #endif
 
 #if STATS 
@@ -45,10 +45,10 @@ REGISTER_LEESTAT("LeeXR_Profiling", STATGROUP_LEE, STATCAT_LEE);
 #define LEE_SCOPE_CYCLE_COUNTER(STATNAME)									\
 	LEE_DECLARE_STAT(LEE_##STATNAME,STATNAME);								\
 	static DEFINE_STAT(STATNAME)											\
-	FScopeCycleCounter CycleCount_LEE_##STATNAME(GET_STATID(STATNAME));	
+	FScopeCycleCounter CycleCount_ICTUMV_##STATNAME(GET_STATID(STATNAME));	
 
 #define LEE_DECLARE_STAT(Description, StatName)																					\
-DECLARE_STAT(TEXT(#Description), StatName, STATGROUP_LEE, EStatDataType::ST_int64,												\
+DECLARE_STAT(TEXT(#Description), StatName, STATGROUP_ICTUMV, EStatDataType::ST_int64,												\
 EStatFlags::CycleStat | EStatFlags::ClearEveryFrame ,																			\
 FPlatformMemory::EMemoryCounterRegion::MCR_Invalid);																																		
 #else																															

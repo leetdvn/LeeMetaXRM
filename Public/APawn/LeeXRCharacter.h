@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Definitions.h"
 #include "Actors/LeeXRHandBase.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -11,10 +12,21 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogLeeXRCharacter,Log,All)
 
+DECLARE_MEMORY_STAT_EXTERN(TEXT("ICTUCharacter"), STAT_ICTUCharacter, STATGROUP_ICTUMV, );
+DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT("LeeXRModules"), STAT_LeeXRModules, STATGROUP_ICTUMV, );
+
+
 UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
 class LEEMETAXRM_API ALeeXRCharacter : public ACharacter
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Actors", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AActor> ActorToSpawn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UNiagaraComponent> NiagaraComponent;
+
 public:
 	// Sets default values for this character's properties
 	ALeeXRCharacter();
@@ -22,9 +34,28 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UAnimInstance* GetHandAnimInstance(bool isLeft);
 
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void TeleportTrace(FVector StartPos, FVector ForwardVec);
+
+	bool IsValidTeleportLocation(FHitResult Hit, FVector& ProjectedLocation);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Varibles")
+	TArray<FVector> TeleportTracePathPositions;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Varibles")
+	FVector TeleportProjectPointToNavigationQueryExtent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Varibles")
+	FVector ProjectedTeleportLocation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Varibles")
+	bool bValidTeleportLocation = false;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
