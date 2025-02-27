@@ -77,12 +77,12 @@ protected:
 	TObjectPtr<class USceneComponent> XROrigin;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
-	TObjectPtr<class ALeeXRHandBase> XRHandLeft;
+	TObjectPtr<ALeeXRHandBase> XRHandLeft;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
-	TObjectPtr<class ALeeXRHandBase> XRHandRight;
+	TObjectPtr<ALeeXRHandBase> XRHandRight;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Data")
+	UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "LeeVR Settings|Data")
 	ULeeXRHandDataAsset* DataLeft;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Data")
@@ -109,6 +109,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
 	TObjectPtr<class UInputAction> IA_RMenuToogle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputAction> IA_Grasp;
 
 
 #pragma endregion Input
@@ -126,32 +128,15 @@ public:
 	UFUNCTION()
 	void OnMoving();
 
-
+	UFUNCTION()
+	void OnHandGrabing(const FInputActionInstance& ActionInstance);
 private:
 
 
-	UFUNCTION()
-	void OnHandTrigger(const FInputActionInstance& ActionInstance);
-	/// <summary>
-	/// Input Action for Grabing
-	/// </summary>
-	/// <param name="ActionInstance"></param>
-	UFUNCTION()
-	void OnHandGrabing(const FInputActionInstance& ActionInstance);
-
-	/// <summary>
-	/// Input Action for Releasing
-	/// </summary>
-	/// <param name="ActionInstance"></param>
-	UFUNCTION()
-	void OnHandRelease(const FInputActionInstance& ActionInstance);
-
-	UFUNCTION()
-	void OnHandInteract(const FInputActionInstance& ActionInstance);
 	/// <summary>
 	/// Hand Initialize
 	/// </summary>
-	void HandInitialize(ELeeXRHandType inType);
+	ALeeXRHandBase* HandInitialize(ELeeXRHandType inType,bool isLeft);
 
 	template<typename T>
 	ALeeXRHandBase* InitializeHandActor(const FString inLeftHandPath);
@@ -187,5 +172,5 @@ inline ALeeXRHandBase* ALeeXRCharacter::InitializeHandActor(TSubclassOf<T> inCla
 	if (HandBase == nullptr) return nullptr;
 	HandBase->AttachToComponent(XROrigin, AttachRules);
 
-	return nullptr;
+	return HandBase;
 }

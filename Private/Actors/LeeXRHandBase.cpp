@@ -29,7 +29,7 @@ ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 bool ALeeXRHandBase::IsValidControllerType(ELeeXRHandType inType)
 {
 	
-	return IsValid(HandSkeletal);
+	return inType == ControllerType;
 }
 
 // Called when the game starts or when spawned
@@ -69,20 +69,11 @@ void ALeeXRHandBase::SetInputComponent()
 	UInputComponent* PlayerInputComponent = GetWorld()->GetFirstPlayerController()->InputComponent;
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Started, this, &ALeeXRCharacter::OnHandGrabing);
-		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Completed, this, &ALeeXRCharacter::OnHandRelease);
-		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Canceled, this, &ALeeXRCharacter::OnHandRelease);
-		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Triggered, this, &ALeeXRCharacter::OnHandTrigger);
 
+		EnhancedInputComponent->BindAction(IA_MenuInteract, ETriggerEvent::Started, this, &ALeeXRHandBase::OnHandInteract);
+		EnhancedInputComponent->BindAction(IA_MenuInteract, ETriggerEvent::Canceled, this, &ALeeXRHandBase::OnHandInteract);
+		EnhancedInputComponent->BindAction(IA_MenuInteract, ETriggerEvent::Completed, this, &ALeeXRHandBase::OnHandInteract);
 
-		//EnhancedInputComponent->BindAction(IA_GraspRight, ETriggerEvent::Started, this, &ALeeXRCharacter::OnHandGrabing);
-		//EnhancedInputComponent->BindAction(IA_GraspRight, ETriggerEvent::Triggered, this, &ALeeXRCharacter::OnHandTrigger);
-		//EnhancedInputComponent->BindAction(IA_GraspRight, ETriggerEvent::Completed, this, &ALeeXRCharacter::OnHandRelease);
-		//EnhancedInputComponent->BindAction(IA_GraspRight, ETriggerEvent::Canceled, this, &ALeeXRCharacter::OnHandRelease);
-
-		//EnhancedInputComponent->BindAction(IA_RMenuInteract, ETriggerEvent::Started, this, &ALeeXRCharacter::OnHandInteract);
-		//EnhancedInputComponent->BindAction(IA_RMenuInteract, ETriggerEvent::Canceled, this, &ALeeXRCharacter::OnHandInteract);
-		//EnhancedInputComponent->BindAction(IA_RMenuInteract, ETriggerEvent::Completed, this, &ALeeXRCharacter::OnHandInteract);
 
 		LeeScreenLog("Setting Input Component",FColor::Blue);
 	}
@@ -203,3 +194,78 @@ void ALeeXRHandBase::OnHandTypeChanged()
 	}
 }
 
+// Called when the player is grabbing
+void ALeeXRHandBase::OnHandGrabing(const FInputActionInstance& ActionInstance)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	FString ActName = ActionInstance.GetSourceAction()->GetName();
+	//bool isLeft = ActName.EndsWith("Left");
+	//TObjectPtr<ALeeXRHandBase> Hand = isLeft ?
+	//	XRHandLeft :
+	//	XRHandRight;
+
+	//if (Hand && Hand->IsValidControllerType(ELeeXRHandType::LeeXRController))
+	//	return Hand->GraspObject();
+	GraspObject();
+}
+
+// Called when the player is releasing
+void ALeeXRHandBase::OnHandRelease(const FInputActionInstance& ActionInstance)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	//FString ActName = ActionInstance.GetSourceAction()->GetName();
+	//bool isLeft = ActName.EndsWith("Left");
+	//TObjectPtr<ALeeXRHandBase> Hand = isLeft ?
+	//	XRHandLeft :
+	//	XRHandRight;
+
+	if (IsValidControllerType(ELeeXRHandType::LeeXRController)) {
+		GraspRelease();
+	}
+}
+
+void ALeeXRHandBase::OnHandInteract(const FInputActionInstance& ActionInstance)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+
+	//FString ActName = ActionInstance.GetSourceAction()->GetName();
+	//bool isLeft = ActName.EndsWith("Left");
+	//TObjectPtr<ALeeXRHandBase> Hand = isLeft ?
+	//	XRHandLeft :
+	//	XRHandRight;
+
+	//ETriggerEvent TriggerEvent = ActionInstance.GetTriggerEvent();
+	//if (Hand) {
+	//	//LEE_LOG(LogLeeXRCharacter, Log, "Interact :%s",Hand->GetName());
+
+	//	LeeScreenLog("Interact :%s", FColor::Green, *Hand->GetName());
+	//	
+	//}
+	WidgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
+}
+
+
+
+void ALeeXRHandBase::OnHandTrigger(const FInputActionInstance& ActionInstance)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	//FString ActName = ActionInstance.GetSourceAction()->GetName();
+	//bool isLeft = ActName.EndsWith("Left");
+	//TObjectPtr<ALeeXRHandBase> Hand = isLeft ?
+	//	XRHandLeft :
+	//	XRHandRight;
+
+	//if (Hand) {
+	//	///Play Animation
+	//	ALeeXRHandController* HandControl = LeeXRGetBaseClass<ALeeXRHandController>(Hand);
+	//	if (HandControl)
+	//	{
+	//		FInputActionValue ActValue = ActionInstance.GetValue();
+	//		HandControl->PlayAnimAction(EFingerInputType::XRGrasp, ActValue.Get<float>(), true);
+
+	//	}
+}

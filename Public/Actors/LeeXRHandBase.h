@@ -139,18 +139,19 @@ protected:
 	TObjectPtr<class UInputMappingContext> HandContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
-	TObjectPtr<class UInputAction> IA_GraspLeft;
+	TObjectPtr<class UInputAction> IA_Grasp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
-	TObjectPtr<class UInputAction> IA_GraspRight;
-
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
-	TObjectPtr<class UInputAction> IA_LMenuInteract;
+	TObjectPtr<class UInputAction> IA_MenuInteract;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
-	TObjectPtr<class UInputAction> IA_RMenuInteract;
+	TObjectPtr<class UInputAction> IA_FingerPoint;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputAction> IA_CurlIndex;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputAction> IA_HandThumpUp;
 
 #pragma endregion
 public:	
@@ -162,4 +163,25 @@ private:
 	AActor* FindActorToGrab(TArray<AActor*> &inActors, FString inTag);
 
 	void OnHandTypeChanged();
+
+
+	UFUNCTION()
+	void OnHandTrigger(const FInputActionInstance& ActionInstance);
+	/// <summary>
+	/// Input Action for Grabing
+	/// </summary>
+	/// <param name="ActionInstance"></param>
+	UFUNCTION()
+	void OnHandGrabing(const FInputActionInstance& ActionInstance);
+
+	/// <summary>
+	/// Input Action for Releasing
+	/// </summary>
+	/// <param name="ActionInstance"></param>
+	UFUNCTION()
+	void OnHandRelease(const FInputActionInstance& ActionInstance);
+
+	UFUNCTION()
+	void OnHandInteract(const FInputActionInstance& ActionInstance);
+
 };

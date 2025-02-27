@@ -40,7 +40,7 @@ namespace LeeXRUltils
 
 		if (ContextObject) {
 			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = Cast<ACharacter>(inContextObject);
+			SpawnParams.Owner = (AActor*)inContextObject;
 			T* Actor = ContextObject->SpawnActor<T>(inClass, Location, Rotation, SpawnParams);
 
 

@@ -37,17 +37,22 @@ public:
 
 	virtual void GraspRelease() override;
 
+
 protected:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-
+	virtual void SetInputComponent() override;
+	UFUNCTION(BlueprintCallable)
+	void OnFingerAnimation(const FInputActionInstance& ActionInstance);
 
 
 private:
 
 	void InittializeSetup();
+
+	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance& ActionInstance);
 
 };
 
