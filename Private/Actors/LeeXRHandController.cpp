@@ -21,6 +21,8 @@ ALeeXRHandController::ALeeXRHandController(const FObjectInitializer& ObjectIniti
 
 void ALeeXRHandController::SetHandSwitch(bool isLeft)
 {
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
 	FString HandName = isLeft ? "Left" : "Right";
 
 	MotionController->MotionSource = FName(*HandName);
@@ -28,6 +30,9 @@ void ALeeXRHandController::SetHandSwitch(bool isLeft)
 
 void ALeeXRHandController::PlayAnimAction(const EFingerInputType& inFinger,float inActionValue, bool isTrigger)
 {
+
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
 	if (!HandSkeletal) return;
 
 	ULeeXRAnimInstance* AnimIns = Cast<ULeeXRAnimInstance>(HandSkeletal->GetAnimInstance());
@@ -59,22 +64,27 @@ void ALeeXRHandController::PlayAnimAction(const EFingerInputType& inFinger,float
 void ALeeXRHandController::GraspObject()
 {
 	Super::GraspObject();
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 
 }
 
 void ALeeXRHandController::GraspRelease()
 {
 	Super::GraspRelease();
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
 }
-
-
-
 
 void ALeeXRHandController::BeginPlay()
 {
 	Super::BeginPlay();
 	
 	InittializeSetup();
+
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+	
+	INC_MEMORY_STAT_BY(STAT_HandController, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
+
 }
 
 /// <summary>
@@ -82,6 +92,8 @@ void ALeeXRHandController::BeginPlay()
 /// </summary>
 void ALeeXRHandController::InittializeSetup()
 {
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
 	///Load the hand assets
 	GrabSphere->SetSphereRadius(12.0f);
 #if WITH_EDITOR

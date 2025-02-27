@@ -40,8 +40,6 @@ protected:
 	virtual void BeginPlay() override;
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
-	TSoftObjectPtr<USkeletalMesh> HandAssets;
 
 
 private:

@@ -7,6 +7,9 @@
 #include <Components/ArrowComponent.h>
 #include <Definitions.h>
 
+
+DEFINE_STAT(STAT_ICTUController);
+DEFINE_STAT(STAT_HandController)
 // Sets default values
 ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -26,8 +29,19 @@ ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 void ALeeXRHandBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
+	INC_MEMORY_STAT_BY(STAT_HandController, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
+
 	LeeScreenLog("Hand %s Checking", FColor::Green,*GetName());
+}
+
+void ALeeXRHandBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+	///Reset Profile Memories
+	SET_MEMORY_STAT(STAT_ICTUController, 0);
 }
 
 // Called when compiled
@@ -67,6 +81,8 @@ void ALeeXRHandBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
 void ALeeXRHandBase::GraspObject()
 {
 
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
 	if (HandSkeletal == nullptr || 
 		ControllerType == ELeeXRHandType::LeeXRHandTracking) return;
 
@@ -97,6 +113,8 @@ void ALeeXRHandBase::GraspObject()
 void ALeeXRHandBase::GraspRelease()
 {
 
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
 	if (ControllerType == ELeeXRHandType::LeeXRHandTracking) return;
 
 	if (CurrentGrabObject == nullptr ||
@@ -120,6 +138,7 @@ void ALeeXRHandBase::Tick(float DeltaTime)
 // Find Actor to Grab
 AActor* ALeeXRHandBase::FindActorToGrab(TArray<AActor*> &inActors, FString inTag)
 {
+
 	for (auto Actor : inActors)
 	{
 		if (Actor->ActorHasTag(*inTag))
@@ -133,6 +152,8 @@ AActor* ALeeXRHandBase::FindActorToGrab(TArray<AActor*> &inActors, FString inTag
 
 void ALeeXRHandBase::OnHandTypeChanged()
 {
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
 	switch (HandType)
 	{
 	case EControllerHand::Left: {

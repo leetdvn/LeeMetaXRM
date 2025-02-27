@@ -1,5 +1,6 @@
 #pragma once
 
+#include <GameFrameWork/Actor.h>
 #include <Async/AsyncWork.h>
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
@@ -32,6 +33,22 @@ namespace LeeXRUltils
 	}
 
 	template<class T>
+	FORCEINLINE T* LeeXRSPawnActorBP(UObject* inContextObject, TSubclassOf<T> inClass, FVector Location = FVector::ZeroVector, FRotator Rotation = FRotator::ZeroRotator) 
+	{
+		UWorld* ContextObject = GEngine->GetWorldFromContextObject(inContextObject, EGetWorldErrorMode::LogAndReturnNull);
+
+		if (ContextObject) {
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = Cast<ACharacter>(inContextObject);
+			T* Actor = ContextObject->SpawnActor<T>(inClass, Location, Rotation, SpawnParams);
+
+
+			return Actor;
+		}
+		return nullptr;
+	}
+
+	template<class T>
 	FORCEINLINE T* LeeXRGetBaseClass(UObject* inObject) {
 		return Cast<T>(inObject);
 	}
@@ -46,5 +63,13 @@ namespace LeeXRUltils
 				Subsystem->AddMappingContext(inContext, inPriority);
 			}
 		}
+	}
+
+	FORCEINLINE APlayerController* LeeXRGetPlayerController(const UObject* inContextObject) {
+		UWorld* ContextObject = GEngine->GetWorldFromContextObject(inContextObject, EGetWorldErrorMode::LogAndReturnNull);
+		if (ContextObject) {
+			return ContextObject->GetFirstPlayerController();
+		}
+		return nullptr;
 	}
 }

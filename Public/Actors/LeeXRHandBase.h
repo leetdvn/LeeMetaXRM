@@ -31,14 +31,15 @@ enum class EFingerInputType : uint8
 
 DEFINE_LOG_CATEGORY_STATIC(LogLeeXRHandBase, Log, All);
 
-//for (TActorIterator<ADayCycle> ActorItr(()); ActorItr; ++ActorItr)
-//{
-//	ActorItr->DoSonething();
-//}
 using namespace LeeXRUltils;
 /**
  *
  */
+
+DECLARE_MEMORY_STAT_EXTERN(TEXT("ICTUController"), STAT_ICTUController, STATGROUP_ICTUMV, );
+DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT("HandController"), STAT_HandController, STATGROUP_ICTUMV, );
+
+
 UCLASS(Abstract)
 class LEEMETAXRM_API ALeeXRHandBase : public AActor
 {
@@ -71,6 +72,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 #if WITH_EDITOR
@@ -97,6 +100,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeVR Settings|Components")
 	TObjectPtr<class USkeletalMeshComponent> HandSkeletal=nullptr;
+
 
 #pragma endregion
 

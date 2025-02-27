@@ -18,4 +18,9 @@ ALeeXRHandTracking::ALeeXRHandTracking(const FObjectInitializer& ObjectInitializ
 void ALeeXRHandTracking::BeginPlay()
 {
 	Super::BeginPlay();
+
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
+	INC_MEMORY_STAT_BY(STAT_HandController, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
+
 }

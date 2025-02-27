@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Definitions.h"
+#include "DataAssets/LeeXRHandDataAsset.h"
 #include "Actors/LeeXRHandBase.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -13,7 +14,7 @@
 DEFINE_LOG_CATEGORY_STATIC(LogLeeXRCharacter,Log,All)
 
 DECLARE_MEMORY_STAT_EXTERN(TEXT("ICTUCharacter"), STAT_ICTUCharacter, STATGROUP_ICTUMV, );
-DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT("LeeXRModules"), STAT_LeeXRModules, STATGROUP_ICTUMV, );
+DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT("ICTUCharacterMemory"), STAT_ICTUCharacterMemory, STATGROUP_ICTUMV, );
 
 
 UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
@@ -80,6 +81,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
 	TObjectPtr<class ALeeXRHandBase> XRHandRight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Data")
+	ULeeXRHandDataAsset* DataLeft;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Data")
+	ULeeXRHandDataAsset* DataRight;
 
 #pragma endregion Components
 
@@ -151,5 +158,39 @@ private:
 	/// </summary>
 	void HandInitialize();
 
-	void HandTrackingInitialize();
+	template<typename T>
+	ALeeXRHandBase* InitializeHandActor(const FString inLeftHandPath);
+
+	template<typename T>
+	ALeeXRHandBase* InitializeHandActor(TSubclassOf<T> inClass);
+
 };
+
+template<typename T>
+inline ALeeXRHandBase* ALeeXRCharacter::InitializeHandActor(const FString inHandPath)
+{
+	if (inHandPath.IsEmpty()) return nullptr;
+	// Path Actor Blueprint
+	FAttachmentTransformRules AttachRules = FAttachmentTransformRules::SnapToTargetNotIncludingScale;
+	// Spawn the hands
+	ALeeXRHandBase* HandBase = LeeXRSPawnActorBP<T>(this, inHandPath);
+	if (HandBase == nullptr) return nullptr;
+	HandBase->AttachToComponent(XROrigin, AttachRules);
+
+	return nullptr;
+}
+
+template<typename T>
+inline ALeeXRHandBase* ALeeXRCharacter::InitializeHandActor(TSubclassOf<T> inClass)
+{
+	if (inClass == nullptr) return nullptr;
+	// Path Actor Blueprint
+
+	FAttachmentTransformRules AttachRules = FAttachmentTransformRules::SnapToTargetNotIncludingScale;
+	// Spawn the hands
+	ALeeXRHandBase* HandBase = LeeXRSPawnActorBP<T>(this,inClass);
+	if (HandBase == nullptr) return nullptr;
+	HandBase->AttachToComponent(XROrigin, AttachRules);
+
+	return nullptr;
+}

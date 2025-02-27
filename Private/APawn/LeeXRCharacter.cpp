@@ -20,8 +20,7 @@
 using namespace LeeXRUltils;
 
 DEFINE_STAT(STAT_ICTUCharacter);
-DEFINE_STAT(STAT_LeeXRModules);
-
+DEFINE_STAT(STAT_ICTUCharacterMemory);
 // Sets default values
 ALeeXRCharacter::ALeeXRCharacter()
 {
@@ -145,7 +144,7 @@ void ALeeXRCharacter::BeginPlay()
 		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
 	}
 
-	INC_MEMORY_STAT_BY(STAT_ICTUCharacter, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
+	INC_MEMORY_STAT_BY(STAT_ICTUCharacterMemory, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
 
 }
 
@@ -315,26 +314,8 @@ void ALeeXRCharacter::HandInitialize()
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
 	// Path Actor Blueprint
-	///Hand Tracking /Script/Engine.Blueprint'/Game/BlueprintTemplates/Hands/BP_LeeXRHandTracking.BP_LeeXRHandTracking'
-	FString PathLeft = TEXT("/Game/Blueprints/Actors/BP_HandLeft.BP_HandLeft_C");  ////Script/Engine.Blueprint'/Game/BlueprintTemplates/Testing/BP_LeeXRHandController.BP_LeeXRHandController'
-	FString PathRight = TEXT("/Game/Blueprints/Actors/BP_HandRight.BP_HandRight_C");
-	////Script/Engine.Blueprint'/Game/Blueprints/Actors/BP_HandTrackingRight.BP_HandTrackingRight'
-	FString RightHandTrackingPath = TEXT("/Game/Blueprints/Actors/BP_HandTrackingRight.BP_HandTrackingRight_C");
-	FString LeftHandTrackingPath = TEXT("/Game/Blueprints/Actors/BP_HandTrackingLeft.BP_HandTrackingLeft_C");
-	FAttachmentTransformRules AttachRules = FAttachmentTransformRules::SnapToTargetNotIncludingScale;
-	// Spawn the hands
-	XRHandLeft = LeeXRSPawnActorBP<ALeeXRHandController>(this, PathLeft);
-
-	XRHandRight = LeeXRSPawnActorBP<ALeeXRHandController>(this, PathRight);
-
-	XRHandLeft->AttachToComponent(XROrigin, AttachRules);
-	XRHandRight->AttachToComponent(XROrigin, AttachRules);
-
-
-}
-
-void ALeeXRCharacter::HandTrackingInitialize()
-{
+	XRHandLeft = InitializeHandActor<ALeeXRHandTracking>(DataLeft->Assets.Tracking);
+	XRHandRight = InitializeHandActor<ALeeXRHandTracking>(DataRight->Assets.Tracking);
 
 }
 
