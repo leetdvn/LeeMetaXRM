@@ -24,6 +24,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
 	USkeletalMeshComponent* GetHandSkeletal() const { return HandSkeletal.Get(); }
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
+	UAnimInstance* GetABPInstance() const { return HandSkeletal->GetAnimInstance(); }
+
 	UFUNCTION(BlueprintCallable, Category = "LeeVR|Func")
 	void SetHandSwitch(bool isLeft);
 

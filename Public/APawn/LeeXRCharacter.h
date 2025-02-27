@@ -104,16 +104,13 @@ protected:
 	TObjectPtr<class UInputAction> IA_Turn;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
-	TObjectPtr<class UInputAction> IA_GraspLeft;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
-	TObjectPtr<class UInputAction> IA_GraspRight;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
 	TObjectPtr<class UInputAction> IA_LMenuToogle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
 	TObjectPtr<class UInputAction> IA_RMenuToogle;
+
+
+
 #pragma endregion Input
 
 public:	
@@ -132,10 +129,6 @@ public:
 
 private:
 
-	/// <summary>
-	/// Initialize Context
-	/// </summary>
-	void InitContext();
 
 	UFUNCTION()
 	void OnHandTrigger(const FInputActionInstance& ActionInstance);
@@ -153,10 +146,12 @@ private:
 	UFUNCTION()
 	void OnHandRelease(const FInputActionInstance& ActionInstance);
 
+	UFUNCTION()
+	void OnHandInteract(const FInputActionInstance& ActionInstance);
 	/// <summary>
 	/// Hand Initialize
 	/// </summary>
-	void HandInitialize();
+	void HandInitialize(ELeeXRHandType inType);
 
 	template<typename T>
 	ALeeXRHandBase* InitializeHandActor(const FString inLeftHandPath);

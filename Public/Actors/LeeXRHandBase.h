@@ -57,13 +57,17 @@ public:
 	bool IsValidGrab() { return bIsHeld; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
-	bool IsValidControllerType(ELeeXRHandType inType) { return ControllerType == inType; }
+	bool IsValidControllerType(ELeeXRHandType inType);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
 	FVector GetMotionControllerLocation() { return MotionController->GetComponentLocation(); }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
 	FVector GetMotionControllerForwardVector() { return MotionController->GetForwardVector(); }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
+	UWidgetInteractionComponent* GetWidgetInteraction() { return WidgetInteraction; }
+
 
 	virtual void GraspObject();
 
@@ -76,11 +80,14 @@ protected:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+	virtual void SetInputComponent();
+
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
 #pragma region Components
+
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeVR Settings|Components")
 	TObjectPtr<class UOculusXRHandComponent> OculusHand;
@@ -121,6 +128,29 @@ protected:
 	/// Interface
 	/// </summary>
 	TScriptInterface<ILeeXRInteraction> CurrentGrabObject;
+
+#pragma endregion
+
+#pragma region Input
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputMappingContext> MenuContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputMappingContext> HandContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputAction> IA_GraspLeft;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputAction> IA_GraspRight;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputAction> IA_LMenuInteract;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputAction> IA_RMenuInteract;
+
 
 #pragma endregion
 public:	

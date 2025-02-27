@@ -6,6 +6,7 @@
 #include <Components/SphereComponent.h>
 #include <Components/ArrowComponent.h>
 #include <Definitions.h>
+#include <EnhancedInputComponent.h>
 
 
 DEFINE_STAT(STAT_ICTUController);
@@ -25,15 +26,27 @@ ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 
 }
 
+bool ALeeXRHandBase::IsValidControllerType(ELeeXRHandType inType)
+{
+	
+	return IsValid(HandSkeletal);
+}
+
 // Called when the game starts or when spawned
 void ALeeXRHandBase::BeginPlay()
 {
 	Super::BeginPlay();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 
+	///Mapping Context
+	if (MenuContext) {
+		InitializationContext(GetWorld(), MenuContext, 0);
+		InitializationContext(GetWorld(), HandContext, 1);
+	}
+
 	INC_MEMORY_STAT_BY(STAT_HandController, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
 
-	LeeScreenLog("Hand %s Checking", FColor::Green,*GetName());
+	SetInputComponent();
 }
 
 void ALeeXRHandBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -49,6 +62,30 @@ void ALeeXRHandBase::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+}
+
+void ALeeXRHandBase::SetInputComponent()
+{
+	UInputComponent* PlayerInputComponent = GetWorld()->GetFirstPlayerController()->InputComponent;
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Started, this, &ALeeXRCharacter::OnHandGrabing);
+		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Completed, this, &ALeeXRCharacter::OnHandRelease);
+		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Canceled, this, &ALeeXRCharacter::OnHandRelease);
+		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Triggered, this, &ALeeXRCharacter::OnHandTrigger);
+
+
+		//EnhancedInputComponent->BindAction(IA_GraspRight, ETriggerEvent::Started, this, &ALeeXRCharacter::OnHandGrabing);
+		//EnhancedInputComponent->BindAction(IA_GraspRight, ETriggerEvent::Triggered, this, &ALeeXRCharacter::OnHandTrigger);
+		//EnhancedInputComponent->BindAction(IA_GraspRight, ETriggerEvent::Completed, this, &ALeeXRCharacter::OnHandRelease);
+		//EnhancedInputComponent->BindAction(IA_GraspRight, ETriggerEvent::Canceled, this, &ALeeXRCharacter::OnHandRelease);
+
+		//EnhancedInputComponent->BindAction(IA_RMenuInteract, ETriggerEvent::Started, this, &ALeeXRCharacter::OnHandInteract);
+		//EnhancedInputComponent->BindAction(IA_RMenuInteract, ETriggerEvent::Canceled, this, &ALeeXRCharacter::OnHandInteract);
+		//EnhancedInputComponent->BindAction(IA_RMenuInteract, ETriggerEvent::Completed, this, &ALeeXRCharacter::OnHandInteract);
+
+		LeeScreenLog("Setting Input Component",FColor::Blue);
+	}
 }
 
 #if WITH_EDITOR

@@ -85,6 +85,15 @@ void ALeeXRHandController::BeginPlay()
 	
 	INC_MEMORY_STAT_BY(STAT_HandController, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
 
+	UAnimInstance* AnimIns = GetABPInstance();
+	if (AnimIns) {
+		ULeeXRAnimInstance* LeeAnimIns = Cast<ULeeXRAnimInstance>(AnimIns);
+		if (LeeAnimIns)
+		{
+			LeeAnimIns->PoseAlphaThumbUp = 1.0f;
+		}
+		LeeScreenLog("Hand Anim Instance :%s", FColor::Cyan, *HandSkeletal->GetAnimInstance()->GetName());
+	}
 }
 
 /// <summary>

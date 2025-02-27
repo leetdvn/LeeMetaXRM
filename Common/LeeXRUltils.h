@@ -6,6 +6,7 @@
 #include "UObject/Interface.h"
 #include "Definitions.h"
 #include <EnhancedInputSubsystems.h>
+#include "InputMappingContext.h"
 
 namespace LeeXRUltils
 {
@@ -71,5 +72,19 @@ namespace LeeXRUltils
 			return ContextObject->GetFirstPlayerController();
 		}
 		return nullptr;
+	}
+
+	FORCEINLINE void InitializationContext(UWorld* inWorld,UInputMappingContext* inContext,int32 Priority=0) {
+
+		if (!inWorld) return;
+		/// Implement the Context
+		APlayerController* PlayerController = inWorld->GetFirstPlayerController();
+		if(PlayerController)
+		{
+			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+			{
+				Subsystem->AddMappingContext(inContext, Priority);
+			}
+		}
 	}
 }
