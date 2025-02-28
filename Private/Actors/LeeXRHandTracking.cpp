@@ -15,6 +15,17 @@ ALeeXRHandTracking::ALeeXRHandTracking(const FObjectInitializer& ObjectInitializ
 	ControllerType = ELeeXRHandType::LeeXRHandTracking;
 }
 
+void ALeeXRHandTracking::GraspObject()
+{
+	//Grasp Object Hand Tracking
+
+}
+
+void ALeeXRHandTracking::GraspRelease()
+{
+	//Grasp Release Hand Tracking
+}
+
 void ALeeXRHandTracking::BeginPlay()
 {
 	Super::BeginPlay();

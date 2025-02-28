@@ -27,12 +27,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
 	UAnimInstance* GetABPInstance() const { return HandSkeletal->GetAnimInstance(); }
 
-	UFUNCTION(BlueprintCallable, Category = "LeeVR|Func")
-	void SetHandSwitch(bool isLeft);
-
 	virtual void GraspObject() override;
 
 	virtual void GraspRelease() override;
+
+	virtual void InittializeSetup() override;
 
 
 protected:
@@ -47,7 +46,6 @@ protected:
 
 private:
 
-	void InittializeSetup();
 
 	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance);
 

@@ -55,6 +55,9 @@ void ALeeXRHandBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 	///Reset Profile Memories
 	SET_MEMORY_STAT(STAT_ICTUController, 0);
+
+	InittializeSetup();
+
 }
 
 // Called when compiled
@@ -77,6 +80,50 @@ void ALeeXRHandBase::SetInputComponent()
 
 		LeeScreenLog("Setting Input Component",FColor::Blue);
 	}
+}
+
+void ALeeXRHandBase::InittializeSetup()
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+	///Load the hand assets
+	GrabSphere->SetSphereRadius(8.0f);
+
+#if WITH_EDITOR
+	if (WidgetInteraction) {
+		WidgetInteraction->bShowDebug = true;
+		WidgetInteraction->DebugColor = FColor::Green;
+		WidgetInteraction->TraceChannel = ECollisionChannel::ECC_WorldDynamic;
+	}
+#endif
+}
+
+void ALeeXRHandBase::SetHandSwitch(bool isLeft)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
+	FString HandName = isLeft ? "Left" : "Right";
+
+	MotionController->MotionSource = FName(*HandName);
+
+	FVector LeftLoc = FVector(-8.5f, -3.5f, 4.5f);
+	FVector RightLoc = FVector(-8.5f, 3.5f, 0.0f);
+	//===================================
+	FRotator LeftRot = FRotator(-80.0f, -180.0f, 78.f);
+	FRotator RightRot = FRotator(80.0f, 0.0f, 78.f);
+
+	if (HandSkeletal)
+	{
+		HandSkeletal->SetRelativeLocation(isLeft ? LeftLoc : RightLoc);
+		HandSkeletal->SetRelativeRotation(isLeft ? LeftRot : RightRot);
+	}
+
+	if (ControllerType == ELeeXRHandType::LeeXRController) {
+		if (ULeeXRAnimInstance* AnimIns = Cast<ULeeXRAnimInstance>(HandSkeletal->GetAnimInstance()))
+		{
+			AnimIns->bMirror = isLeft;
+		}
+	}
+
 }
 
 #if WITH_EDITOR
@@ -122,14 +169,12 @@ void ALeeXRHandBase::GraspObject()
 		AActor* OverlappingActor = OverlappingActors[0];
 		if (OverlappingActor)
 		{
-			LeeScreenLog("Grasp Object :%s", FColor::Green,*OverlappingActor->GetName());
 
 			CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(OverlappingActor);
 			if (CurrentGrabObject) {
 				bIsHeld = true;
 				FVector GrabLocation = HandSkeletal->GetComponentLocation();
 				CurrentGrabObject->OnGrab(HandSkeletal, GrabLocation);
-				LeeScreenLog("Grabbing Object %s", FColor::Green, *OverlappingActor->GetName());
 
 			}
 		}

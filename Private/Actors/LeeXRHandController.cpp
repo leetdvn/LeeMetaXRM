@@ -16,41 +16,15 @@ ALeeXRHandController::ALeeXRHandController(const FObjectInitializer& ObjectIniti
 	GrabSphere->SetRelativeLocation(FVector(0.0f, 2.5f, -2.5f));
 
 	//Set Init Hand Left or Right
-	SetHandSwitch(false);
 
 	ControllerType = ELeeXRHandType::LeeXRController;
-}
-
-void ALeeXRHandController::SetHandSwitch(bool isLeft)
-{
-	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
-
-	FString HandName = isLeft ? "Left" : "Right";
-
-	MotionController->MotionSource = FName(*HandName);
-
-	FVector LeftLoc = FVector(-8.5f, -3.5f, 4.5f);
-	FVector RightLoc = FVector(-8.5f, 3.5f, 0.0f);
-	//===================================
-	FRotator LeftRot = FRotator(-80.0f,-180.0f,78.f);
-	FRotator RightRot = FRotator(80.0f,0.0f,78.f);
-
-	if (HandSkeletal)
-	{
-		HandSkeletal->SetRelativeLocation(isLeft ? LeftLoc : RightLoc);
-		HandSkeletal->SetRelativeRotation(isLeft ? LeftRot : RightRot);
-
-		if (ULeeXRAnimInstance* AnimIns = Cast<ULeeXRAnimInstance>(HandSkeletal->GetAnimInstance()))
-		{
-			AnimIns->bMirror = isLeft;
-		}
-	}
 }
 
 void ALeeXRHandController::GraspObject()
 {
 	Super::GraspObject();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+	LeeScreenLog("Grasp Object :%s", FColor::Green, *GetName());
 
 }
 
@@ -65,7 +39,7 @@ void ALeeXRHandController::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	InittializeSetup();
+	SetHandSwitch(HandType == EControllerHand::Left);
 
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 	
@@ -157,17 +131,5 @@ void ALeeXRHandController::SetInputComponent()
 /// </summary>
 void ALeeXRHandController::InittializeSetup()
 {
-	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
-
-	SetHandSwitch(HandType == EControllerHand::Left);
-	///Load the hand assets
-	GrabSphere->SetSphereRadius(8.0f);
-
-#if WITH_EDITOR
-	if (WidgetInteraction) {
-		WidgetInteraction->bShowDebug = true;
-		WidgetInteraction->DebugColor = FColor::Green;
-		WidgetInteraction->TraceChannel = ECollisionChannel::ECC_WorldDynamic;
-	}
-#endif
+	Super::InittializeSetup();
 }

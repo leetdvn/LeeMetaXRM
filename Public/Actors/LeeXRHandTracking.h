@@ -20,7 +20,10 @@ class LEEMETAXRM_API ALeeXRHandTracking : public ALeeXRHandBase
 public:
 	ALeeXRHandTracking(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	
+	virtual void GraspObject() override;
 
+	virtual void GraspRelease() override;
 protected:
 
 	// Called when the game starts or when spawned

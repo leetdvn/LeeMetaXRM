@@ -82,6 +82,10 @@ protected:
 
 	virtual void SetInputComponent();
 
+	virtual void InittializeSetup();
+
+	void SetHandSwitch(bool isLeft);
+
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
