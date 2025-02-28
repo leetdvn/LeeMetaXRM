@@ -2,8 +2,11 @@
 
 
 #include "Animations/LeeXRAnimInstance.h"
+#include "Definitions.h"
+#include "APawn/LeeXRCharacter.h"
 
 ULeeXRAnimInstance::ULeeXRAnimInstance(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 }
+

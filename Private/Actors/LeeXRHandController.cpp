@@ -27,38 +27,17 @@ void ALeeXRHandController::SetHandSwitch(bool isLeft)
 	FString HandName = isLeft ? "Left" : "Right";
 
 	MotionController->MotionSource = FName(*HandName);
-}
 
-void ALeeXRHandController::PlayAnimAction(const EFingerInputType& inFinger,float inActionValue, bool isTrigger)
-{
+	FVector LeftLoc = FVector(3.0f, -3.5f, 4.5f);
+	FVector RightLoc = FVector(-8.0f, 3.5f, 0.0f);
+	//===================================
+	FRotator LeftRot = FRotator(90.f, -25.0f, -180.0f);
+	FRotator RightRot = FRotator(7.8f, 80.0f, 0.0f);
 
-	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
-
-	if (!HandSkeletal) return;
-
-	ULeeXRAnimInstance* AnimIns = Cast<ULeeXRAnimInstance>(HandSkeletal->GetAnimInstance());
-	if (AnimIns)
+	if (HandSkeletal)
 	{
-		switch (inFinger)
-		{
-		case EFingerInputType::XRGrasp:
-			isTrigger ? AnimIns->PoseAlphaGrasp = inActionValue : 
-				AnimIns->PoseAlphaGrasp = 0.0f;
-			break;
-		case EFingerInputType::XRIndex:
-			isTrigger ? AnimIns->PoseAlphaIndexCurl = inActionValue:
-				 AnimIns->PoseAlphaIndexCurl = 0.0f;
-			break;
-		case EFingerInputType::XRPoint:
-			isTrigger ? AnimIns->PoseAlphaPoint = inActionValue :
-				AnimIns->PoseAlphaPoint = 0.0f;
-			break;
-		case EFingerInputType::XRThumbUp:
-			isTrigger ? AnimIns->PoseAlphaThumbUp = inActionValue :
-				AnimIns->PoseAlphaThumbUp = 0.0f;
-			break;
-		}
-
+		HandSkeletal->SetRelativeLocation(isLeft ? LeftLoc : RightLoc);
+		HandSkeletal->SetRelativeRotation(isLeft ? LeftRot : RightRot);
 	}
 }
 
@@ -86,18 +65,9 @@ void ALeeXRHandController::BeginPlay()
 	
 	INC_MEMORY_STAT_BY(STAT_HandController, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
 
-	UAnimInstance* AnimIns = GetABPInstance();
-	if (AnimIns) {
-		ULeeXRAnimInstance* LeeAnimIns = Cast<ULeeXRAnimInstance>(AnimIns);
-		if (LeeAnimIns)
-		{
-			LeeAnimIns->PoseAlphaThumbUp = 1.0f;
-		}
-		LeeScreenLog("Anim :%s", FColor::Cyan, *HandSkeletal->GetAnimInstance()->GetName());
-	}
 }
 
-void ALeeXRHandController::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance& ActionInstance)
+void ALeeXRHandController::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance)
 {
 	if (inComponet == nullptr) {
 		LeeScreenLog("Hand Skeletal is Null", FColor::Red);
@@ -105,33 +75,40 @@ void ALeeXRHandController::SetFingerAnimationPose(USkeletalMeshComponent* inComp
 	};
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 
-	ETriggerEvent inEventType = ActionInstance.GetTriggerEvent();
-	float PoseValue = inEventType == ETriggerEvent::Started ? 1.0f : 0.0f;
+	float ActValue = ActionInstance.GetValue().Get<float>();
+	
+	ETriggerEvent &&inEventType = ActionInstance.GetTriggerEvent();
+
+	float PoseValueStartCancel = inEventType == ETriggerEvent::Completed ? ActValue : 0.0f;
+
+	float PoseValueCancelCompleted = inEventType == ETriggerEvent::Triggered ? ActValue : 0.0f;
+
+	FString EventName = UEnum::GetValueAsString(inEventType);
+
 	FString ActName = ActionInstance.GetSourceAction()->GetName();
 
-	//ULeeXRAnimInstance* AnimIns = CastChecked<ULeeXRAnimInstance>(inComponet->GetAnimInstance());
-	//if (!AnimIns) return;
+	ULeeXRAnimInstance* AnimIns = CastChecked<ULeeXRAnimInstance>(inComponet->GetAnimInstance());
+	if (!AnimIns) return;
 
+	if (ActName == this->IA_FingerPoint->GetName())
+	{
+		AnimIns->PoseAlphaPoint = PoseValueStartCancel;
+	}
+	else if (ActName == this->IA_CurlIndex->GetName())
+	{
+		AnimIns->PoseAlphaIndexCurl = PoseValueCancelCompleted;
+	}
+	else if (ActName == this->IA_HandThumpUp->GetName())
+	{
+		AnimIns->PoseAlphaThumbUp = PoseValueStartCancel;
+	}
+	else if (ActName == this->IA_Grasp->GetName())
+	{
+		AnimIns->PoseAlphaGrasp = PoseValueCancelCompleted;
 
-	//if (ActName == IA_FingerPoint->GetName())
-	//{
-	//	AnimIns->PoseAlphaPoint = PoseValue;
-	//}
-	//else if (ActName == IA_CurlIndex->GetName())
-	//{
-	//	AnimIns->PoseAlphaIndexCurl = PoseValue;
-	//}
-	//else if (ActName == IA_HandThumpUp->GetName())
-	//{
-	//	AnimIns->PoseAlphaThumbUp = PoseValue;
-	//}
-	//else if (ActName == IA_Grasp->GetName())
-	//{
-	//	AnimIns->PoseAlphaGrasp = PoseValue;
-
-	//	PoseValue == 1 ? 
-	//		GraspObject() : GraspRelease();
-	//}
+		PoseValueCancelCompleted == 1 ?
+			GraspObject() : GraspRelease();
+	}
 
 }
 
@@ -149,7 +126,7 @@ void ALeeXRHandController::SetInputComponent()
 	UInputComponent* PlayerInputComponent = GetWorld()->GetFirstPlayerController()->InputComponent;
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		EnhancedInputComponent->BindAction(IA_Grasp, ETriggerEvent::Started, this, &ALeeXRHandController::OnFingerAnimation);
+		EnhancedInputComponent->BindAction(IA_Grasp, ETriggerEvent::Triggered, this, &ALeeXRHandController::OnFingerAnimation);
 		EnhancedInputComponent->BindAction(IA_Grasp, ETriggerEvent::Completed, this, &ALeeXRHandController::OnFingerAnimation);
 		EnhancedInputComponent->BindAction(IA_Grasp, ETriggerEvent::Canceled, this, &ALeeXRHandController::OnFingerAnimation);
 		//EnhancedInputComponent->BindAction(IA_Grasp, ETriggerEvent::Triggered, this, &ALeeXRHandBase::OnHandTrigger);
@@ -158,7 +135,7 @@ void ALeeXRHandController::SetInputComponent()
 		EnhancedInputComponent->BindAction(IA_HandThumpUp, ETriggerEvent::Canceled, this, &ALeeXRHandController::OnFingerAnimation);
 		EnhancedInputComponent->BindAction(IA_HandThumpUp, ETriggerEvent::Completed, this, &ALeeXRHandController::OnFingerAnimation);
 
-		EnhancedInputComponent->BindAction(IA_CurlIndex, ETriggerEvent::Started, this, &ALeeXRHandController::OnFingerAnimation);
+		EnhancedInputComponent->BindAction(IA_CurlIndex, ETriggerEvent::Triggered, this, &ALeeXRHandController::OnFingerAnimation);
 		EnhancedInputComponent->BindAction(IA_CurlIndex, ETriggerEvent::Canceled, this, &ALeeXRHandController::OnFingerAnimation);
 		EnhancedInputComponent->BindAction(IA_CurlIndex, ETriggerEvent::Completed, this, &ALeeXRHandController::OnFingerAnimation);
 

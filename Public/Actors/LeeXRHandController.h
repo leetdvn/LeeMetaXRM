@@ -30,9 +30,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LeeVR|Func")
 	void SetHandSwitch(bool isLeft);
 
-	UFUNCTION(BlueprintCallable)
-	void PlayAnimAction(const EFingerInputType& inFinger,float inActionValue,bool isTrigger=false);
-
 	virtual void GraspObject() override;
 
 	virtual void GraspRelease() override;
@@ -52,7 +49,7 @@ private:
 
 	void InittializeSetup();
 
-	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance& ActionInstance);
+	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance);
 
 };
 

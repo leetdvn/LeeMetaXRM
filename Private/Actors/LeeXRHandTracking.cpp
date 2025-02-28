@@ -24,3 +24,7 @@ void ALeeXRHandTracking::BeginPlay()
 	INC_MEMORY_STAT_BY(STAT_HandController, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
 
 }
+
+void ALeeXRHandTracking::InitializeHandTracking()
+{
+}
