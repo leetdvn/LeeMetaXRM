@@ -32,14 +32,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings")
 	TObjectPtr<class UBoxComponent> GrabRegion;
 
-	virtual void OnGrab(USkeletalMeshComponent* inComponent,const FVector& InGrabLocation) override;
+	virtual void OnGrab(UObject* inComponent,const FVector& InGrabLocation) override;
 
-	virtual void OnRelease(USkeletalMeshComponent* inComponent) override;
+	virtual void OnRelease(UObject* inComponent) override;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	TObjectPtr<USkeletalMeshComponent> GrabBodySkeletal;
+	UObject* GrabUObject;
 };

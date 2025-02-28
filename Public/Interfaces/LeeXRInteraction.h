@@ -22,6 +22,6 @@ class LEEMETAXRM_API ILeeXRInteraction
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void OnGrab(USkeletalMeshComponent* inComponent,const FVector &InGrabLocation) = 0;
-	virtual void OnRelease(USkeletalMeshComponent* inComponent) = 0;
+	virtual void OnGrab(UObject* inComponent,const FVector &InGrabLocation) = 0;
+	virtual void OnRelease(UObject* inComponent) = 0;
 };

@@ -84,8 +84,14 @@ protected:
 
 	virtual void InittializeSetup();
 
-	void SetHandSwitch(bool isLeft);
+	virtual void OnFingerAnimation(const FInputActionInstance& ActionInstance);
 
+	AActor* HasOverlapActor(const USphereComponent* inSphere);
+
+	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance);
+
+	void SetHandSwitch(bool isLeft);
+	bool bIsCanGrasp;
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
@@ -163,6 +169,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
+
 
 	AActor* FindActorToGrab(TArray<AActor*> &inActors, FString inTag);
 

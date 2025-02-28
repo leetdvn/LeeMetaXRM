@@ -28,7 +28,7 @@ void ALeeXRGrabActors::BeginPlay()
 	
 }
 
-void ALeeXRGrabActors::OnGrab(USkeletalMeshComponent* inComponent,const FVector& InGrabLocation)
+void ALeeXRGrabActors::OnGrab(UObject* inComponent,const FVector& InGrabLocation)
 {
 	/*
 	Need Setup Collision Profileing and Custom Edit Collision Presets
@@ -43,20 +43,20 @@ void ALeeXRGrabActors::OnGrab(USkeletalMeshComponent* inComponent,const FVector&
 		ActorMesh->SetSimulatePhysics(false);
 	}
 
-	bIsheld = ActorMesh->AttachToComponent(inComponent, AttachRules, NAME_None);
+	bIsheld = ActorMesh->AttachToComponent(Cast<USceneComponent>(inComponent), AttachRules, NAME_None);
 	if (bIsheld) {
-		GrabBodySkeletal = inComponent;
+		GrabUObject = inComponent;
 	}
 }
 
-void ALeeXRGrabActors::OnRelease(USkeletalMeshComponent* inComponent)
+void ALeeXRGrabActors::OnRelease(UObject* inComponent)
 {
 	if (inComponent == nullptr) return;
 
 	if (bIsheld)
 	{
-		LeeScreenLog("Releasing Object %s", FColor::Green, *GrabBodySkeletal->GetName());
-		if (inComponent == GrabBodySkeletal) {
+		LeeScreenLog("Releasing Object %s", FColor::Green, *GrabUObject->GetName());
+		if (inComponent == GrabUObject) {
 			ActorMesh->SetSimulatePhysics(true);
 			bIsheld = false;
 		}

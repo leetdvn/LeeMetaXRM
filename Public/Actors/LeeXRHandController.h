@@ -40,8 +40,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void SetInputComponent() override;
-	UFUNCTION(BlueprintCallable)
-	void OnFingerAnimation(const FInputActionInstance& ActionInstance);
+
 
 
 private:

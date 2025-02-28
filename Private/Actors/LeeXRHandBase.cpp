@@ -47,6 +47,9 @@ void ALeeXRHandBase::BeginPlay()
 	INC_MEMORY_STAT_BY(STAT_HandController, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
 
 	SetInputComponent();
+
+	InittializeSetup();
+
 }
 
 void ALeeXRHandBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -56,7 +59,6 @@ void ALeeXRHandBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	///Reset Profile Memories
 	SET_MEMORY_STAT(STAT_ICTUController, 0);
 
-	InittializeSetup();
 
 }
 
@@ -77,6 +79,22 @@ void ALeeXRHandBase::SetInputComponent()
 		EnhancedInputComponent->BindAction(IA_MenuInteract, ETriggerEvent::Canceled, this, &ALeeXRHandBase::OnHandInteract);
 		EnhancedInputComponent->BindAction(IA_MenuInteract, ETriggerEvent::Completed, this, &ALeeXRHandBase::OnHandInteract);
 
+		EnhancedInputComponent->BindAction(IA_Grasp, ETriggerEvent::Triggered, this, &ALeeXRHandBase::OnFingerAnimation);
+		EnhancedInputComponent->BindAction(IA_Grasp, ETriggerEvent::Completed, this, &ALeeXRHandBase::OnFingerAnimation);
+		EnhancedInputComponent->BindAction(IA_Grasp, ETriggerEvent::Canceled, this, &ALeeXRHandBase::OnFingerAnimation);
+		//EnhancedInputComponent->BindAction(IA_Grasp, ETriggerEvent::Triggered, this, &ALeeXRHandBase::OnHandTrigger);
+
+		EnhancedInputComponent->BindAction(IA_HandThumpUp, ETriggerEvent::Started, this, &ALeeXRHandBase::OnFingerAnimation);
+		EnhancedInputComponent->BindAction(IA_HandThumpUp, ETriggerEvent::Canceled, this, &ALeeXRHandBase::OnFingerAnimation);
+		EnhancedInputComponent->BindAction(IA_HandThumpUp, ETriggerEvent::Completed, this, &ALeeXRHandBase::OnFingerAnimation);
+
+		EnhancedInputComponent->BindAction(IA_CurlIndex, ETriggerEvent::Triggered, this, &ALeeXRHandBase::OnFingerAnimation);
+		EnhancedInputComponent->BindAction(IA_CurlIndex, ETriggerEvent::Canceled, this, &ALeeXRHandBase::OnFingerAnimation);
+		EnhancedInputComponent->BindAction(IA_CurlIndex, ETriggerEvent::Completed, this, &ALeeXRHandBase::OnFingerAnimation);
+
+		EnhancedInputComponent->BindAction(IA_FingerPoint, ETriggerEvent::Started, this, &ALeeXRHandBase::OnFingerAnimation);
+		EnhancedInputComponent->BindAction(IA_FingerPoint, ETriggerEvent::Canceled, this, &ALeeXRHandBase::OnFingerAnimation);
+		EnhancedInputComponent->BindAction(IA_FingerPoint, ETriggerEvent::Completed, this, &ALeeXRHandBase::OnFingerAnimation);
 
 		LeeScreenLog("Setting Input Component",FColor::Blue);
 	}
@@ -86,7 +104,8 @@ void ALeeXRHandBase::InittializeSetup()
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 	///Load the hand assets
-	GrabSphere->SetSphereRadius(8.0f);
+	if(GrabSphere)
+		GrabSphere->SetSphereRadius(8.0f);
 
 #if WITH_EDITOR
 	if (WidgetInteraction) {
@@ -95,6 +114,64 @@ void ALeeXRHandBase::InittializeSetup()
 		WidgetInteraction->TraceChannel = ECollisionChannel::ECC_WorldDynamic;
 	}
 #endif
+}
+
+void ALeeXRHandBase::OnFingerAnimation(const FInputActionInstance& ActionInstance)
+{
+	SetFingerAnimationPose(HandSkeletal, ActionInstance);
+}
+
+AActor* ALeeXRHandBase::HasOverlapActor(const USphereComponent* inSphere)
+{
+	TArray<AActor*> OverlappingActors;
+	inSphere->GetOverlappingActors(OverlappingActors);
+	
+	return OverlappingActors.IsEmpty() ? nullptr : OverlappingActors[0];
+}
+
+void ALeeXRHandBase::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance)
+{
+	if (inComponet == nullptr) {
+		LeeScreenLog("Hand Skeletal is Null", FColor::Red);
+		return;
+	};
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
+	float ActValue = ActionInstance.GetValue().Get<float>();
+
+	ETriggerEvent&& inEventType = ActionInstance.GetTriggerEvent();
+
+	float PoseValueStartCancel = inEventType == ETriggerEvent::Completed ? ActValue : 0.0f;
+
+	float PoseValueCancelCompleted = inEventType == ETriggerEvent::Triggered ? ActValue : 0.0f;
+
+	FString EventName = UEnum::GetValueAsString(inEventType);
+
+	FString ActName = ActionInstance.GetSourceAction()->GetName();
+
+	ULeeXRAnimInstance* AnimIns = CastChecked<ULeeXRAnimInstance>(inComponet->GetAnimInstance());
+	if (!AnimIns) return;
+
+	if (ActName == this->IA_FingerPoint->GetName())
+	{
+		AnimIns->PoseAlphaPoint = PoseValueStartCancel;
+	}
+	else if (ActName == this->IA_CurlIndex->GetName())
+	{
+		AnimIns->PoseAlphaIndexCurl = PoseValueCancelCompleted;
+	}
+	else if (ActName == this->IA_HandThumpUp->GetName())
+	{
+		AnimIns->PoseAlphaThumbUp = PoseValueStartCancel;
+	}
+	else if (ActName == this->IA_Grasp->GetName())
+	{
+		AnimIns->PoseAlphaGrasp = PoseValueCancelCompleted;
+
+		PoseValueCancelCompleted == 1 ?
+			GraspObject() : GraspRelease();
+	}
+
 }
 
 void ALeeXRHandBase::SetHandSwitch(bool isLeft)
@@ -161,21 +238,16 @@ void ALeeXRHandBase::GraspObject()
 	if (HandSkeletal == nullptr || 
 		ControllerType == ELeeXRHandType::LeeXRHandTracking) return;
 
-	TArray<AActor*> OverlappingActors;
-	GrabSphere->GetOverlappingActors(OverlappingActors);
-
-	if (!OverlappingActors.IsEmpty())
+	AActor* OverlappingActor = HasOverlapActor(GrabSphere);
+	if (OverlappingActor)
 	{
-		AActor* OverlappingActor = OverlappingActors[0];
 		if (OverlappingActor)
 		{
-
 			CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(OverlappingActor);
 			if (CurrentGrabObject) {
 				bIsHeld = true;
 				FVector GrabLocation = HandSkeletal->GetComponentLocation();
 				CurrentGrabObject->OnGrab(HandSkeletal, GrabLocation);
-
 			}
 		}
 	}
@@ -291,8 +363,6 @@ void ALeeXRHandBase::OnHandInteract(const FInputActionInstance& ActionInstance)
 	//}
 	WidgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
 }
-
-
 
 void ALeeXRHandBase::OnHandTrigger(const FInputActionInstance& ActionInstance)
 {

@@ -17,6 +17,13 @@ class LEEMETAXRM_API ALeeXRHandTracking : public ALeeXRHandBase
 {
 	GENERATED_BODY()
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USphereComponent> SphereThumb;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USphereComponent> SphereIndex;
+
+
 public:
 	ALeeXRHandTracking(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
@@ -24,12 +31,46 @@ public:
 	virtual void GraspObject() override;
 
 	virtual void GraspRelease() override;
+
+	DECLARE_DELEGATE(FCanGraspObject);
+	FCanGraspObject OnCanGraspObject;
+
 protected:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
+	virtual void InittializeSetup() override;
+
+	UFUNCTION()
+	void OnComponentIndexHit(UPrimitiveComponent* HitComponent,
+		AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp,
+		FVector NormalImpulse, 
+		const FHitResult& Hit);
+
+	UFUNCTION()
+	void OnComponentThumbHit(UPrimitiveComponent* HitComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		FVector NormalImpulse,
+		const FHitResult& Hit);
+
+	UFUNCTION()
+	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
 
 private:
 
-	void InitializeHandTracking();
+	AActor* HitIndexActor=nullptr;
+	AActor* HitThumbActor = nullptr;
+
+	void TrackingGrasp();
+
+	FTimerDelegate TimerDelegate;
+	FTimerHandle TimerHandle;
 };

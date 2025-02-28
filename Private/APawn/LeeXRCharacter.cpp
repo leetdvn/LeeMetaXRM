@@ -187,7 +187,6 @@ void ALeeXRCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChan
 	}
 }
 #endif
-
 // Called every frame
 void ALeeXRCharacter::Tick(float DeltaTime)
 {
@@ -262,8 +261,6 @@ void ALeeXRCharacter::OnHandGrabing(const FInputActionInstance& ActionInstance)
 		LeeAnimIns->PoseAlphaGrasp = inEventType == ETriggerEvent::Started ? 1.0f : 0.0f;
 	}
 }
-
-
 // Initialize the hands
 ALeeXRHandBase* ALeeXRCharacter::HandInitialize(ELeeXRHandType inType,bool isLeft)
 {
