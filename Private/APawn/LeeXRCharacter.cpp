@@ -16,6 +16,8 @@
 #include <Animations/LeeXRAnimInstance.h>
 #include <NavigationSystem.h>
 #include <NiagaraDataInterfaceArrayFunctionLibrary.h>
+#include <NiagaraComponent.h>
+#include <NiagaraFunctionLibrary.h>
 
 using namespace LeeXRUltils;
 
@@ -37,6 +39,9 @@ ALeeXRCharacter::ALeeXRCharacter()
 
 	DisplayMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DisplayMesh"));
 	DisplayMesh->SetupAttachment(Camera);
+
+	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
+	NiagaraComponent->SetupAttachment(XROrigin);
 }
 
 // Get the hand animation instance
@@ -153,6 +158,7 @@ void ALeeXRCharacter::BeginPlay()
 		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
 	}
 
+
 	INC_MEMORY_STAT_BY(STAT_ICTUCharacterMemory, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
 
 }
@@ -204,7 +210,8 @@ void ALeeXRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		// Bind the action to the delegate
-		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ALeeXRCharacter::OnMoving);
+		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Started, this, &ALeeXRCharacter::OnMoving);
+		//EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ALeeXRCharacter::OnMoving);
 
 		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Started, this, &ALeeXRCharacter::OnHandGrabing);
 		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Completed, this, &ALeeXRCharacter::OnHandRelease);
@@ -229,16 +236,23 @@ void ALeeXRCharacter::OnMoving()
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
-	if (!IsValid(XRHandRight)) return;
+	bTeleportTraceActive = true;
 
-	FVector StartPos = XRHandRight->GetMotionControllerLocation();
-	FVector ForwardVec = XRHandRight->GetMotionControllerForwardVector();
+	TeleportTracePathPositions.Empty();
 
-	TeleportTrace(StartPos, ForwardVec);
+	NiagaraComponent->SetVisibility(true);
 
-	UKismetSystemLibrary::DrawDebugSphere(this, ProjectedTeleportLocation, 10.0f, 12, FColor::Green, 5.0f, 0.0f);
+	AActor* Teleport = LeeXRSPawnActorBP<AActor>(this, TeleportVisualizer);
 
-	LeeScreenLog("Location %s", FColor::Cyan,*ProjectedTeleportLocation.ToString());
+	LeeScreenLog("Teleport %s", FColor::Purple, *Teleport->GetName());
+	//FVector StartPos = XRHandRight->GetMotionControllerLocation();
+	//FVector ForwardVec = XRHandRight->GetMotionControllerForwardVector();
+
+	//TeleportTrace(StartPos, ForwardVec);
+
+	//UKismetSystemLibrary::DrawDebugSphere(this, ProjectedTeleportLocation, 10.0f, 12, FColor::Green, 5.0f, 0.0f);
+
+	//LeeScreenLog("Location %s", FColor::Cyan,*ProjectedTeleportLocation.ToString());
 
 }
 

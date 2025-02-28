@@ -24,6 +24,8 @@ ALeeXRHandTracking::ALeeXRHandTracking(const FObjectInitializer& ObjectInitializ
 }
 
 
+
+
 /// <summary>
 /// Tracking Grasp ========================================
 /// </summary>
@@ -90,6 +92,12 @@ void ALeeXRHandTracking::BeginPlay()
 
 	if (SphereThumb->OnComponentBeginOverlap.IsBound()) SphereThumb->OnComponentBeginOverlap.Clear();
 	SphereThumb->OnComponentBeginOverlap.AddDynamic(this, &ALeeXRHandTracking::OnBeginOverlap);
+
+	if (SphereIndex->OnComponentEndOverlap.IsBound()) SphereIndex->OnComponentEndOverlap.Clear();
+	SphereIndex->OnComponentEndOverlap.AddDynamic(this, &ALeeXRHandTracking::OnEndOverlap);
+
+	if (SphereThumb->OnComponentEndOverlap.IsBound()) SphereThumb->OnComponentEndOverlap.Clear();
+	SphereThumb->OnComponentEndOverlap.AddDynamic(this, &ALeeXRHandTracking::OnEndOverlap);
 }
 
 void ALeeXRHandTracking::InittializeSetup()
@@ -124,11 +132,14 @@ void ALeeXRHandTracking::OnComponentThumbHit(UPrimitiveComponent* HitComponent, 
 	}
 }
 
-void ALeeXRHandTracking::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ALeeXRHandTracking::OnBeginOverlap(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	//Do Something
-	
-	LeeScreenLog("Overlap Comp %s", FColor::Green, *OtherComp->GetName());
+	LeeScreenLog("Overlap %s", FColor::Green, *OtherActor->GetName());
+}
+
+void ALeeXRHandTracking::OnEndOverlap(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	LeeScreenLog("End Overlap %s", FColor::Red, *OtherActor->GetName());
 }
 
 

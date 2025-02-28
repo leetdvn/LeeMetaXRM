@@ -57,13 +57,18 @@ protected:
 		const FHitResult& Hit);
 
 	UFUNCTION()
-	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent,
+	void OnBeginOverlap(UPrimitiveComponent* HitComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex,
 		bool bFromSweep,
 		const FHitResult& SweepResult);
 
+	UFUNCTION()
+	void OnEndOverlap(UPrimitiveComponent* HitComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex);
 private:
 
 	AActor* HitIndexActor=nullptr;

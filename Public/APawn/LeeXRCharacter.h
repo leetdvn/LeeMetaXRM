@@ -28,6 +28,9 @@ class LEEMETAXRM_API ALeeXRCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALeeVR Settings|Actors", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UNiagaraComponent> NiagaraComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALeeVR Settings|Actors", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AActor> TeleportVisualizer;
+
 public:
 	// Sets default values for this character's properties
 	ALeeXRCharacter();
@@ -52,6 +55,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALeeVR Settings|Varibles")
 	bool bValidTeleportLocation = false;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALeeVR Settings|Varibles")
+	bool bTeleportTraceActive;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
