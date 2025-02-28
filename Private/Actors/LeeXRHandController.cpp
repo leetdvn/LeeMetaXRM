@@ -12,7 +12,8 @@ ALeeXRHandController::ALeeXRHandController(const FObjectInitializer& ObjectIniti
 	HandSkeletal->SetupAttachment(MotionController);
 
 	GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphereCollison"));
-	GrabSphere->SetupAttachment(MotionController);
+	GrabSphere->AttachToComponent(HandSkeletal, FAttachmentTransformRules::SnapToTargetNotIncludingScale,"palm_r");
+	GrabSphere->SetRelativeLocation(FVector(0.0f, 2.5f, -2.5f));
 
 	//Set Init Hand Left or Right
 	SetHandSwitch(false);
@@ -28,16 +29,21 @@ void ALeeXRHandController::SetHandSwitch(bool isLeft)
 
 	MotionController->MotionSource = FName(*HandName);
 
-	FVector LeftLoc = FVector(3.0f, -3.5f, 4.5f);
-	FVector RightLoc = FVector(-8.0f, 3.5f, 0.0f);
+	FVector LeftLoc = FVector(-8.5f, -3.5f, 4.5f);
+	FVector RightLoc = FVector(-8.5f, 3.5f, 0.0f);
 	//===================================
-	FRotator LeftRot = FRotator(90.f, -25.0f, -180.0f);
-	FRotator RightRot = FRotator(7.8f, 80.0f, 0.0f);
+	FRotator LeftRot = FRotator(-80.0f,-180.0f,78.f);
+	FRotator RightRot = FRotator(80.0f,0.0f,78.f);
 
 	if (HandSkeletal)
 	{
 		HandSkeletal->SetRelativeLocation(isLeft ? LeftLoc : RightLoc);
 		HandSkeletal->SetRelativeRotation(isLeft ? LeftRot : RightRot);
+
+		if (ULeeXRAnimInstance* AnimIns = Cast<ULeeXRAnimInstance>(HandSkeletal->GetAnimInstance()))
+		{
+			AnimIns->bMirror = isLeft;
+		}
 	}
 }
 
@@ -115,7 +121,7 @@ void ALeeXRHandController::SetFingerAnimationPose(USkeletalMeshComponent* inComp
 void ALeeXRHandController::OnFingerAnimation(const FInputActionInstance& ActionInstance)
 {
 	///Set Animation Pose
-	return SetFingerAnimationPose(HandSkeletal, ActionInstance);
+	SetFingerAnimationPose(HandSkeletal, ActionInstance);
 }
 
 
@@ -153,8 +159,10 @@ void ALeeXRHandController::InittializeSetup()
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 
+	SetHandSwitch(HandType == EControllerHand::Left);
 	///Load the hand assets
-	GrabSphere->SetSphereRadius(12.0f);
+	GrabSphere->SetSphereRadius(8.0f);
+
 #if WITH_EDITOR
 	if (WidgetInteraction) {
 		WidgetInteraction->bShowDebug = true;
