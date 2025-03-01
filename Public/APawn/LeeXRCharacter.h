@@ -17,6 +17,9 @@ DECLARE_MEMORY_STAT_EXTERN(TEXT("ICTUCharacter"), STAT_ICTUCharacter, STATGROUP_
 DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT("ICTUCharacterMemory"), STAT_ICTUCharacterMemory, STATGROUP_ICTUMV, );
 
 
+/**
+ * XR Character Class
+ */
 UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
 class LEEMETAXRM_API ALeeXRCharacter : public ACharacter
 {

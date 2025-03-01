@@ -12,9 +12,7 @@ ALeeXRHandController::ALeeXRHandController(const FObjectInitializer& ObjectIniti
 	HandSkeletal->SetupAttachment(MotionController);
 
 	GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphereCollison"));
-	GrabSphere->AttachToComponent(HandSkeletal, FAttachmentTransformRules::SnapToTargetNotIncludingScale,"palm_r");
-	GrabSphere->SetRelativeLocation(FVector(0.0f, 2.5f, -2.5f));
-
+	GrabSphere->SetupAttachment(HandSkeletal);
 	//Set Init Hand Left or Right
 
 	ControllerType = ELeeXRHandType::LeeXRController;
@@ -69,4 +67,8 @@ void ALeeXRHandController::SetInputComponent()
 void ALeeXRHandController::InittializeSetup()
 {
 	Super::InittializeSetup();
+
+	GrabSphere->AttachToComponent(HandSkeletal, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "palm_r");
+	GrabSphere->SetRelativeLocation(FVector(0.0f, 2.5f, -2.5f));
+
 }

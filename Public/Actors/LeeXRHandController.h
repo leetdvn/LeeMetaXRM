@@ -19,18 +19,39 @@ class LEEMETAXRM_API ALeeXRHandController : public ALeeXRHandBase
 
 
 public:
+	/// <summary>
+	/// Initialize the hand controller
+	/// </summary>
+	/// <param name="ObjectInitializer"></param>
 	ALeeXRHandController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	/// <summary>
+	/// Get Skeeletal Mesh Component
+	/// </summary>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
 	USkeletalMeshComponent* GetHandSkeletal() const { return HandSkeletal.Get(); }
 
+	/// <summary>
+	/// Get Animation Blueprint Instance
+	/// </summary>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
 	UAnimInstance* GetABPInstance() const { return HandSkeletal->GetAnimInstance(); }
 
+	/// <summary>
+	///	Grap Object
+	/// </summary>
 	virtual void GraspObject() override;
 
+	/// <summary>
+	/// Grasp Release
+	/// </summary>
 	virtual void GraspRelease() override;
 
+	/// <summary>
+	/// Initialize the hand controller
+	/// </summary>
 	virtual void InittializeSetup() override;
 
 
@@ -39,6 +60,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	/// <summary>
+	/// Set Input Component
+	/// </summary>
 	virtual void SetInputComponent() override;
 
 
@@ -46,6 +70,11 @@ protected:
 private:
 
 
+	/// <summary>
+	/// Finger Animation Pose
+	/// </summary>
+	/// <param name="inComponet"></param>
+	/// <param name="ActionInstance"></param>
 	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance);
 
 };
