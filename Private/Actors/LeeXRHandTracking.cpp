@@ -4,6 +4,9 @@
 #include "Actors/LeeXRHandTracking.h"
 #include "OculusXRHandComponent.h"
 #include "HandPoseRecognizer.h"
+#include "Common/LeeXRUltils.h"
+
+using namespace LeeXRUltils;
 
 ALeeXRHandTracking::ALeeXRHandTracking(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -99,6 +102,43 @@ void ALeeXRHandTracking::BeginPlay()
 
 	if (SphereThumb->OnComponentEndOverlap.IsBound()) SphereThumb->OnComponentEndOverlap.Clear();
 	SphereThumb->OnComponentEndOverlap.AddDynamic(this, &ALeeXRHandTracking::OnEndOverlap);
+}
+
+void ALeeXRHandTracking::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (HandPoseRecognizer && !HandPoseRecognizer->Poses.IsEmpty()) {
+
+		FString Name;
+		int Index;
+		float Duration;
+		float Error;
+		float Confidence;
+		HandPoseRecognizer->GetRecognizedHandPose(Index, Name, Duration, Error, Confidence);
+		
+		LeeHandPose hPose = LeeXRGetEnumValueByString<LeeHandPose>(Name);
+
+		if (Name.EndsWith("None")) return;
+
+		LeeScreenLog("Hand Pose :%s", FColor::Green, *UEnum::GetValueAsString(hPose));
+		switch (hPose)
+		{
+		case LeeHandPose::LHandMenu:
+			//Do Something
+			break;
+		case LeeHandPose::LHandGrasp:
+			//GraspObject();
+			break;
+		case LeeHandPose::LHandRelease:
+			//GraspRelease();
+			break;
+		case LeeHandPose::LHandMove:
+			//Do Something
+			break;
+		}
+
+	}
 }
 
 void ALeeXRHandTracking::InittializeSetup()

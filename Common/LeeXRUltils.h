@@ -12,7 +12,7 @@ namespace LeeXRUltils
 {
 
 	template<class T>
-	inline T LeeXRGetEnumValueByString(const FString inEnumName, FString enumStr) {
+	inline T LeeXRGetEnumValueByString(const FString& enumStr) {
 		int32 Index = StaticEnum<T>()->GetValueByName(*enumStr);
 		T result = static_cast<T>(Index);
 		return result;

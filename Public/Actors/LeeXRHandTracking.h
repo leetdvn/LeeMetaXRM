@@ -10,6 +10,17 @@
 DEFINE_LOG_CATEGORY_STATIC(LogLeeXRHandTracking, Log, All);
 
 
+UENUM(BlueprintType)
+enum class LeeHandPose : uint8
+{
+	LHandMove UMETA(DisplayName = "Teleport"),
+	LHandGrasp UMETA(DisplayName = "Grasp"),
+	LHandRelease UMETA(DisplayName = "Release"),
+	LHandMenu UMETA(DisplayName = "Menu"),
+};
+
+
+
 /**
  * 
  */
@@ -39,6 +50,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
+	virtual void Tick(float DeltaTime) override;
+
 	virtual void InittializeSetup() override;
 
 	UFUNCTION()
