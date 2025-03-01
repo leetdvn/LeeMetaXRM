@@ -34,7 +34,8 @@ public class LeeMetaXRM : ModuleRules
             "HeadMountedDisplay",
             "XRBase",
             "OculusXRInput",
-            "Niagara"
+            "Niagara",
+            "OculusHandPoseRecognition"
         });
 
         //PrivateIncludePaths.AddRange(new string[] {

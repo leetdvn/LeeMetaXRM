@@ -3,6 +3,7 @@
 
 #include "Actors/LeeXRHandTracking.h"
 #include "OculusXRHandComponent.h"
+#include "HandPoseRecognizer.h"
 
 ALeeXRHandTracking::ALeeXRHandTracking(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -14,13 +15,13 @@ ALeeXRHandTracking::ALeeXRHandTracking(const FObjectInitializer& ObjectInitializ
 	ControllerType = ELeeXRHandType::LeeXRHandTracking;
 
 	SphereIndex = CreateDefaultSubobject<USphereComponent>(TEXT("SphereIndex"));
-	SphereIndex->AttachToComponent(HandTrackingComp,FAttachmentTransformRules::SnapToTargetNotIncludingScale,TEXT("Index3"));
 
 	WidgetInteraction->SetupAttachment(SphereIndex);
 
 	SphereThumb = CreateDefaultSubobject<USphereComponent>(TEXT("SphereThumb"));
-	SphereThumb->AttachToComponent(HandTrackingComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("Thumb3"));
 
+	HandPoseRecognizer = CreateDefaultSubobject<UHandPoseRecognizer>(TEXT("HandPoseRecognizer"));
+	HandPoseRecognizer->SetupAttachment(HandTrackingComp);
 }
 
 
@@ -106,6 +107,9 @@ void ALeeXRHandTracking::InittializeSetup()
 
 	SphereIndex->SetSphereRadius(1);
 	SphereThumb->SetSphereRadius(1);
+
+	SphereIndex->SetupAttachment(HandTrackingComp);
+	SphereThumb->SetupAttachment(HandTrackingComp);
 }
 
 void ALeeXRHandTracking::OnComponentIndexHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

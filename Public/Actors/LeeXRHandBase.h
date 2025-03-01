@@ -39,6 +39,9 @@ using namespace LeeXRUltils;
 DECLARE_MEMORY_STAT_EXTERN(TEXT("ICTUController"), STAT_ICTUController, STATGROUP_ICTUMV, );
 DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT("HandController"), STAT_HandController, STATGROUP_ICTUMV, );
 
+UDELEGATE()
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLogRecognizer);
+
 
 UCLASS(Abstract)
 class LEEMETAXRM_API ALeeXRHandBase : public AActor
@@ -118,6 +121,9 @@ protected:
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeVR Settings|Components")
 	TObjectPtr<class USkeletalMeshComponent> HandSkeletal=nullptr;
 
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeVR Settings|Components")
+	TObjectPtr<class UHandPoseRecognizer> HandPoseRecognizer = nullptr;
+
 
 #pragma endregion
 
@@ -163,10 +169,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
 	TObjectPtr<class UInputAction> IA_HandThumpUp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputAction> IA_HandLog;
+
 #pragma endregion
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	UFUNCTION()
+	void LogReconize() { OnLogRecognizer.Broadcast(); }
+
+	UPROPERTY(BlueprintAssignable, Category = "LeeVR|Delegate")
+	FOnLogRecognizer OnLogRecognizer;
 
 private:
 
