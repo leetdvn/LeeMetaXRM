@@ -5,6 +5,8 @@
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include <Definitions.h>
+#include "AbilitySystemComponent.h"
+
 
 // Sets default values
 ALeeXRGrabActors::ALeeXRGrabActors()
@@ -19,6 +21,7 @@ ALeeXRGrabActors::ALeeXRGrabActors()
 
 	GrabRegion->SetCollisionProfileName(TEXT("Grabbable"));
 
+	AbilityComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -26,6 +29,11 @@ void ALeeXRGrabActors::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	//GrabRegion->OnComponentBeginOverlap.AddDynamic(this, &ALeeXRGrabActors::OnBeginOverlap);
+
+	AbilityComponent->InitAbilityActorInfo(this, this);
+
+	//AbilityComponent->AddGameplayCue(ObjectTags);
 }
 
 void ALeeXRGrabActors::OnGrab(UObject* inComponent,const FVector& InGrabLocation)
@@ -55,7 +63,7 @@ void ALeeXRGrabActors::OnRelease(UObject* inComponent)
 
 	if (bIsheld)
 	{
-		LeeScreenLog("Releasing Object %s", FColor::Green, *GrabUObject->GetName());
+		//LeeScreenLog("Releasing Object %s", FColor::Green, *GrabUObject->GetName());
 		if (inComponent == GrabUObject) {
 			ActorMesh->SetSimulatePhysics(true);
 			bIsheld = false;
@@ -82,5 +90,13 @@ void ALeeXRGrabActors::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ALeeXRGrabActors::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (SweepResult.HasValidHitObjectHandle())
+	{
+		LeeScreenLog("Overlap %s", FColor::Green, *OtherActor->GetName());
+	}
 }
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Actors/LeeXRHandBase.h"
+#include "OculusXRInputFunctionLibrary.h"
 #include "LeeXRHandTracking.generated.h"
 
 
@@ -34,7 +35,6 @@ class LEEMETAXRM_API ALeeXRHandTracking : public ALeeXRHandBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USphereComponent> SphereIndex;
-
 
 public:
 	ALeeXRHandTracking(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
@@ -81,12 +81,16 @@ protected:
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex);
+
+	void AttachOculusHandTracking(const EOculusXRBone inEbone, USphereComponent* inSphere);
+
+	bool IsGrabable(TArray<AActor*> inOverlapActors,AActor* InArrayAct);
+
 private:
 
-	AActor* HitIndexActor=nullptr;
-	AActor* HitThumbActor = nullptr;
-
 	void TrackingGrasp();
+	AActor* HitIndexActor = nullptr;
+	AActor* HitThumbActor = nullptr;
 
 	FTimerDelegate TimerDelegate;
 	FTimerHandle TimerHandle;

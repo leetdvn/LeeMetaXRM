@@ -2,12 +2,17 @@
 
 #pragma once
 
+#include <GameplayTagContainer.h>
 #include "ICTUGrabbableActor.h"
 #include "Interfaces/LeeXRInteraction.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "LeeXRGrabActors.generated.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogLeeGrabActors, Log, All)
+
+
+class UAbilitySystemComponent;
 
 
 UCLASS(BlueprintType)
@@ -32,6 +37,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings")
 	TObjectPtr<class UBoxComponent> GrabRegion;
 
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "LeeXR Settings")
+	FGameplayTag ObjectTags;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LA Settings", meta = (AllowPrivateAccess = "true", DisplayName = "AbilitySystem"))
+	UAbilitySystemComponent* AbilityComponent;
+
 	virtual void OnGrab(UObject* inComponent,const FVector& InGrabLocation) override;
 
 	virtual void OnRelease(UObject* inComponent) override;
@@ -42,4 +53,12 @@ public:
 
 private:
 	UObject* GrabUObject;
+
+	void OnBeginOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep, 
+		const FHitResult& SweepResult);
 };

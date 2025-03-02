@@ -18,31 +18,18 @@ ALeeXRHandTracking::ALeeXRHandTracking(const FObjectInitializer& ObjectInitializ
 	ControllerType = ELeeXRHandType::LeeXRHandTracking;
 
 	SphereIndex = CreateDefaultSubobject<USphereComponent>(TEXT("SphereIndex"));
-
-	WidgetInteraction->SetupAttachment(SphereIndex);
+	SphereIndex->SetupAttachment(HandTrackingComp);
 
 	SphereThumb = CreateDefaultSubobject<USphereComponent>(TEXT("SphereThumb"));
+	SphereThumb->SetupAttachment(HandTrackingComp);
 
 	HandPoseRecognizer = CreateDefaultSubobject<UHandPoseRecognizer>(TEXT("HandPoseRecognizer"));
 	HandPoseRecognizer->SetupAttachment(HandTrackingComp);
+	WidgetInteraction->SetupAttachment(SphereIndex);
+
 }
 
 
-
-
-/// <summary>
-/// Tracking Grasp ========================================
-/// </summary>
-void ALeeXRHandTracking::TrackingGrasp()
-{
-	float dist = FVector::Dist(SphereIndex->GetComponentToWorld().GetLocation(),
-		SphereThumb->GetComponentToWorld().GetLocation());
-
-	if (dist >= 4.5f) {
-		GraspRelease();
-		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
-	}
-}
 
 /// <summary>
 /// Grasp Object
@@ -52,6 +39,7 @@ void ALeeXRHandTracking::GraspObject()
 	CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(HitThumbActor);
 	if (CurrentGrabObject) {
 		bIsHeld = true;
+
 		FVector GrabLocation = HandTrackingComp->GetComponentLocation();
 		CurrentGrabObject->OnGrab(HandTrackingComp, GrabLocation);
 	}
@@ -59,11 +47,9 @@ void ALeeXRHandTracking::GraspObject()
 	///Timm Distance Count
 	if (TimerDelegate.IsBound()) TimerDelegate.Unbind();
 
-	TimerDelegate.BindLambda([this]() {	TrackingGrasp(); });
-
+	TimerDelegate.BindLambda([this]() {TrackingGrasp(); });
 
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, 0.02f, true);
-
 
 }
 
@@ -75,6 +61,10 @@ void ALeeXRHandTracking::GraspRelease()
 	CurrentGrabObject->OnRelease(HandTrackingComp);
 	CurrentGrabObject = nullptr;
 	bIsHeld = false;
+
+	if (TimerHandle.IsValid())
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+
 }
 
 void ALeeXRHandTracking::BeginPlay()
@@ -85,6 +75,8 @@ void ALeeXRHandTracking::BeginPlay()
 
 	INC_MEMORY_STAT_BY(STAT_HandController, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
 
+	//if (GrabSphere->OnComponentHit.IsBound()) GrabSphere->OnComponentHit.Clear();
+	//	GrabSphere->OnComponentHit.AddDynamic(this, &ALeeXRHandTracking::OnComponentHit);
 	if (SphereIndex->OnComponentHit.IsBound()) SphereIndex->OnComponentHit.Clear();
 	SphereIndex->OnComponentHit.AddDynamic(this, &ALeeXRHandTracking::OnComponentIndexHit);
 
@@ -97,11 +89,11 @@ void ALeeXRHandTracking::BeginPlay()
 	if (SphereThumb->OnComponentBeginOverlap.IsBound()) SphereThumb->OnComponentBeginOverlap.Clear();
 	SphereThumb->OnComponentBeginOverlap.AddDynamic(this, &ALeeXRHandTracking::OnBeginOverlap);
 
-	if (SphereIndex->OnComponentEndOverlap.IsBound()) SphereIndex->OnComponentEndOverlap.Clear();
-	SphereIndex->OnComponentEndOverlap.AddDynamic(this, &ALeeXRHandTracking::OnEndOverlap);
+	//if (SphereIndex->OnComponentEndOverlap.IsBound()) SphereIndex->OnComponentEndOverlap.Clear();
+	//SphereIndex->OnComponentEndOverlap.AddDynamic(this, &ALeeXRHandTracking::OnEndOverlap);
 
-	if (SphereThumb->OnComponentEndOverlap.IsBound()) SphereThumb->OnComponentEndOverlap.Clear();
-	SphereThumb->OnComponentEndOverlap.AddDynamic(this, &ALeeXRHandTracking::OnEndOverlap);
+	//if (SphereThumb->OnComponentEndOverlap.IsBound()) SphereThumb->OnComponentEndOverlap.Clear();
+	//SphereThumb->OnComponentEndOverlap.AddDynamic(this, &ALeeXRHandTracking::OnEndOverlap);
 }
 
 void ALeeXRHandTracking::Tick(float DeltaTime)
@@ -121,17 +113,18 @@ void ALeeXRHandTracking::Tick(float DeltaTime)
 
 		if (Name.EndsWith("None")) return;
 
-		LeeScreenLog("Hand Pose :%s", FColor::Green, *UEnum::GetValueAsString(hPose));
+		//LeeScreenLog("Hand Pose :%s", FColor::Green, *UEnum::GetValueAsString(hPose));
 		switch (hPose)
 		{
 		case LeeHandPose::LHandMenu:
 			//Do Something
 			break;
 		case LeeHandPose::LHandGrasp:
-			//GraspObject();
+			//if(!bIsHeld)
+				//GraspObject();
 			break;
 		case LeeHandPose::LHandRelease:
-			//GraspRelease();
+				//GraspRelease();
 			break;
 		case LeeHandPose::LHandMove:
 			//Do Something
@@ -145,11 +138,18 @@ void ALeeXRHandTracking::InittializeSetup()
 {
 	Super::InittializeSetup();
 
-	SphereIndex->SetSphereRadius(1);
-	SphereThumb->SetSphereRadius(1);
 
-	SphereIndex->SetupAttachment(HandTrackingComp);
-	SphereThumb->SetupAttachment(HandTrackingComp);
+	FTimerHandle AttachHandle;
+	GetWorld()->GetTimerManager().SetTimer(AttachHandle, [this]() {
+			this->AttachOculusHandTracking(EOculusXRBone::Index_Tip, this->SphereIndex);
+			this->AttachOculusHandTracking(EOculusXRBone::Thumb_Tip, this->SphereThumb);
+			GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
+
+		},1.f, false, 1.f);
+
+	
+	SphereIndex->SetSphereRadius(1.f);
+	SphereThumb->SetSphereRadius(1.f);
 }
 
 void ALeeXRHandTracking::OnComponentIndexHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -157,33 +157,77 @@ void ALeeXRHandTracking::OnComponentIndexHit(UPrimitiveComponent* HitComponent, 
 	//Do Something
 	if (Hit.bBlockingHit) {
 
-		HitIndexActor = Hit.GetActor();
-		if (HitThumbActor == HitIndexActor) {
-			GraspObject();
-		}
+		//HitIndexActor = Hit.GetActor();
+		//if (HitIndexActor == HitThumbActor)
+		//	GraspObject();
 	}
 	
 }
 
 void ALeeXRHandTracking::OnComponentThumbHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	//Do Something
 	if (Hit.bBlockingHit) {
+		//HitThumbActor = Hit.GetActor();
 
-		HitThumbActor = Hit.GetActor();
-
-		if (HitThumbActor == HitIndexActor)
-			GraspObject();
+		//if (HitThumbActor == HitIndexActor)
+		//	GraspObject();
 	}
 }
 
 void ALeeXRHandTracking::OnBeginOverlap(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	LeeScreenLog("Overlap %s", FColor::Green, *OtherActor->GetName());
+	//LeeScreenLog("Overlap %s", FColor::Green, *OtherActor->GetName());
+	HitIndexActor = OtherActor;
+	HitThumbActor = OtherActor;
+	//if (HitIndexActor == HitThumbActor)
+	//	GraspObject();
+
+	LeeScreenLog("1 %s :", FColor::Green, *HitComponent->GetName());
+
+	TArray<AActor*> OverlappingActors;
+	OtherComp->GetOverlappingActors(OverlappingActors);
+
+	if (HitIndexActor == HitThumbActor)
+		GraspObject();
 }
+
 
 void ALeeXRHandTracking::OnEndOverlap(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	LeeScreenLog("End Overlap %s", FColor::Red, *OtherActor->GetName());
+	//LeeScreenLog("End Overlap %s", FColor::Red, *OtherActor->GetName());
 }
 
+void ALeeXRHandTracking::AttachOculusHandTracking(const EOculusXRBone inEbone,USphereComponent* inSphere)
+{
+	FString BoneName = UOculusXRInputFunctionLibrary::GetBoneName(inEbone);
+	if (HandTrackingComp->DoesSocketExist(*BoneName)) {
+		inSphere->AttachToComponent(HandTrackingComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, *BoneName);
+		inSphere->SetSphereRadius(1.f);
+		float offset = HandType == EControllerHand::Right ? 1.0f : -1.0f;
+		inSphere->SetRelativeLocation(FVector(offset, 0.0f, 0.0f));
+	}
+}
 
+bool ALeeXRHandTracking::IsGrabable(TArray<AActor*> inOverlapActors, AActor* InArrayAct)
+{
+	if (inOverlapActors.IsEmpty()) return false;
+	
+	for (AActor* actor : inOverlapActors) {
+		if (actor == InArrayAct) return true;
+	}
+	return false;
+}
+
+/// <summary>
+/// Tracking Grasp ========================================
+/// </summary>
+void ALeeXRHandTracking::TrackingGrasp()
+{
+	float dist = FVector::Dist(SphereIndex->GetComponentToWorld().GetLocation(),
+		SphereThumb->GetComponentToWorld().GetLocation());
+
+	if (dist >= 4.5f) {
+		GraspRelease();
+	}
+}
