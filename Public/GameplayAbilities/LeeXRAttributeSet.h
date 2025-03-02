@@ -14,8 +14,7 @@
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName)\
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
-class UAbilitySystemComponent;
-class UAttributeSet;
+
 /**
  * 
  */
@@ -25,6 +24,8 @@ class LEEMETAXRM_API ULeeXRAttributeSet : public UAttributeSet
 	GENERATED_BODY()
 	
 public:
+
+	ULeeXRAttributeSet(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	UPROPERTY(BlueprintReadWrite, Category = "LeeVR Settings|Tags")
 	FGameplayAttributeData GrabableTag;

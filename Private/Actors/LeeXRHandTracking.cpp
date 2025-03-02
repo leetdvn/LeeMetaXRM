@@ -75,14 +75,6 @@ void ALeeXRHandTracking::BeginPlay()
 
 	INC_MEMORY_STAT_BY(STAT_HandController, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
 
-	//if (GrabSphere->OnComponentHit.IsBound()) GrabSphere->OnComponentHit.Clear();
-	//	GrabSphere->OnComponentHit.AddDynamic(this, &ALeeXRHandTracking::OnComponentHit);
-	if (SphereIndex->OnComponentHit.IsBound()) SphereIndex->OnComponentHit.Clear();
-	SphereIndex->OnComponentHit.AddDynamic(this, &ALeeXRHandTracking::OnComponentIndexHit);
-
-	if (SphereThumb->OnComponentHit.IsBound()) SphereThumb->OnComponentHit.Clear();
-	SphereThumb->OnComponentHit.AddDynamic(this, &ALeeXRHandTracking::OnComponentThumbHit);
-
 	if (SphereIndex->OnComponentBeginOverlap.IsBound()) SphereIndex->OnComponentBeginOverlap.Clear();
 	SphereIndex->OnComponentBeginOverlap.AddDynamic(this, &ALeeXRHandTracking::OnBeginOverlap);
 
@@ -99,6 +91,8 @@ void ALeeXRHandTracking::BeginPlay()
 void ALeeXRHandTracking::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bIsHeld) return;
 
 	if (HandPoseRecognizer && !HandPoseRecognizer->Poses.IsEmpty()) {
 
@@ -152,41 +146,15 @@ void ALeeXRHandTracking::InittializeSetup()
 	SphereThumb->SetSphereRadius(1.f);
 }
 
-void ALeeXRHandTracking::OnComponentIndexHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	//Do Something
-	if (Hit.bBlockingHit) {
-
-		//HitIndexActor = Hit.GetActor();
-		//if (HitIndexActor == HitThumbActor)
-		//	GraspObject();
-	}
-	
-}
-
-void ALeeXRHandTracking::OnComponentThumbHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	//Do Something
-	if (Hit.bBlockingHit) {
-		//HitThumbActor = Hit.GetActor();
-
-		//if (HitThumbActor == HitIndexActor)
-		//	GraspObject();
-	}
-}
-
 void ALeeXRHandTracking::OnBeginOverlap(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	//LeeScreenLog("Overlap %s", FColor::Green, *OtherActor->GetName());
 	HitIndexActor = OtherActor;
 	HitThumbActor = OtherActor;
-	//if (HitIndexActor == HitThumbActor)
-	//	GraspObject();
 
-	LeeScreenLog("1 %s :", FColor::Green, *HitComponent->GetName());
 
-	TArray<AActor*> OverlappingActors;
-	OtherComp->GetOverlappingActors(OverlappingActors);
+	//TArray<AActor*> OverlappingActors;
+	//OtherComp->GetOverlappingActors(OverlappingActors);
 
 	if (HitIndexActor == HitThumbActor)
 		GraspObject();

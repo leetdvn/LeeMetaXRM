@@ -3,3 +3,8 @@
 
 #include "GameplayAbilities/LeeXRAttributeSet.h"
 
+ULeeXRAttributeSet::ULeeXRAttributeSet(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	//SetGrabableTag()
+}

@@ -55,20 +55,6 @@ protected:
 	virtual void InittializeSetup() override;
 
 	UFUNCTION()
-	void OnComponentIndexHit(UPrimitiveComponent* HitComponent,
-		AActor* OtherActor, 
-		UPrimitiveComponent* OtherComp,
-		FVector NormalImpulse, 
-		const FHitResult& Hit);
-
-	UFUNCTION()
-	void OnComponentThumbHit(UPrimitiveComponent* HitComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		FVector NormalImpulse,
-		const FHitResult& Hit);
-
-	UFUNCTION()
 	void OnBeginOverlap(UPrimitiveComponent* HitComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
