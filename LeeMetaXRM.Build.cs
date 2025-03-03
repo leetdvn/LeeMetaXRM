@@ -37,6 +37,7 @@ public class LeeMetaXRM : ModuleRules
             "Niagara",
             "OculusHandPoseRecognition",
             "GameplayAbilities",
+            "OculusUtils"
         });
 
         //PrivateIncludePaths.AddRange(new string[] {

@@ -32,6 +32,23 @@ void ULeeXRMeshSocket::ConstructionEditor()
 	
 }
 
+void ULeeXRMeshSocket::SetFlicker(bool isTurnOn)
+{
+	if (MaterialIns == nullptr) return;
+
+	float isFlicker = isTurnOn ? 1.f : 0.f;
+	MaterialIns->SetScalarParameterValue(*MaterialParamName, isFlicker);
+}
+
+void ULeeXRMeshSocket::SetCorrectShape(bool isTrue)
+{
+	if (MaterialIns == nullptr) return;
+
+	float isCorrect = isTrue ? 1.f : 0.f;
+	MaterialIns->SetScalarParameterValue(TEXT("TrueColor"), isCorrect);
+
+}
+
 void ULeeXRMeshSocket::BeginPlay()
 {
 	Super::BeginPlay();
@@ -48,17 +65,32 @@ void ULeeXRMeshSocket::BeginPlay()
 ///Overlapped Event
 void ULeeXRMeshSocket::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	USphereComponent* SphereCollision = Cast<USphereComponent>(OtherComp);
+	if (SphereCollision) return;
+
+
 	if (SweepResult.HasValidHitObjectHandle())
 	{
-		MaterialIns->SetScalarParameterValue(*MaterialParamName,1.f);
-		ALeeXRGrabActors* GrabActor = Cast<ALeeXRGrabActors>(OtherActor);
+		ALeeXRGrabActors* GrabActor = CastChecked<ALeeXRGrabActors>(OtherActor);
+
+		SetFlicker(true);
 		if (GrabActor &&  GrabActor->IsTag(SocketTag))
 		{
-			GrabActor->SetSimulation(false);
-			OtherActor->AttachToComponent(GetAttachParent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, GetAttachSocketName());
-			SetVisibility(false);
-			LeeScreenLog("P :%s Other : %s", FColor::Red,*GetAttachParent()->GetName(),*OtherActor->GetName());
+			SetCorrectShape(true);
+			//if (!GrabActor->IsSimulation()) return;
 
+			{
+				GrabActor->SetSimulation(false);
+				GrabActor->SetFreeze(FrezzeOnSnap);
+				OtherActor->AttachToComponent(GetAttachParent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, GetAttachSocketName());
+				OtherActor->SetActorRelativeLocation(FVector::ZeroVector);
+				SetFlicker(false);
+
+			}
+
+		}
+		else {
+			SetCorrectShape(false);
 		}
 	}
 }
@@ -66,5 +98,5 @@ void ULeeXRMeshSocket::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
 void ULeeXRMeshSocket::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	//Reset Color
-	MaterialIns->SetScalarParameterValue(*MaterialParamName, DefaultParamValue);
+	SetFlicker(false);
 }

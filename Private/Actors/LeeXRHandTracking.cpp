@@ -8,6 +8,11 @@
 
 using namespace LeeXRUltils;
 
+void ALeeXRHandTracking::TickUntilGrasp(const UObject* WorldContextObject, ELeeTickUntilInputPin InputPin, FLatentActionInfo LatentInfo)
+{
+	return TickUntil(WorldContextObject, InputPin, LatentInfo);
+}
+
 ALeeXRHandTracking::ALeeXRHandTracking(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {

@@ -13,6 +13,11 @@ AICTUGrabbableActor::AICTUGrabbableActor()
 	SetRootComponent(ActorMesh);
 }
 
+void AICTUGrabbableActor::SetFreeze(bool bFreeze)
+{
+	isFreeze = bFreeze;
+}
+
 // Called when the game starts or when spawned
 void AICTUGrabbableActor::BeginPlay()
 {
@@ -20,11 +25,7 @@ void AICTUGrabbableActor::BeginPlay()
 	
 }
 
-void AICTUGrabbableActor::OnConstruction(const FTransform& Transform)
-{
-	Super::OnConstruction(Transform);
-}
-
+#if WITH_EDITOR
 void AICTUGrabbableActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -36,3 +37,4 @@ void AICTUGrabbableActor::PostEditChangeProperty(FPropertyChangedEvent& Property
 	}
 
 }
+#endif

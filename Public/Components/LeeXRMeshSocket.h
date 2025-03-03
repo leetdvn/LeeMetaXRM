@@ -19,8 +19,8 @@ class LEEMETAXRM_API ULeeXRMeshSocket : public UStaticMeshComponent
 public:
 	ULeeXRMeshSocket(const FObjectInitializer & ObjectInitializer = FObjectInitializer::Get());
 
-	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
-	FString MaterialParamName;
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties",meta=(DefaultValue="OnOff"))
+	FString MaterialParamName= TEXT("OnOff");
 
 	UPROPERTY(Transient, EditAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties", meta = (DefaultValue ="FLinearColor::Green"))
 	FColor StartColor;
@@ -37,6 +37,18 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
 	FGameplayTag SocketTag;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
+	bool FrezzeOnSnap=false;
+
+	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
+	bool IsDone = false;
+
+
+	UFUNCTION(BlueprintCallable)
+	void SetFlicker(bool isTurnOn);
+
+	UFUNCTION(BlueprintCallable)
+	void SetCorrectShape(bool isTrue);
 protected:
 	virtual void BeginPlay() override;
 
@@ -59,4 +71,5 @@ protected:
 		int32 OtherBodyIndex);
 
 private:
+
 };

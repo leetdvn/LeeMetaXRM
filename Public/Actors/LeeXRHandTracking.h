@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "LeeXRUltils.h"
+#include "OculusUtilsLibrary.h"
 #include "CoreMinimal.h"
 #include "Actors/LeeXRHandBase.h"
 #include "OculusXRInputFunctionLibrary.h"
@@ -36,6 +38,7 @@ class LEEMETAXRM_API ALeeXRHandTracking : public ALeeXRHandBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USphereComponent> SphereIndex;
 
+
 public:
 	ALeeXRHandTracking(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
@@ -44,6 +47,8 @@ public:
 
 	virtual void GraspRelease() override;
 
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func", meta = (Latent, WorldContext = "WorldContextObject", LatentInfo = "LatentInfo", Keywords = "sleep", ExpandEnumAsExecs = "InputPin"))
+	void TickUntilGrasp(const UObject* WorldContextObject, ELeeTickUntilInputPin InputPin, struct FLatentActionInfo LatentInfo);
 
 protected:
 

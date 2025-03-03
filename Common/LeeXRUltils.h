@@ -7,6 +7,45 @@
 #include "Definitions.h"
 #include <EnhancedInputSubsystems.h>
 #include "InputMappingContext.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
+#include "OculusUtilsLibrary.h"
+
+
+UENUM(BlueprintType)
+enum class ELeeTickUntilInputPin : uint8
+{
+	Start,
+	Break
+};
+
+
+class FTickUntilAction : public FPendingLatentAction
+{
+public:
+	FName ExecutionFunction;
+	int32 OutputLink;
+	FWeakObjectPtr CallbackTarget;
+	bool bIsComplete = false;
+
+	FTickUntilAction(FLatentActionInfo const& LatentInfo) :
+		ExecutionFunction(LatentInfo.ExecutionFunction),
+		OutputLink(LatentInfo.Linkage),
+		CallbackTarget(LatentInfo.CallbackTarget)
+	{
+	}
+
+	virtual void UpdateOperation(FLatentResponse& Response) override
+	{
+		if (bIsComplete)
+		{
+			Response.DoneIf(true);
+		}
+		else
+		{
+			Response.TriggerLink(ExecutionFunction, OutputLink, CallbackTarget);
+		}
+	}
+};
 
 namespace LeeXRUltils
 {
@@ -154,5 +193,28 @@ namespace LeeXRUltils
 			}
 		}
 		Instance->UpdateOverridableBaseProperties();
+	}
+
+	static void TickUntil(const UObject* WorldContextObject, ELeeTickUntilInputPin InputPin, struct FLatentActionInfo LatentInfo)
+	{
+		if (auto World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+		{
+			auto& LatentActionManager = World->GetLatentActionManager();
+			auto Action = LatentActionManager.FindExistingAction<FTickUntilAction>(LatentInfo.CallbackTarget, LatentInfo.UUID);
+			if (InputPin == ELeeTickUntilInputPin::Start)
+			{
+				if (Action == nullptr)
+				{
+					LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FTickUntilAction(LatentInfo));
+				}
+			}
+			else if (InputPin == ELeeTickUntilInputPin::Break)
+			{
+				if (Action != nullptr)
+				{
+					Action->bIsComplete = true;
+				}
+			}
+		}
 	}
 }
