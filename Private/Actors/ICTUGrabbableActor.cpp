@@ -20,3 +20,19 @@ void AICTUGrabbableActor::BeginPlay()
 	
 }
 
+void AICTUGrabbableActor::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+}
+
+void AICTUGrabbableActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(AICTUGrabbableActor, ActorMesh))
+	{
+		
+	}
+
+}

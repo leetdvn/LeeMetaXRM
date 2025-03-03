@@ -87,4 +87,72 @@ namespace LeeXRUltils
 			}
 		}
 	}
+
+	/// <summary>
+	/// Set Material Instance Static Switch Parameter Value
+	/// </summary>
+	/// <param name="Instance"></param>
+	/// <param name="ParameterName"></param>
+	/// <param name="Value"></param>
+	FORCEINLINE	void SetMaterialInstanceStaticSwitchParameterValue(UMaterialInstance* Instance, FName ParameterName, bool Value)
+	{
+		FStaticParameterSet StaticParameters = Instance->GetStaticParameters();
+		for (auto& SwitchParameter : StaticParameters.StaticSwitchParameters)
+		{
+			if (SwitchParameter.ParameterInfo.Name == ParameterName)
+			{
+				SwitchParameter.Value = Value;
+				break;;
+			}
+		}
+		Instance->UpdateStaticPermutation(StaticParameters);
+	}
+
+	/// <summary>
+	/// Set Material Instance Dynamic Static Switch Parameter Value
+	/// </summary>
+	/// <param name="Instance"></param>
+	/// <param name="ParameterName"></param>
+	/// <param name="Value"></param>
+	FORCEINLINE	void SetMaterialInstanceStaticSwitchParameterValue(UMaterialInstanceDynamic* Instance, FName ParameterName, bool Value)
+	{
+		FStaticParameterSet StaticParameters = Instance->GetStaticParameters();
+		for (auto& SwitchParameter : StaticParameters.StaticSwitchParameters)
+		{
+			if (SwitchParameter.ParameterInfo.Name == ParameterName)
+			{
+				SwitchParameter.Value = Value;
+				break;;
+			}
+		}
+		Instance->UpdateStaticPermutation(StaticParameters);
+	}
+
+	FORCEINLINE	void SetMaterialInstanceVectorParameterValue(UMaterialInstance* Instance, FName ParameterName, FColor Value)
+	{
+		TArray<FVectorParameterValue> StaticParameters = Instance->VectorParameterValues;
+		for (auto& VParameter : StaticParameters)
+		{
+			if (VParameter.ParameterInfo.Name == ParameterName)
+			{
+				VParameter.ParameterValue = Value;
+				break;;
+			}
+		}
+		//Instance->UpdateOverridableBaseProperties();
+	}
+
+	FORCEINLINE	void SetMaterialInstanceVectorParameterValue(UMaterialInstance* Instance, FName ParameterName, FLinearColor Value)
+	{
+		TArray<FVectorParameterValue> StaticParameters = Instance->VectorParameterValues;
+		for (auto& VParameter : StaticParameters)
+		{
+			if (VParameter.ParameterInfo.Name == ParameterName)
+			{
+				VParameter.ParameterValue = Value;
+				break;;
+			}
+		}
+		Instance->UpdateOverridableBaseProperties();
+	}
 }
