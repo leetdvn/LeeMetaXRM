@@ -24,6 +24,9 @@ public:
 	// Sets default values for this actor's properties
 	ALeeXRGrabActors();
 
+	UFUNCTION(BlueprintCallable)
+	bool IsTag(const FGameplayTag inObjectTag) const { return ObjectTags == inObjectTag; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

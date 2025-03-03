@@ -27,6 +27,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings")
 	TObjectPtr<class UStaticMeshComponent> ActorMesh;
 
+	UFUNCTION(BlueprintCallable)
+	bool IsSimulation() { return ActorMesh->IsSimulatingPhysics(); }
+
+	UFUNCTION(BlueprintCallable)
+	void SetSimulation(bool bSimulate) { ActorMesh->SetSimulatePhysics(bSimulate); }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

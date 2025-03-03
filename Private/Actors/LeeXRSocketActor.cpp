@@ -22,18 +22,18 @@ void ALeeXRSocketActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	TArray< ULeeXRMeshSocket*> MeshSockets{};
-	GetComponents<ULeeXRMeshSocket>(MeshSockets);
-	if (MeshSockets.IsEmpty()) return;
+	//TArray< ULeeXRMeshSocket*> MeshSockets{};
+	//GetComponents<ULeeXRMeshSocket>(MeshSockets);
+	//if (MeshSockets.IsEmpty()) return;
 
-	for (auto comp : MeshSockets)
-	{
-		if (comp->OnComponentBeginOverlap.IsBound()) comp->OnComponentBeginOverlap.Clear();
-		comp->OnComponentBeginOverlap.AddDynamic(this, &ALeeXRSocketActor::OnBeginOverlap);
+	//for (auto comp : MeshSockets)
+	//{
+	//	if (comp->OnComponentBeginOverlap.IsBound()) comp->OnComponentBeginOverlap.Clear();
+	//	comp->OnComponentBeginOverlap.AddDynamic(this, &ALeeXRSocketActor::OnBeginOverlap);
 
-		if (comp->OnComponentEndOverlap.IsBound()) comp->OnComponentEndOverlap.Clear();
-		comp->OnComponentEndOverlap.AddDynamic(this, &ALeeXRSocketActor::OnEndOverlap);
-	}
+	//	if (comp->OnComponentEndOverlap.IsBound()) comp->OnComponentEndOverlap.Clear();
+	//	comp->OnComponentEndOverlap.AddDynamic(this, &ALeeXRSocketActor::OnEndOverlap);
+	//}
 }
 
 void ALeeXRSocketActor::OnConstruction(const FTransform& Transform)
@@ -61,23 +61,23 @@ void ALeeXRSocketActor::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AAct
 	if (SweepResult.HasValidHitObjectHandle())
 	{
 
-		ULeeXRMeshSocket* MeshSocket = CastChecked<ULeeXRMeshSocket>(OverlappedComp);
-		MeshSocket->MaterialIns->GetScalarParameterValue(*MeshSocket->MaterialParamName, MeshSocket->DefaultParamValue);
-		if (MeshSocket && MeshSocket->IsSimulatingPhysics())
-		{
-			//Snap to Target
-			//LeeScreenLog("Visibility %s", FColor::Green, *OtherActor->GetName());
-			OtherActor->AttachToComponent(SkeletonBasic, FAttachmentTransformRules::SnapToTargetNotIncludingScale, MeshSocket->GetAttachSocketName());
-			//Change Visibility
-			SkeletonBasic->SetVisibility(false);
+		//ULeeXRMeshSocket* MeshSocket = CastChecked<ULeeXRMeshSocket>(OverlappedComp);
+		//MeshSocket->MaterialIns->GetScalarParameterValue(*MeshSocket->MaterialParamName, MeshSocket->DefaultParamValue);
+		//if (MeshSocket && MeshSocket->IsSimulatingPhysics())
+		//{
+		//	//Snap to Target
+		//	//LeeScreenLog("Visibility %s", FColor::Green, *OtherActor->GetName());
+		//	OtherActor->AttachToComponent(SkeletonBasic, FAttachmentTransformRules::SnapToTargetNotIncludingScale, MeshSocket->GetAttachSocketName());
+		//	//Change Visibility
+		//	SkeletonBasic->SetVisibility(false);
 
-		}
-		else {
-			//set Color to Green Correct to Snap
-			MeshSocket->MaterialIns->SetScalarParameterValue(*MeshSocket->MaterialParamName, 1.f);
-			LeeScreenLog("Changed %s", FColor::Green, *OtherActor->GetName());
+		//}
+		//else {
+		//	//set Color to Green Correct to Snap
+		//	MeshSocket->MaterialIns->SetScalarParameterValue(*MeshSocket->MaterialParamName, 1.f);
+		//	LeeScreenLog("Changed %s", FColor::Green, *OtherActor->GetName());
 
-		}
+		//}
 
 	}
 
@@ -86,6 +86,7 @@ void ALeeXRSocketActor::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AAct
 void ALeeXRSocketActor::OnEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	ULeeXRMeshSocket* MeshSocket = CastChecked<ULeeXRMeshSocket>(OverlappedComp);
-	MeshSocket->MaterialIns->SetScalarParameterValue(*MeshSocket->MaterialParamName, MeshSocket->DefaultParamValue);
+	float OldValue = MeshSocket->DefaultParamValue == 0 ? 1.f : 0.f;
+	MeshSocket->MaterialIns->SetScalarParameterValue(*MeshSocket->MaterialParamName, OldValue);
 	LeeScreenLog("End Overlap %s", FColor::Red, *OtherActor->GetName());
 }

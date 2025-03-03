@@ -6,6 +6,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "LeeXRMeshSocket.generated.h"
 
+
+struct FGameplayTag;
 /**
  * 
  */
@@ -16,9 +18,6 @@ class LEEMETAXRM_API ULeeXRMeshSocket : public UStaticMeshComponent
 	
 public:
 	ULeeXRMeshSocket(const FObjectInitializer & ObjectInitializer = FObjectInitializer::Get());
-
-	UPROPERTY(EditAnyWhere,BlueprintReadOnly,Category ="LeeVR Settings|Properties")
-	FString TargetSocketName;
 
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
 	FString MaterialParamName;
@@ -34,6 +33,9 @@ public:
 
 	UPROPERTY(Transient, EditAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
 	float DefaultParamValue;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
+	FGameplayTag SocketTag;
 
 protected:
 	virtual void BeginPlay() override;

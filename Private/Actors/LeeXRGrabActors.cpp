@@ -66,6 +66,7 @@ void ALeeXRGrabActors::OnRelease(UObject* inComponent)
 		//LeeScreenLog("Releasing Object %s", FColor::Green, *GrabUObject->GetName());
 		if (inComponent == GrabUObject) {
 			ActorMesh->SetSimulatePhysics(true);
+			this->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 			bIsheld = false;
 		}
 	}

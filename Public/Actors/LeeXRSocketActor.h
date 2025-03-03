@@ -15,14 +15,14 @@ class LEEMETAXRM_API ALeeXRSocketActor : public AActor
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USkeletalMeshComponent> SkeletonBasic;
 
 public:	
 	// Sets default values for this actor's properties
 	ALeeXRSocketActor();
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties", meta = (AllowPrivateAccess="true",DefaultValue="FColor::Green"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties", meta = (AllowPrivateAccess="true",DefaultValue="FColor::Green"))
 	FColor PreviewColor=FColor::Green;
 
 
