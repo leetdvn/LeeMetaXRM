@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <NiagaraComponent.h>
 #include <LeeXRUltils.h>
 #include <Interfaces/LeeXRInteraction.h>
 #include "MotionControllerComponent.h"
@@ -49,28 +50,28 @@ class LEEMETAXRM_API ALeeXRHandBase : public AActor
 	GENERATED_BODY()
 	
 
+
 public:	
 	// Sets default values for this actor's properties
 	ALeeXRHandBase(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UAnimInstance* GetHandAnimInstance() { return HandSkeletal->GetAnimInstance(); }
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
-	bool IsValidGrab() { return bIsHeld; }
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	bool IsValidControllerType(ELeeXRHandType inType);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	bool IsValidGrab() { return bIsHeld; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	FVector GetMotionControllerLocation() { return MotionController->GetComponentLocation(); }
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	FVector GetMotionControllerForwardVector() { return MotionController->GetForwardVector(); }
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeVR|Func", meta = (BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UWidgetInteractionComponent* GetWidgetInteraction() { return WidgetInteraction; }
-
 
 	virtual void GraspObject();
 
@@ -95,9 +96,54 @@ protected:
 
 	void SetHandSwitch(bool isLeft);
 	bool bIsCanGrasp;
+
+	TObjectPtr<ALeeXRCharacter> XRCharacter=nullptr;
+
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
+
+#pragma region Teleport
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void TeleportTrace(FVector StartPos, FVector ForwardVec);
+
+	bool IsValidTeleportLocation(FHitResult Hit, FVector& ProjectedLocation);
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void StartTeleportTrace();
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void TryTeleport();
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	FVector GetTeleportLocation(const class ALeeXRCharacter* inXRCharacter);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Varibles")
+	TArray<FVector> TeleportTracePathPositions;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Varibles")
+	FVector TeleportProjectPointToNavigationQueryExtent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Varibles")
+	FVector ProjectedTeleportLocation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Varibles")
+	bool bValidTeleportLocation = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Varibles")
+	bool bTeleportTraceActive;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Varibles")
+	TObjectPtr<AActor> TeleportRef;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Actors")
+	TObjectPtr<class UNiagaraComponent> NiagaraComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Actors")
+	TSubclassOf<AActor> TeleportVisualizer;
+
+#pragma endregion
 
 #pragma region Components
 

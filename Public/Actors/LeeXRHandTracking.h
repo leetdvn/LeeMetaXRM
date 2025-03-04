@@ -50,6 +50,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func", meta = (Latent, WorldContext = "WorldContextObject", LatentInfo = "LatentInfo", Keywords = "sleep", ExpandEnumAsExecs = "InputPin"))
 	void TickUntilGrasp(const UObject* WorldContextObject, ELeeTickUntilInputPin InputPin, struct FLatentActionInfo LatentInfo);
 
+
+
 protected:
 
 	// Called when the game starts or when spawned

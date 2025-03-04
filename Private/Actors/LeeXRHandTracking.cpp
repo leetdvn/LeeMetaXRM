@@ -6,6 +6,7 @@
 #include "HandPoseRecognizer.h"
 #include "Common/LeeXRUltils.h"
 
+
 using namespace LeeXRUltils;
 
 void ALeeXRHandTracking::TickUntilGrasp(const UObject* WorldContextObject, ELeeTickUntilInputPin InputPin, FLatentActionInfo LatentInfo)
@@ -13,12 +14,14 @@ void ALeeXRHandTracking::TickUntilGrasp(const UObject* WorldContextObject, ELeeT
 	return TickUntil(WorldContextObject, InputPin, LatentInfo);
 }
 
+
 ALeeXRHandTracking::ALeeXRHandTracking(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	HandTrackingComp = CreateDefaultSubobject<UOculusXRHandComponent>(TEXT("HandTrackingComp"));
 	HandTrackingComp->SetupAttachment(MotionController);
 
+	NiagaraComponent->SetupAttachment(HandTrackingComp);
 
 	ControllerType = ELeeXRHandType::LeeXRHandTracking;
 
@@ -112,7 +115,6 @@ void ALeeXRHandTracking::Tick(float DeltaTime)
 
 		if (Name.EndsWith("None")) return;
 
-		//LeeScreenLog("Hand Pose :%s", FColor::Green, *UEnum::GetValueAsString(hPose));
 		switch (hPose)
 		{
 		case LeeHandPose::LHandMenu:
@@ -121,12 +123,24 @@ void ALeeXRHandTracking::Tick(float DeltaTime)
 		case LeeHandPose::LHandGrasp:
 			//if(!bIsHeld)
 				//GraspObject();
+			if (bTeleportTraceActive) {
+				bTeleportTraceActive = false;
+				TryTeleport();
+			}
 			break;
 		case LeeHandPose::LHandRelease:
 				//GraspRelease();
 			break;
 		case LeeHandPose::LHandMove:
 			//Do Something
+			if (bTeleportTraceActive &&
+				HandType == EControllerHand::Right
+				) {
+				//Do Something
+				FVector StartPos = HandTrackingComp->GetComponentToWorld().GetLocation();
+				FVector ForwardVec = NiagaraComponent->GetForwardVector();
+				TeleportTrace(StartPos,ForwardVec);
+			}
 			break;
 		}
 
@@ -142,6 +156,7 @@ void ALeeXRHandTracking::InittializeSetup()
 	GetWorld()->GetTimerManager().SetTimer(AttachHandle, [this]() {
 			this->AttachOculusHandTracking(EOculusXRBone::Index_Tip, this->SphereIndex);
 			this->AttachOculusHandTracking(EOculusXRBone::Thumb_Tip, this->SphereThumb);
+			NiagaraComponent->SetupAttachment(HandTrackingComp, *UOculusXRInputFunctionLibrary::GetBoneName(EOculusXRBone::Wrist_Root));
 			GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
 
 		},1.f, false, 1.f);

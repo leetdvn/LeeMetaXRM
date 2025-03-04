@@ -40,9 +40,9 @@ ALeeXRCharacter::ALeeXRCharacter()
 	DisplayMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DisplayMesh"));
 	DisplayMesh->SetupAttachment(Camera);
 
-	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
-	NiagaraComponent->SetupAttachment(XROrigin);
 }
+
+
 
 // Get the hand animation instance
 UAnimInstance* ALeeXRCharacter::GetHandAnimInstance(bool isLeft)
@@ -59,79 +59,6 @@ UAnimInstance* ALeeXRCharacter::GetHandAnimInstance(bool isLeft)
 	return nullptr;
 }
 
-void ALeeXRCharacter::TeleportTrace(FVector StartPos, FVector ForwardVec)
-{
-	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
-
-	//Trace Teleport
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>();
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
-
-	float teleportSpped = 650.0f;
-	float TeleportRadius = 3.6f;
-	float LocalNavMeshCellHeight = 8.0f;
-	FHitResult OutHit{};
-	TArray<FVector> PathPositions = TArray<FVector>();
-	FVector LastTraceDestination = FVector::ZeroVector;
-
-	UGameplayStatics::Blueprint_PredictProjectilePath_ByObjectType(
-		GetWorld(),
-		OutHit,
-		PathPositions,
-		LastTraceDestination,
-		StartPos,
-		teleportSpped * ForwardVec,
-		true,
-		TeleportRadius,
-		ObjectTypes,
-		false,
-		TArray<AActor*>(),
-		EDrawDebugTrace::None,
-		0.0f,
-		15.0f,
-		2.0f,
-		0.0f
-	);
-
-
-	//Update TeleportVisualizer Location
-	PathPositions.Insert(StartPos, 0);
-	FVector ProjectedLocation{};
-	bool isTeleportValid = IsValidTeleportLocation(OutHit, ProjectedLocation);
-
-	ProjectedTeleportLocation = FVector(ProjectedLocation.X, ProjectedLocation.Y, ProjectedLocation.Z - 8.0f);
-
-	if (bValidTeleportLocation != isTeleportValid)
-	{
-		bValidTeleportLocation = isTeleportValid;
-		ActorToSpawn.GetDefaultObject()->GetRootComponent()->SetVisibility(bValidTeleportLocation);
-	}
-
-	//then Update Sequence 2
-
-	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(NiagaraComponent,
-		TEXT("User.PointArray"),
-		PathPositions);
-
-}
-
-bool ALeeXRCharacter::IsValidTeleportLocation(FHitResult Hit, FVector& ProjectedLocation)
-{
-	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
-
-	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetNavigationSystem(GetWorld());
-	if (!NavSys) return false;
-
-
-	return  NavSys->K2_ProjectPointToNavigation(
-		GetWorld(),
-		Hit.Location,
-		ProjectedLocation,
-		NavSys->GetAbstractNavData(),
-		NULL,
-		TeleportProjectPointToNavigationQueryExtent);
-
-}
 
 // Called when the game starts or when spawned
 void ALeeXRCharacter::BeginPlay()
@@ -236,15 +163,7 @@ void ALeeXRCharacter::OnMoving()
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
-	bTeleportTraceActive = true;
 
-	TeleportTracePathPositions.Empty();
-
-	NiagaraComponent->SetVisibility(true);
-
-	AActor* Teleport = LeeXRSPawnActorBP<AActor>(this, TeleportVisualizer);
-
-	LeeScreenLog("Teleport %s", FColor::Purple, *Teleport->GetName());
 	//FVector StartPos = XRHandRight->GetMotionControllerLocation();
 	//FVector ForwardVec = XRHandRight->GetMotionControllerForwardVector();
 

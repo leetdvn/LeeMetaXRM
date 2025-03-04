@@ -113,6 +113,17 @@ namespace LeeXRUltils
 		return nullptr;
 	}
 
+
+	template<typename T>
+	FORCEINLINE T* LeeXRGetCustomCharacter(const UObject* inContextObject) {
+		UWorld* ContextObject = GEngine->GetWorldFromContextObject(inContextObject, EGetWorldErrorMode::LogAndReturnNull);
+		if (ContextObject) {
+			return Cast<T>(ContextObject->GetFirstPlayerController()->GetPawn());
+		}
+		return nullptr;
+	}
+
+
 	FORCEINLINE void InitializationContext(UWorld* inWorld,UInputMappingContext* inContext,int32 Priority=0) {
 
 		if (!inWorld) return;

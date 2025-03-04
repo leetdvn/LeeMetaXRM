@@ -7,6 +7,10 @@
 #include <Components/ArrowComponent.h>
 #include <Definitions.h>
 #include <EnhancedInputComponent.h>
+#include <NiagaraDataInterfaceArrayFunctionLibrary.h>
+#include <NavigationSystem.h>
+#include "Actors/LeeXRTeleportActor.h"
+#include "APawn/LeeXRCharacter.h"
 
 
 DEFINE_STAT(STAT_ICTUController);
@@ -24,11 +28,12 @@ ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 	WidgetInteraction = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("WidgetInteraction"));
 	WidgetInteraction->SetupAttachment(MotionController);
 
+	
+	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
 }
 
 bool ALeeXRHandBase::IsValidControllerType(ELeeXRHandType inType)
 {
-	
 	return inType == ControllerType;
 }
 
@@ -115,6 +120,14 @@ void ALeeXRHandBase::InittializeSetup()
 		WidgetInteraction->TraceChannel = ECollisionChannel::ECC_WorldDynamic;
 	}
 #endif
+
+	XRCharacter = LeeXRGetCustomCharacter<ALeeXRCharacter>(this);
+
+	if (!XRCharacter)
+	{
+		LeeScreenLog("XRCharacter is Null", FColor::Red);
+		return;
+	}
 }
 
 void ALeeXRHandBase::OnFingerAnimation(const FInputActionInstance& ActionInstance)
@@ -385,3 +398,125 @@ void ALeeXRHandBase::OnHandTrigger(const FInputActionInstance& ActionInstance)
 
 	//	}
 }
+
+
+#pragma region Teleport
+
+void ALeeXRHandBase::TeleportTrace(FVector StartPos, FVector ForwardVec)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	//Trace Teleport
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>();
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
+
+	float teleportSpped = 650.0f;
+	float TeleportRadius = 3.6f;
+	float LocalNavMeshCellHeight = 8.0f;
+	FHitResult OutHit{};
+	FVector LastTraceDestination = FVector::ZeroVector;
+
+	UGameplayStatics::Blueprint_PredictProjectilePath_ByObjectType(
+		GetWorld(),
+		OutHit,
+		TeleportTracePathPositions,
+		LastTraceDestination,
+		StartPos,
+		teleportSpped * ForwardVec,
+		true,
+		TeleportRadius,
+		ObjectTypes,
+		false,
+		TArray<AActor*>(),
+		EDrawDebugTrace::None,
+		0.0f,
+		15.0f,
+		2.0f,
+		0.0f
+	);
+
+
+	//Update TeleportVisualizer Location
+	TeleportTracePathPositions.Insert(StartPos, 0);
+	FVector ProjectedLocation{};
+	bool isTeleportValid = IsValidTeleportLocation(OutHit, ProjectedLocation);
+
+	ProjectedTeleportLocation = FVector(ProjectedLocation.X, ProjectedLocation.Y, ProjectedLocation.Z - LocalNavMeshCellHeight);
+
+	if (bValidTeleportLocation != isTeleportValid)
+	{
+		bValidTeleportLocation = isTeleportValid;
+		//ActorToSpawn.GetDefaultObject()->GetRootComponent()->SetVisibility(bValidTeleportLocation);
+	}
+
+	TeleportRef->GetRootComponent()->SetVisibility(bValidTeleportLocation,true);
+	//then Update Sequence 2
+
+
+	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(NiagaraComponent,
+		TEXT("User.PointArray"),
+		TeleportTracePathPositions);
+	FHitResult* Hit = new FHitResult();
+
+	FVector TeleportLocation = GetTeleportLocation(XRCharacter);
+
+	TeleportRef->SetActorLocation(ProjectedTeleportLocation);
+}
+
+bool ALeeXRHandBase::IsValidTeleportLocation(FHitResult Hit, FVector& ProjectedLocation)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetNavigationSystem(GetWorld());
+	if (!NavSys) return false;
+
+
+	return  NavSys->K2_ProjectPointToNavigation(
+		GetWorld(),
+		Hit.Location,
+		ProjectedLocation,
+		NULL,
+		NULL,
+		TeleportProjectPointToNavigationQueryExtent);
+}
+
+void ALeeXRHandBase::StartTeleportTrace()
+{
+	//Start Teleport Trace
+	bTeleportTraceActive = true;
+	TeleportTracePathPositions.Empty();
+	//NiagaraComponent->SetVisibility(true);
+	if (TeleportRef == nullptr)
+		TeleportRef = LeeXRSPawnActorBP<AActor>(this, TeleportVisualizer);
+}
+void ALeeXRHandBase::TryTeleport()
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
+
+	if (XRCharacter) {
+		FVector TeleportLocation = GetTeleportLocation(XRCharacter);
+		XRCharacter->TeleportTo(TeleportLocation, FRotator(0.0f, XRCharacter->GetActorRotation().Yaw, 0.0f),false,true);
+	}
+
+}
+FVector ALeeXRHandBase::GetTeleportLocation(const ALeeXRCharacter* inXRCharacter)
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr) return FVector::ZeroVector;
+
+	if (inXRCharacter) {
+		FVector CamVec = inXRCharacter->GetCameraLocation();
+		FVector Minus = FVector(CamVec.X, CamVec.Y, inXRCharacter->GetActorRotation().Yaw);
+		FVector TeleportLocation = ProjectedTeleportLocation - Minus;
+
+		if (TeleportLocation.Z < 0)
+			TeleportLocation.Z = 5;
+		LeeScreenLog("Teleport Location %s", FColor::Green, *TeleportLocation.ToString());
+		return TeleportLocation;
+		//XRCharacter->TeleportTo(TeleportLocation, FRotator(0.0f, XRCharacter->GetActorRotation().Yaw, 0.0f), false, true);
+	}
+
+	return FVector::ZeroVector;
+}
+#pragma endregion Teleport
