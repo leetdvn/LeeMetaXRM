@@ -128,6 +128,13 @@ void ALeeXRHandBase::InittializeSetup()
 		LeeScreenLog("XRCharacter is Null", FColor::Red);
 		return;
 	}
+	if (TeleportRef == nullptr) {
+		TeleportRef = LeeXRSPawnActorBP<AActor>(this, TeleportVisualizer);
+
+		if(TeleportRef)
+			TeleportRef->GetRootComponent()->SetVisibility(false, true);;
+	}
+
 }
 
 void ALeeXRHandBase::OnFingerAnimation(const FInputActionInstance& ActionInstance)
@@ -449,7 +456,14 @@ void ALeeXRHandBase::TeleportTrace(FVector StartPos, FVector ForwardVec)
 		//ActorToSpawn.GetDefaultObject()->GetRootComponent()->SetVisibility(bValidTeleportLocation);
 	}
 
-	TeleportRef->GetRootComponent()->SetVisibility(bValidTeleportLocation,true);
+
+	if (TeleportRef) {
+		TeleportRef->GetRootComponent()->SetVisibility(bValidTeleportLocation, true);
+
+		if(OutHit.bBlockingHit)
+			TeleportRef->SetActorLocation(ProjectedTeleportLocation);
+	}
+
 	//then Update Sequence 2
 
 
@@ -460,7 +474,7 @@ void ALeeXRHandBase::TeleportTrace(FVector StartPos, FVector ForwardVec)
 
 	FVector TeleportLocation = GetTeleportLocation(XRCharacter);
 
-	TeleportRef->SetActorLocation(ProjectedTeleportLocation);
+
 }
 
 bool ALeeXRHandBase::IsValidTeleportLocation(FHitResult Hit, FVector& ProjectedLocation)
@@ -486,8 +500,9 @@ void ALeeXRHandBase::StartTeleportTrace()
 	bTeleportTraceActive = true;
 	TeleportTracePathPositions.Empty();
 	//NiagaraComponent->SetVisibility(true);
-	if (TeleportRef == nullptr)
+	if (TeleportRef == nullptr) {
 		TeleportRef = LeeXRSPawnActorBP<AActor>(this, TeleportVisualizer);
+	}
 }
 void ALeeXRHandBase::TryTeleport()
 {
@@ -496,7 +511,11 @@ void ALeeXRHandBase::TryTeleport()
 
 	if (XRCharacter) {
 		FVector TeleportLocation = GetTeleportLocation(XRCharacter);
-		XRCharacter->TeleportTo(TeleportLocation, FRotator(0.0f, XRCharacter->GetActorRotation().Yaw, 0.0f),false,true);
+		if (TeleportLocation.IsNearlyZero(0.0001f)) {
+			LeeScreenLog("Teleport Location is Zero", FColor::Red);
+		}
+		XRCharacter->TeleportTo(TeleportLocation, FRotator(0.0f, XRCharacter->GetActorRotation().Yaw, 0.0f), false, true);
+
 	}
 
 }
@@ -508,13 +527,7 @@ FVector ALeeXRHandBase::GetTeleportLocation(const ALeeXRCharacter* inXRCharacter
 	if (inXRCharacter) {
 		FVector CamVec = inXRCharacter->GetCameraLocation();
 		FVector Minus = FVector(CamVec.X, CamVec.Y, inXRCharacter->GetActorRotation().Yaw);
-		FVector TeleportLocation = ProjectedTeleportLocation - Minus;
-
-		if (TeleportLocation.Z < 0)
-			TeleportLocation.Z = 5;
-		LeeScreenLog("Teleport Location %s", FColor::Green, *TeleportLocation.ToString());
-		return TeleportLocation;
-		//XRCharacter->TeleportTo(TeleportLocation, FRotator(0.0f, XRCharacter->GetActorRotation().Yaw, 0.0f), false, true);
+		return ProjectedTeleportLocation - Minus;
 	}
 
 	return FVector::ZeroVector;

@@ -133,10 +133,9 @@ void ALeeXRHandTracking::Tick(float DeltaTime)
 			break;
 		case LeeHandPose::LHandMove:
 			//Do Something
-			if (bTeleportTraceActive &&
-				HandType == EControllerHand::Right
-				) {
+			if (HandType == EControllerHand::Right) {
 				//Do Something
+				bTeleportTraceActive = true;
 				FVector StartPos = HandTrackingComp->GetComponentToWorld().GetLocation();
 				FVector ForwardVec = NiagaraComponent->GetForwardVector();
 				TeleportTrace(StartPos,ForwardVec);
