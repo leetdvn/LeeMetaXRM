@@ -55,18 +55,17 @@ public:
 	virtual void InittializeSetup() override;
 
 
+
 protected:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	/// <summary>
-	/// Set Input Component
-	/// </summary>
-	virtual void SetInputComponent() override;
+	virtual void SetInputComponent();
 
 
-
+	UFUNCTION()
+	void OnInputActionMove(const FInputActionInstance& ActionInstance);
 private:
 
 

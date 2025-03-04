@@ -3,7 +3,7 @@
 #pragma once
 
 #include <GameplayTagContainer.h>
-#include "ICTUGrabbableActor.h"
+#include "LeeXRGrabbableActor.h"
 #include "Interfaces/LeeXRInteraction.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -16,7 +16,7 @@ class UAbilitySystemComponent;
 
 
 UCLASS(BlueprintType)
-class LEEMETAXRM_API ALeeXRGrabActors : public AICTUGrabbableActor, public ILeeXRInteraction
+class LEEMETAXRM_API ALeeXRGrabActors : public ALeeXRGrabbableActor, public ILeeXRInteraction
 {
 	GENERATED_BODY()
 	

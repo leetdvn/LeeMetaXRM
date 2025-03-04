@@ -37,8 +37,6 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
 	FGameplayTag SocketTag;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
-	bool FrezzeOnSnap=false;
 
 	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
 	bool IsDone = false;

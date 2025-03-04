@@ -41,15 +41,19 @@ bool ALeeXRHandBase::IsValidControllerType(ELeeXRHandType inType)
 void ALeeXRHandBase::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	///PROFILE
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+	INC_MEMORY_STAT_BY(STAT_HandController, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
 
 	///Mapping Context
 	if (MenuContext) {
+		InitializationContext(GetWorld(),DefaultContext ,0);
 		InitializationContext(GetWorld(), MenuContext, 0);
 		InitializationContext(GetWorld(), HandContext, 1);
+
 	}
 
-	INC_MEMORY_STAT_BY(STAT_HandController, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
 
 	SetInputComponent();
 
@@ -128,11 +132,16 @@ void ALeeXRHandBase::InittializeSetup()
 		LeeScreenLog("XRCharacter is Null", FColor::Red);
 		return;
 	}
-	if (TeleportRef == nullptr) {
-		TeleportRef = LeeXRSPawnActorBP<AActor>(this, TeleportVisualizer);
 
-		if(TeleportRef)
-			TeleportRef->GetRootComponent()->SetVisibility(false, true);;
+	if (TeleportRef == nullptr) {
+
+		//Define Teleport Hand Action Left or Right
+		if (TeleportValid()) {
+			TeleportRef = LeeXRSPawnActorBP<AActor>(this, TeleportVisualizer);
+
+			if (TeleportRef)
+				TeleportRef->GetRootComponent()->SetVisibility(false, true);;
+		}
 	}
 
 }
@@ -383,6 +392,8 @@ void ALeeXRHandBase::OnHandInteract(const FInputActionInstance& ActionInstance)
 	//	
 	//}
 	WidgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
+	WidgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
+	LeeScreenLog("Interact :%s", FColor::Green, *GetName());
 }
 
 void ALeeXRHandBase::OnHandTrigger(const FInputActionInstance& ActionInstance)
@@ -412,7 +423,8 @@ void ALeeXRHandBase::OnHandTrigger(const FInputActionInstance& ActionInstance)
 void ALeeXRHandBase::TeleportTrace(FVector StartPos, FVector ForwardVec)
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
-
+	if(TeleportRef)
+		TeleportRef->SetActorHiddenInGame(false);
 	//Trace Teleport
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>();
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
@@ -484,14 +496,15 @@ bool ALeeXRHandBase::IsValidTeleportLocation(FHitResult Hit, FVector& ProjectedL
 	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetNavigationSystem(GetWorld());
 	if (!NavSys) return false;
 
+	ANavigationData* UseNavData = NavSys->GetDefaultNavDataInstance(FNavigationSystem::DontCreate);
 
 	return  NavSys->K2_ProjectPointToNavigation(
 		GetWorld(),
 		Hit.Location,
 		ProjectedLocation,
+		UseNavData,
 		NULL,
-		NULL,
-		TeleportProjectPointToNavigationQueryExtent);
+		TeleportProjectPointToNavigationQueryExtent);	
 }
 
 void ALeeXRHandBase::StartTeleportTrace()
@@ -515,12 +528,28 @@ void ALeeXRHandBase::TryTeleport()
 			LeeScreenLog("Teleport Location is Zero", FColor::Red);
 		}
 		XRCharacter->TeleportTo(TeleportLocation, FRotator(0.0f, XRCharacter->GetActorRotation().Yaw, 0.0f), false, true);
-
+		TeleportRef->SetActorHiddenInGame(true);
 	}
 
 }
+
+
+bool ALeeXRHandBase::TeleportValid()
+{
+	if (XRCharacter == nullptr) return false;
+
+	ELeeXRTeleportHandAction TelportAct = XRCharacter->GetTeleportHandAction();
+
+	bool TpAction = TelportAct == ELeeXRTeleportHandAction::LeeXRRight ? true : false;
+
+	EControllerHand Direction = TpAction ? EControllerHand::Right : EControllerHand::Left;
+
+	return HandType == Direction;
+}
+
 FVector ALeeXRHandBase::GetTeleportLocation(const ALeeXRCharacter* inXRCharacter)
 {
+	//Get Teleport Location from XRCharacter Camera
 	UWorld* World = GetWorld();
 	if (World == nullptr) return FVector::ZeroVector;
 

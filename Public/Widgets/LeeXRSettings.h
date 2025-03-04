@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "ICTUSettings.generated.h"
+#include "LeeXRSettings.generated.h"
 
 /**
  * 
  */
 UCLASS(BlueprintType)
-class LEEMETAXRM_API UICTUSettings : public UUserWidget
+class LEEMETAXRM_API ULeeXRSettings : public UUserWidget
 {
 	GENERATED_BODY()
 	
 public:
-	UICTUSettings(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	ULeeXRSettings(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 protected:
 	virtual void NativeConstruct() override;

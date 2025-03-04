@@ -37,8 +37,6 @@ ALeeXRHandTracking::ALeeXRHandTracking(const FObjectInitializer& ObjectInitializ
 
 }
 
-
-
 /// <summary>
 /// Grasp Object
 void ALeeXRHandTracking::GraspObject()
@@ -82,6 +80,7 @@ void ALeeXRHandTracking::BeginPlay()
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 
 	INC_MEMORY_STAT_BY(STAT_HandController, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
+
 
 	if (SphereIndex->OnComponentBeginOverlap.IsBound()) SphereIndex->OnComponentBeginOverlap.Clear();
 	SphereIndex->OnComponentBeginOverlap.AddDynamic(this, &ALeeXRHandTracking::OnBeginOverlap);
@@ -133,7 +132,7 @@ void ALeeXRHandTracking::Tick(float DeltaTime)
 			break;
 		case LeeHandPose::LHandMove:
 			//Do Something
-			if (HandType == EControllerHand::Right) {
+			if (TeleportValid()) {
 				//Do Something
 				bTeleportTraceActive = true;
 				FVector StartPos = HandTrackingComp->GetComponentToWorld().GetLocation();
@@ -150,7 +149,6 @@ void ALeeXRHandTracking::InittializeSetup()
 {
 	Super::InittializeSetup();
 
-
 	FTimerHandle AttachHandle;
 	GetWorld()->GetTimerManager().SetTimer(AttachHandle, [this]() {
 			this->AttachOculusHandTracking(EOculusXRBone::Index_Tip, this->SphereIndex);
@@ -165,7 +163,13 @@ void ALeeXRHandTracking::InittializeSetup()
 	SphereThumb->SetSphereRadius(1.f);
 }
 
-void ALeeXRHandTracking::OnBeginOverlap(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ALeeXRHandTracking::OnBeginOverlap(
+	UPrimitiveComponent* HitComponent,
+	AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp, 
+	int32 OtherBodyIndex, 
+	bool bFromSweep,
+	const FHitResult& SweepResult)
 {
 	//LeeScreenLog("Overlap %s", FColor::Green, *OtherActor->GetName());
 	HitIndexActor = OtherActor;
@@ -178,7 +182,6 @@ void ALeeXRHandTracking::OnBeginOverlap(UPrimitiveComponent* HitComponent, AActo
 	if (HitIndexActor == HitThumbActor)
 		GraspObject();
 }
-
 
 void ALeeXRHandTracking::OnEndOverlap(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {

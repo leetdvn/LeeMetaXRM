@@ -41,7 +41,7 @@ void ALeeXRGrabActors::OnGrab(UObject* inComponent,const FVector& InGrabLocation
 	/*
 	Need Setup Collision Profileing and Custom Edit Collision Presets
 	*/
-	if (inComponent == nullptr || isFreeze) return;
+	if (inComponent == nullptr || FrezzeOnSnap) return;
 
 	FAttachmentTransformRules AttachRules = GrabType == EGrabType::EGT_Free ?
 		FAttachmentTransformRules::KeepWorldTransform : 
@@ -59,7 +59,7 @@ void ALeeXRGrabActors::OnGrab(UObject* inComponent,const FVector& InGrabLocation
 
 void ALeeXRGrabActors::OnRelease(UObject* inComponent)
 {
-	if (inComponent == nullptr || isFreeze) return;
+	if (inComponent == nullptr || FrezzeOnSnap) return;
 
 	if (bIsheld)
 	{

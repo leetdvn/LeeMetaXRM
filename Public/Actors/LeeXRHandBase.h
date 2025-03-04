@@ -117,6 +117,13 @@ protected:
 	void TryTeleport();
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	bool TeleportValid();
+	/// <summary>
+	/// Get Teleport Location from XRCharacter Camera
+	/// </summary>
+	/// <param name="inXRCharacter"></param>
+	/// <returns></returns>
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	FVector GetTeleportLocation(const class ALeeXRCharacter* inXRCharacter);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Varibles")
@@ -201,6 +208,9 @@ protected:
 	TObjectPtr<class UInputMappingContext> HandContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputMappingContext> DefaultContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
 	TObjectPtr<class UInputAction> IA_Grasp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
@@ -217,6 +227,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
 	TObjectPtr<class UInputAction> IA_HandLog;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	TObjectPtr<class UInputAction> IA_Move;
 
 #pragma endregion
 public:	

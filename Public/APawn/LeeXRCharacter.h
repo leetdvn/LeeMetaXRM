@@ -17,6 +17,14 @@ DECLARE_MEMORY_STAT_EXTERN(TEXT("ICTUCharacter"), STAT_ICTUCharacter, STATGROUP_
 DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT("ICTUCharacterMemory"), STAT_ICTUCharacterMemory, STATGROUP_ICTUMV, );
 
 
+
+UENUM(BlueprintType)
+enum class ELeeXRTeleportHandAction : uint8
+{
+	LeeXRLeft UMETA(DisplayName = "Left Action"),
+	LeeXRRight UMETA(DisplayName = "Right Action")
+};
+
 /**
  * XR Character Class
  */
@@ -38,6 +46,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	FVector GetCameraLocation() const { return Camera->GetRelativeLocation(); }
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	ELeeXRTeleportHandAction GetTeleportHandAction() const { return TeleportHandAction; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -49,6 +60,9 @@ protected:
 #endif
 
 #pragma region Components
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "LeeXR Settings", meta = (DisplayName = "Teleport Action"))
+	ELeeXRTeleportHandAction TeleportHandAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UCameraComponent> Camera;

@@ -43,7 +43,7 @@ void ALeeXRSocketActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (StatusAct = nullptr) return;
+	if (StatusAct == nullptr) return;
 
 	LookAtComponent<UWidgetComponent>(StatusAct,true);
 }
