@@ -43,6 +43,8 @@ void ALeeXRGrabActors::OnGrab(UObject* inComponent,const FVector& InGrabLocation
 	*/
 	if (inComponent == nullptr || FrezzeOnSnap) return;
 
+	//Execute Grab Delegate
+	LeeXROnGrabObject.Broadcast();
 	FAttachmentTransformRules AttachRules = GrabType == EGrabType::EGT_Free ?
 		FAttachmentTransformRules::KeepWorldTransform : 
 		FAttachmentTransformRules::SnapToTargetNotIncludingScale;
@@ -65,6 +67,9 @@ void ALeeXRGrabActors::OnRelease(UObject* inComponent)
 	{
 		//LeeScreenLog("Releasing Object %s", FColor::Green, *GrabUObject->GetName());
 		if (inComponent == GrabUObject) {
+			
+			//Execute Release Delegate
+			LeeXROnReleaseObject.Broadcast();
 			ActorMesh->SetSimulatePhysics(true);
 			this->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 			bIsheld = false;

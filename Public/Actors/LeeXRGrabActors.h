@@ -12,6 +12,9 @@
 DEFINE_LOG_CATEGORY_STATIC(LogLeeGrabActors, Log, All)
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLeeXROnGrabObject);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLeeXROnReleaseObject);
+
 class UAbilitySystemComponent;
 
 
@@ -26,6 +29,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool IsTag(const FGameplayTag inObjectTag) const { return ObjectTags == inObjectTag; }
+
+	UPROPERTY(BlueprintAssignable, Category = "LeeXR Settings|Delegates")
+	FLeeXROnGrabObject LeeXROnGrabObject;
+
+	UPROPERTY(BlueprintAssignable, Category = "LeeXR Settings|Delegates")
+	FLeeXROnReleaseObject LeeXROnReleaseObject;
 
 protected:
 	// Called when the game starts or when spawned
