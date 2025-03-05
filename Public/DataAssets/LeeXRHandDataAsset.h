@@ -42,9 +42,9 @@ class LEEMETAXRM_API ULeeXRHandDataAsset : public UDataAsset
 	
 public:
 
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "LeeVR Settings|Data")
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "LeeXR Settings|Data")
 	FString AssetName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeVR Settings|Data")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Data")
 	FLeeHandData Assets;
 };

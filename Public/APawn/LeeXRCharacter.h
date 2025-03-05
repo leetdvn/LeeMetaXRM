@@ -49,6 +49,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	ELeeXRTeleportHandAction GetTeleportHandAction() const { return TeleportHandAction; }
 
+	UFUNCTION(BlueprintCallable,  Category = "LeeXR|Func")
+	void SetTeleportHandAction(ELeeXRTeleportHandAction inAction) { TeleportHandAction = inAction; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

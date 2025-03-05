@@ -30,7 +30,7 @@ ALeeXRCharacter::ALeeXRCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 
-	XROrigin = CreateDefaultSubobject<USceneComponent>(TEXT("LeeVROrigin"));
+	XROrigin = CreateDefaultSubobject<USceneComponent>(TEXT("LeeXROrigin"));
 	XROrigin->SetupAttachment(GetMesh());
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
@@ -88,6 +88,11 @@ void ALeeXRCharacter::BeginPlay()
 
 	INC_MEMORY_STAT_BY(STAT_ICTUCharacterMemory, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
 
+#if !UE_BUILD_SHIPPING
+	//LeeScreenLog("Hand Type %s", FColor::Green, *HandType.ToString());
+	UKismetSystemLibrary::ExecuteConsoleCommand(this, TEXT("ShowFlag.Collision"));
+
+#endif
 }
 
 void ALeeXRCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)

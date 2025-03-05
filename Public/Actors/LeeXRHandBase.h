@@ -155,44 +155,46 @@ protected:
 #pragma region Components
 
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeVR Settings|Components")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UOculusXRHandComponent> OculusHand;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UMotionControllerComponent> MotionController;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UWidgetInteractionComponent> WidgetInteraction;
 
 	/**Collision Sphere**/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<class USphereComponent> GrabSphere;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Components")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UOculusXRHandComponent> HandTrackingComp;
 
-	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeVR Settings|Components")
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class USkeletalMeshComponent> HandSkeletal=nullptr;
 
-	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeVR Settings|Components")
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UHandPoseRecognizer> HandPoseRecognizer = nullptr;
 
 
 #pragma endregion
 
 #pragma region HandData
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeVR Settings")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeXR Settings")
 	EControllerHand HandType;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeVR Settings")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings")
 	ELeeXRHandType ControllerType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings")
 	bool bMirrorAnimation = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings")
 	bool bIsHeld = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings", meta = (ClampMin = "650", ClampMax = "2000",DefaultValue="650.0"))
+	float TeleportDistance = 650;
 	/// <summary>
 	/// Interface
 	/// </summary>
@@ -201,34 +203,34 @@ protected:
 #pragma endregion
 
 #pragma region Input
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputMappingContext> MenuContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputMappingContext> HandContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputMappingContext> DefaultContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputAction> IA_Grasp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputAction> IA_MenuInteract;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputAction> IA_FingerPoint;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputAction> IA_CurlIndex;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputAction> IA_HandThumpUp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputAction> IA_HandLog;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeVR Settings|Input")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputAction> IA_Move;
 
 #pragma endregion
@@ -238,7 +240,7 @@ public:
 	UFUNCTION()
 	void LogReconize() { OnLogRecognizer.Broadcast(); }
 
-	UPROPERTY(BlueprintAssignable, Category = "LeeVR|Delegate")
+	UPROPERTY(BlueprintAssignable, Category = "LeeXR|Delegate")
 	FOnLogRecognizer OnLogRecognizer;
 
 private:

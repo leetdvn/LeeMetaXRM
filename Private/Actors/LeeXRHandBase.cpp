@@ -134,7 +134,6 @@ void ALeeXRHandBase::InittializeSetup()
 	}
 
 	if (TeleportRef == nullptr) {
-
 		//Define Teleport Hand Action Left or Right
 		if (TeleportValid()) {
 			TeleportRef = LeeXRSPawnActorBP<AActor>(this, TeleportVisualizer);
@@ -417,7 +416,6 @@ void ALeeXRHandBase::OnHandTrigger(const FInputActionInstance& ActionInstance)
 	//	}
 }
 
-
 #pragma region Teleport
 
 void ALeeXRHandBase::TeleportTrace(FVector StartPos, FVector ForwardVec)
@@ -429,7 +427,6 @@ void ALeeXRHandBase::TeleportTrace(FVector StartPos, FVector ForwardVec)
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>();
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
 
-	float teleportSpped = 650.0f;
 	float TeleportRadius = 3.6f;
 	float LocalNavMeshCellHeight = 8.0f;
 	FHitResult OutHit{};
@@ -441,7 +438,7 @@ void ALeeXRHandBase::TeleportTrace(FVector StartPos, FVector ForwardVec)
 		TeleportTracePathPositions,
 		LastTraceDestination,
 		StartPos,
-		teleportSpped * ForwardVec,
+		TeleportDistance * ForwardVec,
 		true,
 		TeleportRadius,
 		ObjectTypes,
@@ -471,7 +468,6 @@ void ALeeXRHandBase::TeleportTrace(FVector StartPos, FVector ForwardVec)
 
 	if (TeleportRef) {
 		TeleportRef->GetRootComponent()->SetVisibility(bValidTeleportLocation, true);
-
 		if(OutHit.bBlockingHit)
 			TeleportRef->SetActorLocation(ProjectedTeleportLocation);
 	}
@@ -479,14 +475,12 @@ void ALeeXRHandBase::TeleportTrace(FVector StartPos, FVector ForwardVec)
 	//then Update Sequence 2
 
 
-	UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(NiagaraComponent,
-		TEXT("User.PointArray"),
-		TeleportTracePathPositions);
-	FHitResult* Hit = new FHitResult();
+	//UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector(NiagaraComponent,
+	//	TEXT("User.PointArray"),
+	//	TeleportTracePathPositions);
+	//FHitResult* Hit = new FHitResult();
 
 	FVector TeleportLocation = GetTeleportLocation(XRCharacter);
-
-
 }
 
 bool ALeeXRHandBase::IsValidTeleportLocation(FHitResult Hit, FVector& ProjectedLocation)
@@ -528,11 +522,10 @@ void ALeeXRHandBase::TryTeleport()
 			LeeScreenLog("Teleport Location is Zero", FColor::Red);
 		}
 		XRCharacter->TeleportTo(TeleportLocation, FRotator(0.0f, XRCharacter->GetActorRotation().Yaw, 0.0f), false, true);
-		TeleportRef->SetActorHiddenInGame(true);
+		if(TeleportRef)
+			TeleportRef->SetActorHiddenInGame(true);
 	}
-
 }
-
 
 bool ALeeXRHandBase::TeleportValid()
 {

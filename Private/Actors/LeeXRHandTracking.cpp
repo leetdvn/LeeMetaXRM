@@ -131,6 +131,7 @@ void ALeeXRHandTracking::Tick(float DeltaTime)
 				//GraspRelease();
 			break;
 		case LeeHandPose::LHandMove:
+
 			//Do Something
 			if (TeleportValid()) {
 				//Do Something
@@ -171,7 +172,13 @@ void ALeeXRHandTracking::OnBeginOverlap(
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	//LeeScreenLog("Overlap %s", FColor::Green, *OtherActor->GetName());
+
+	FString CompName = OtherComp->GetName();
+	if (CompName.EndsWith("Index") || CompName.EndsWith("Thumb"))
+	{
+		//LeeScreenLog("Overlap %s", FColor::Green, *CompName);
+
+	}
 	HitIndexActor = OtherActor;
 	HitThumbActor = OtherActor;
 

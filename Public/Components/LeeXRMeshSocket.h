@@ -19,26 +19,26 @@ class LEEMETAXRM_API ULeeXRMeshSocket : public UStaticMeshComponent
 public:
 	ULeeXRMeshSocket(const FObjectInitializer & ObjectInitializer = FObjectInitializer::Get());
 
-	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties",meta=(DefaultValue="OnOff"))
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties",meta=(DefaultValue="OnOff"))
 	FString MaterialParamName= TEXT("OnOff");
 
-	UPROPERTY(Transient, EditAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties", meta = (DefaultValue ="FLinearColor::Green"))
+	UPROPERTY(Transient, EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties", meta = (DefaultValue ="FLinearColor::Green"))
 	FColor StartColor;
 
 	UFUNCTION(Exec, BlueprintCallable, Category = "LeeXR|Func")
 	void ConstructionEditor();
 
-	UPROPERTY(Transient, EditAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
+	UPROPERTY(Transient, EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	TObjectPtr<UMaterialInstanceDynamic> MaterialIns;
 
-	UPROPERTY(Transient, EditAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
+	UPROPERTY(Transient, EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	float DefaultParamValue;
 
-	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	FGameplayTag SocketTag;
 
 
-	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
+	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	bool IsDone = false;
 
 

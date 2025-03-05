@@ -144,7 +144,7 @@ namespace LeeXRUltils
 	/// <param name="Instance"></param>
 	/// <param name="ParameterName"></param>
 	/// <param name="Value"></param>
-	FORCEINLINE	void SetMaterialInstanceStaticSwitchParameterValue(UMaterialInstance* Instance, FName ParameterName, bool Value)
+	FORCEINLINE	void SetMaterialInstanceStaticSwitchParameterValue(const UMaterialInstance* Instance, FName ParameterName, bool Value)
 	{
 		FStaticParameterSet StaticParameters = Instance->GetStaticParameters();
 		for (auto& SwitchParameter : StaticParameters.StaticSwitchParameters)
@@ -155,7 +155,7 @@ namespace LeeXRUltils
 				break;;
 			}
 		}
-		Instance->UpdateStaticPermutation(StaticParameters);
+		//Instance->UpdateStaticPermutation(StaticParameters);
 	}
 
 	/// <summary>
@@ -164,7 +164,7 @@ namespace LeeXRUltils
 	/// <param name="Instance"></param>
 	/// <param name="ParameterName"></param>
 	/// <param name="Value"></param>
-	FORCEINLINE	void SetMaterialInstanceStaticSwitchParameterValue(UMaterialInstanceDynamic* Instance, FName ParameterName, bool Value)
+	FORCEINLINE	void SetMaterialInstanceStaticSwitchParameterValue(const UMaterialInstanceDynamic* Instance, FName ParameterName, bool Value)
 	{
 		FStaticParameterSet StaticParameters = Instance->GetStaticParameters();
 		for (auto& SwitchParameter : StaticParameters.StaticSwitchParameters)
@@ -175,7 +175,7 @@ namespace LeeXRUltils
 				break;;
 			}
 		}
-		Instance->UpdateStaticPermutation(StaticParameters);
+		//Instance->UpdateStaticPermutation(StaticParameters);
 	}
 
 	FORCEINLINE	void SetMaterialInstanceVectorParameterValue(UMaterialInstance* Instance, FName ParameterName, FColor Value)
