@@ -49,6 +49,9 @@ public:
 	/// </summary>
 	virtual void GraspRelease() override;
 
+	virtual void OnGrabObject() override;
+
+	virtual void OnReleaseObject() override;
 	/// <summary>
 	/// Initialize the hand controller
 	/// </summary>

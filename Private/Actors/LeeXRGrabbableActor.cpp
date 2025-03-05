@@ -2,7 +2,9 @@
 
 
 #include "Actors/LeeXRGrabbableActor.h"
+#include <MotionControllerComponent.h>
 #include <Kismet/KismetMathLibrary.h>
+#include <SphereComponent.h>
 
 // Sets default values
 ALeeXRGrabbableActor::ALeeXRGrabbableActor()
@@ -10,8 +12,6 @@ ALeeXRGrabbableActor::ALeeXRGrabbableActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	ActorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ActorMesh"));
-	SetRootComponent(ActorMesh);
 }
 
 void ALeeXRGrabbableActor::SetFreeze(bool bFreeze)
@@ -39,19 +39,45 @@ FRotator ALeeXRGrabbableActor::GetTwoHandRotation(const  UMotionControllerCompon
 // Called when the game starts or when spawned
 void ALeeXRGrabbableActor::BeginPlay()
 {
-	Super::BeginPlay();
+	Super::BeginPlay();	
 	
+	InitSettings();
 }
 
+void ALeeXRGrabbableActor::OnGrab(UObject* inComponent, const FVector& InGrabLocation)
+{
+}
+
+void ALeeXRGrabbableActor::OnRelease(UObject* inComponent)
+{
+}
+
+void ALeeXRGrabbableActor::OnGrabObjects(UMotionControllerComponent* inComponent)
+{
+}
+
+void ALeeXRGrabbableActor::OnReleaseObjects(UMotionControllerComponent* inComponent)
+{
+}
+
+void ALeeXRGrabbableActor::InitSettings()
+{
+	//Do Nothing
+}
+
+
+
 #if WITH_EDITOR
+
+
 void ALeeXRGrabbableActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
 	
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(ALeeXRGrabbableActor, ActorMesh))
+	if (PROPERTYCHANGED(ALeeXRGrabbableActor,GrabableType))
 	{
-		
+		InitSettings();
 	}
 
 }

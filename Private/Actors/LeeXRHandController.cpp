@@ -32,6 +32,18 @@ void ALeeXRHandController::GraspRelease()
 
 }
 
+void ALeeXRHandController::OnGrabObject()
+{
+	Super::OnGrabObject();
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+}
+
+void ALeeXRHandController::OnReleaseObject()
+{
+	Super::OnReleaseObject();
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+}
+
 void ALeeXRHandController::BeginPlay()
 {
 	Super::BeginPlay();

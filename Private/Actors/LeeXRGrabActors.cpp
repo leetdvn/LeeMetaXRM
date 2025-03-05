@@ -14,6 +14,9 @@ ALeeXRGrabActors::ALeeXRGrabActors()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	ActorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ActorMesh"));
+	SetRootComponent(ActorMesh);
+
 	GrabRegion = CreateDefaultSubobject<UBoxComponent>(TEXT("GrabRegion"));
 
 	//GrabRegion->SetupAttachment(ActorMesh);
@@ -38,6 +41,7 @@ void ALeeXRGrabActors::BeginPlay()
 
 void ALeeXRGrabActors::OnGrab(UObject* inComponent,const FVector& InGrabLocation)
 {
+	Super::OnGrab(inComponent, InGrabLocation);
 	/*
 	Need Setup Collision Profileing and Custom Edit Collision Presets
 	*/
@@ -61,6 +65,8 @@ void ALeeXRGrabActors::OnGrab(UObject* inComponent,const FVector& InGrabLocation
 
 void ALeeXRGrabActors::OnRelease(UObject* inComponent)
 {
+	Super::OnRelease(inComponent);
+
 	if (inComponent == nullptr || FrezzeOnSnap) return;
 
 	if (bIsheld)
@@ -91,10 +97,37 @@ void ALeeXRGrabActors::OnRelease(UObject* inComponent)
 	//}
 }
 
+void ALeeXRGrabActors::OnGrabObjects(UMotionControllerComponent* inComponent)
+{
+	Super::OnGrabObjects(inComponent);
+
+
+
+
+}
+
+void ALeeXRGrabActors::OnReleaseObjects(UMotionControllerComponent* inComponent)
+{
+}
+
+void ALeeXRGrabActors::InitSettings()
+{
+	Super::InitSettings();
+	//Set the Collision Profile
+
+}
+
+void ALeeXRGrabActors::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	//Set the Collision Profile
+}
+
 // Called every frame
 void ALeeXRGrabActors::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 
 }
 

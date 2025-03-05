@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <MotionControllerComponent.h>
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "LeeXRInteraction.generated.h"
@@ -24,4 +25,7 @@ class LEEMETAXRM_API ILeeXRInteraction
 public:
 	virtual void OnGrab(UObject* inComponent,const FVector &InGrabLocation) = 0;
 	virtual void OnRelease(UObject* inComponent) = 0;
+
+	virtual void OnGrabObjects(UMotionControllerComponent* inComponent) = 0;
+	virtual void OnReleaseObjects(UMotionControllerComponent* inComponent) = 0;
 };

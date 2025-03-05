@@ -206,6 +206,7 @@ namespace LeeXRUltils
 		Instance->UpdateOverridableBaseProperties();
 	}
 
+	//Dont Know if this is the right way to do it
 	static void TickUntil(const UObject* WorldContextObject, ELeeTickUntilInputPin InputPin, struct FLatentActionInfo LatentInfo)
 	{
 		if (auto World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
@@ -227,5 +228,9 @@ namespace LeeXRUltils
 				}
 			}
 		}
+	}
+
+	FORCEINLINE FVector LeeXRGetWorldLocation(const USceneComponent* inComponent) {
+		return inComponent->GetComponentToWorld().GetLocation();
 	}
 }

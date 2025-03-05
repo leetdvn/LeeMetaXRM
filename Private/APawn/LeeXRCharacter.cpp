@@ -180,6 +180,10 @@ void ALeeXRCharacter::OnMoving()
 
 }
 
+/// <summary>
+/// Grab Controller Input 
+/// </summary>
+/// <param name="ActionInstance"></param>
 void ALeeXRCharacter::OnHandGrabing(const FInputActionInstance& ActionInstance)
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
@@ -190,7 +194,7 @@ void ALeeXRCharacter::OnHandGrabing(const FInputActionInstance& ActionInstance)
 	if (!HandController) return;
 
 	if (HandController->IsValidControllerType(ELeeXRHandType::LeeXRController))
-		HandController->GraspObject();
+		HandController->OnGrabObject();
 
 	ULeeXRAnimInstance* LeeAnimIns = Cast<ULeeXRAnimInstance>(HandController->GetABPInstance());
 	if (LeeAnimIns)
@@ -199,6 +203,7 @@ void ALeeXRCharacter::OnHandGrabing(const FInputActionInstance& ActionInstance)
 		LeeAnimIns->PoseAlphaGrasp = inEventType == ETriggerEvent::Started ? 1.0f : 0.0f;
 	}
 }
+
 // Initialize the hands
 ALeeXRHandBase* ALeeXRCharacter::HandInitialize(ELeeXRHandType inType,bool isLeft)
 {

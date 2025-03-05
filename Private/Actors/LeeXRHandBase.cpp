@@ -78,6 +78,7 @@ void ALeeXRHandBase::OnConstruction(const FTransform& Transform)
 
 }
 
+//
 void ALeeXRHandBase::SetInputComponent()
 {
 	UInputComponent* PlayerInputComponent = GetWorld()->GetFirstPlayerController()->InputComponent;
@@ -110,6 +111,7 @@ void ALeeXRHandBase::SetInputComponent()
 	}
 }
 
+//
 void ALeeXRHandBase::InittializeSetup()
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
@@ -147,11 +149,13 @@ void ALeeXRHandBase::InittializeSetup()
 
 void ALeeXRHandBase::OnFingerAnimation(const FInputActionInstance& ActionInstance)
 {
+	
 	SetFingerAnimationPose(HandSkeletal, ActionInstance);
 }
 
 AActor* ALeeXRHandBase::HasOverlapActor(const USphereComponent* inSphere)
 {
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 	TArray<AActor*> OverlappingActors;
 	inSphere->GetOverlappingActors(OverlappingActors);
 	
@@ -160,11 +164,12 @@ AActor* ALeeXRHandBase::HasOverlapActor(const USphereComponent* inSphere)
 
 void ALeeXRHandBase::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance)
 {
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
 	if (inComponet == nullptr) {
 		LeeScreenLog("Hand Skeletal is Null", FColor::Red);
 		return;
 	};
-	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 
 	float ActValue = ActionInstance.GetValue().Get<float>();
 
@@ -203,6 +208,7 @@ void ALeeXRHandBase::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, 
 
 }
 
+// Called when the hand is interacted
 void ALeeXRHandBase::SetHandSwitch(bool isLeft)
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
@@ -276,10 +282,58 @@ void ALeeXRHandBase::GraspObject()
 			if (CurrentGrabObject) {
 				bIsHeld = true;
 				FVector GrabLocation = HandSkeletal->GetComponentLocation();
-				CurrentGrabObject->OnGrab(HandSkeletal, GrabLocation);
+				CurrentGrabObject->OnGrabObjects(MotionController);
 			}
 		}
 	}
+
+}
+
+/// Grab Object 2
+void ALeeXRHandBase::OnGrabObject()
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+	TArray<AActor*> OverlappingActors;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{};
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic));
+	TArray<AActor*> ActorToIgnore;
+
+	bool isOverlaped = UKismetSystemLibrary::SphereOverlapActors(
+		GetWorld(),
+		LeeXRGetWorldLocation(MotionController),
+		GrabSphere->GetScaledSphereRadius(),
+		ObjectTypes,
+		nullptr, 
+		ActorToIgnore, 
+		OverlappingActors);
+
+
+	for (auto Actor : OverlappingActors)
+	{
+		//Tag Check
+		if (Actor->ActorHasTag("Grabbable"))
+		{
+			CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(Actor);
+			if (CurrentGrabObject) {
+				bIsHeld = true;
+				CurrentGrabObject->OnGrabObjects(MotionController);
+				break;
+			}
+		}
+	}
+}
+
+/// Release Object 2
+void ALeeXRHandBase::OnReleaseObject()
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+	if (CurrentGrabObject == nullptr ||
+		HandSkeletal == nullptr) {
+		return;
+	}
+	CurrentGrabObject->OnReleaseObjects(MotionController);
+	CurrentGrabObject = nullptr;
+	bIsHeld = false;
 
 }
 
@@ -297,7 +351,7 @@ void ALeeXRHandBase::GraspRelease()
 		return;
 	}
 
-	CurrentGrabObject->OnRelease(HandSkeletal);
+	CurrentGrabObject->OnReleaseObjects(MotionController);
 	CurrentGrabObject = nullptr;
 	bIsHeld = false;
 }
@@ -324,6 +378,7 @@ AActor* ALeeXRHandBase::FindActorToGrab(TArray<AActor*> &inActors, FString inTag
 	return nullptr;
 }
 
+// Called when the hand type is changed
 void ALeeXRHandBase::OnHandTypeChanged()
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
@@ -353,7 +408,7 @@ void ALeeXRHandBase::OnHandGrabing(const FInputActionInstance& ActionInstance)
 
 	//if (Hand && Hand->IsValidControllerType(ELeeXRHandType::LeeXRController))
 	//	return Hand->GraspObject();
-	GraspObject();
+	OnGrabObject();
 }
 
 // Called when the player is releasing
@@ -372,6 +427,7 @@ void ALeeXRHandBase::OnHandRelease(const FInputActionInstance& ActionInstance)
 	}
 }
 
+// Called when the player is interacting
 void ALeeXRHandBase::OnHandInteract(const FInputActionInstance& ActionInstance)
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
@@ -395,6 +451,7 @@ void ALeeXRHandBase::OnHandInteract(const FInputActionInstance& ActionInstance)
 	LeeScreenLog("Interact :%s", FColor::Green, *GetName());
 }
 
+// Called when the player is triggering
 void ALeeXRHandBase::OnHandTrigger(const FInputActionInstance& ActionInstance)
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);

@@ -2,7 +2,9 @@
 
 #pragma once
 
+#include <LeeXRUltils.h>
 #include <MotionControllerComponent.h>
+#include "Interfaces/LeeXRInteraction.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "LeeXRGrabbableActor.generated.h"
@@ -23,8 +25,16 @@ enum class ELeeXRGrabableType : uint8
 	LeeXRTwoHand UMETA(DisplayName = "Two Hand")
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLeeXROnGrabObject);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLeeXROnReleaseObject);
+
+using namespace LeeXRUltils;
+/**
+ *
+ */
+
 UCLASS(Abstract)
-class LEEMETAXRM_API ALeeXRGrabbableActor : public AActor
+class LEEMETAXRM_API ALeeXRGrabbableActor : public AActor ,public ILeeXRInteraction
 {
 	GENERATED_BODY()
 	
@@ -36,14 +46,11 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	ELeeXRGrabableType GrabableType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
-	TObjectPtr<class UStaticMeshComponent> ActorMesh;
+	UPROPERTY(BlueprintAssignable, Category = "LeeXR Settings|Delegates")
+	FLeeXROnGrabObject LeeXROnGrabObject;
 
-	UFUNCTION(BlueprintCallable)
-	bool IsSimulation() { return ActorMesh->IsSimulatingPhysics(); }
-
-	UFUNCTION(BlueprintCallable)
-	void SetSimulation(bool bSimulate) { ActorMesh->SetSimulatePhysics(bSimulate); }
+	UPROPERTY(BlueprintAssignable, Category = "LeeXR Settings|Delegates")
+	FLeeXROnReleaseObject LeeXROnReleaseObject;
 
 	void SetFreeze(bool bFreeze);
 
@@ -59,12 +66,25 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void OnGrab(UObject* inComponent, const FVector& InGrabLocation) override;
+
+	virtual void OnRelease(UObject* inComponent) override;
+
+	virtual void OnGrabObjects(UMotionControllerComponent* inComponent) override;
+
+	virtual void OnReleaseObjects(UMotionControllerComponent* inComponent) override;
+
+	virtual void InitSettings();
+
+
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
 #endif
 
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
 	bool FrezzeOnSnap = false;
+
 
 };

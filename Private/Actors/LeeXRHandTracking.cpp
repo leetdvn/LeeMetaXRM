@@ -47,7 +47,7 @@ void ALeeXRHandTracking::GraspObject()
 		bIsHeld = true;
 
 		FVector GrabLocation = HandTrackingComp->GetComponentLocation();
-		CurrentGrabObject->OnGrab(HandTrackingComp, GrabLocation);
+		CurrentGrabObject->OnGrabObjects(MotionController);
 	}
 
 	///Timm Distance Count

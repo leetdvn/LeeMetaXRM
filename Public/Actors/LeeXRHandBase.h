@@ -74,8 +74,10 @@ public:
 	UWidgetInteractionComponent* GetWidgetInteraction() { return WidgetInteraction; }
 
 	virtual void GraspObject();
+	virtual void OnGrabObject();
 
 	virtual void GraspRelease();
+	virtual void OnReleaseObject();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

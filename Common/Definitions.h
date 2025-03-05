@@ -64,3 +64,7 @@ FPlatformMemory::EMemoryCounterRegion::MCR_Invalid);
 #define LEE_LOG(Category,Verbosity, Format, ...) UE_LOG(Category, Verbosity, TEXT(Format), ##__VA_ARGS__)
 
 #define LeeScreenLog(Format,Color, ...) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 10.f, Color, FString::Printf(TEXT(Format), ##__VA_ARGS__),true,FVector2D(4,4))
+
+#if WITH_EDITOR
+#define PROPERTYCHANGED(Class,inProperty) PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(Class, inProperty)
+#endif
