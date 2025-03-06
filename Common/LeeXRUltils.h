@@ -233,4 +233,11 @@ namespace LeeXRUltils
 	FORCEINLINE FVector LeeXRGetWorldLocation(const USceneComponent* inComponent) {
 		return inComponent->GetComponentToWorld().GetLocation();
 	}
+
+	FORCEINLINE void LeeXRPlayerHapicEffect(const UObject* inContextObject, UHapticFeedbackEffect_Base* inEffect, EControllerHand inHand) {
+		if (APlayerController* PlayerController = LeeXRGetPlayerController(inContextObject))
+		{
+			PlayerController->PlayHapticEffect(inEffect, inHand);
+		}
+	}
 }

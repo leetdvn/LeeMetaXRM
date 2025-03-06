@@ -52,6 +52,21 @@ public:
 	UFUNCTION(BlueprintCallable,  Category = "LeeXR|Func")
 	void SetTeleportHandAction(ELeeXRTeleportHandAction inAction) { TeleportHandAction = inAction; }
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	ELeeXRHandType GetHandType() const { return HandType; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	ALeeXRHandBase* GetHand(bool isLeft) const { return isLeft ? XRHandLeft : XRHandRight; }
+
+	UFUNCTION(BlueprintCallable,  Category = "LeeXR|Func")
+	void SetHandType(ELeeXRHandType inType) { HandType = inType; }
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void CalculateMotionControllerVelocities();
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void UpdateClimbing();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -135,7 +150,16 @@ public:
 	void OnHandGrabing(const FInputActionInstance& ActionInstance);
 private:
 
+	TObjectPtr<class ALeeXRGrabbableActor> HeldLeftObject;
 
+	TObjectPtr<class ALeeXRGrabbableActor> HeldRightObject;
+
+	bool isClimbing;
+
+	FVector RightHandVelocity;
+	FVector LeftHandVelocity;
+	FVector LastFrameRightHandLocation;
+	FVector LastFrameLeftHandLocation;
 	/// <summary>
 	/// Hand Initialize
 	/// </summary>

@@ -60,7 +60,7 @@ void ALeeXRGrabbableActor::CaptureHandMesh(UMotionControllerComponent* inControl
 	//Link Anim Layers Blueprint
 	
 	if (IsValid(AnimLayerClimb)) {
-		HandSkeletalMesh->LinkAnimClassLayers(AnimLayerClimb);
+		HandSkeletalMesh->LinkAnimClassLayers(AnimLayerClimb.Get());
 	}
 
 
@@ -69,11 +69,11 @@ void ALeeXRGrabbableActor::CaptureHandMesh(UMotionControllerComponent* inControl
 		
 		
 		//Required to snap the Socket name to the Hand Mesh
-		if (SocketName.IsEmpty()) {
+		if (Sockets.MainSocketName.IsEmpty()) {
 			FString msg = __FUNCTION__;
 			UE_LOG(LogTemp, Warning, TEXT("Socket Name is Empty %s"), *msg);
 		}
-		HandSkeletalMesh->K2_AttachToComponent(HandSkeletalMesh->GetAttachParent(), *SocketName, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
+		HandSkeletalMesh->K2_AttachToComponent(HandSkeletalMesh->GetAttachParent(), *Sockets.MainSocketName, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
 	}
 		
 }
@@ -82,20 +82,20 @@ void ALeeXRGrabbableActor::ReleaseHandMesh(UMotionControllerComponent*& inContro
 {
 	//UnLink Anim Layers Blueprint
 	if (IsValid(AnimLayerClimb)) {
-		HandSkeletalMesh->UnlinkAnimClassLayers(AnimLayerClimb);
+		HandSkeletalMesh->UnlinkAnimClassLayers(AnimLayerClimb.Get());
 	}
 
 
 	if (SnapHandMesh) {
 		//Release the Hand Mesh
 				//Required to snap the Socket name to the Hand Mesh
-		if (SocketName.IsEmpty()) {
+		if (Sockets.MainSocketName.IsEmpty()) {
 			FString func =  __FUNCTION__;
 
 			LEE_LOG(LeeXRMacro, Warning, "Socket Name is Empty %s", *func);
 		}
 
-		HandSkeletalMesh->K2_AttachToComponent(inController, *SocketName, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, true);
+		HandSkeletalMesh->K2_AttachToComponent(inController, *Sockets.MainSocketName, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, true);
 
 		HandSkeletalMesh->SetRelativeTransform(CacheHandTransform);
 		//HandSkeletalMesh->SetRelativeTransform(CacheHandTransform);
@@ -122,6 +122,9 @@ void ALeeXRGrabbableActor::OnGrabObjects(UMotionControllerComponent* inComponent
 {
 	LeeScreenLog("Abstract Act Grabs ", FColor::Green);
 	LeeXROnGrabObject.Broadcast();
+
+	//Player Haptic Feedback
+	LeeXRPlayerHapicEffect(this, HapticEffect,inComponent->GetTrackingSource());
 }
 
 void ALeeXRGrabbableActor::OnReleaseObjects(UMotionControllerComponent* inComponent)

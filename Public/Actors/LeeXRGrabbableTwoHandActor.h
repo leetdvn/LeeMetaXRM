@@ -28,12 +28,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	TObjectPtr<class USphereComponent> SecondaryGribCollision;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
-	FString MainSocketName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
-	FString SecondarySocketName;
-
 	virtual void InitSettings() override;
 
 protected:

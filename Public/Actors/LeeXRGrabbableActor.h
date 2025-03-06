@@ -3,6 +3,7 @@
 #pragma once
 
 #include <LeeXRUltils.h>
+#include <Animation/AnimLayerInterface.h>
 #include <MotionControllerComponent.h>
 #include "Interfaces/LeeXRInteraction.h"
 #include "CoreMinimal.h"
@@ -23,6 +24,23 @@ enum class ELeeXRGrabableType : uint8
 {
 	LeeXROneHand UMETA(DisplayName = "One Hand"),
 	LeeXRTwoHand UMETA(DisplayName = "Two Hand")
+};
+
+USTRUCT(BlueprintType)
+struct FLeeXRGrabbableSockets
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	FString MainSocketName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	FString SecondarySocketName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	FString SubSocketName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	FString OptionalSocketName;
+
+	FLeeXRGrabbableSockets() : MainSocketName(TEXT("")), SubSocketName(TEXT("")), OptionalSocketName(TEXT("")) {}
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLeeXROnGrabObject);
@@ -53,12 +71,15 @@ public:
 	FRotator SecondaryOffset;
 
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
-	FString SocketName;
+	FLeeXRGrabbableSockets Sockets;
 
-	UPROPERTY(BlueprintAssignable, Category = "LeeXR Settings|Delegates")
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	TObjectPtr<UHapticFeedbackEffect_Base> HapticEffect;
+
+	UPROPERTY(BlueprintAssignable, Category = "LeeXR Settings|Delegates",meta=(DisplayName="OnGrabObject"))
 	FLeeXROnGrabObject LeeXROnGrabObject;
 
-	UPROPERTY(BlueprintAssignable, Category = "LeeXR Settings|Delegates")
+	UPROPERTY(BlueprintAssignable, Category = "LeeXR Settings|Delegates", meta = (DisplayName = "OnReleaseObject"))
 	FLeeXROnReleaseObject LeeXROnReleaseObject;
 
 	void SetFreeze(bool bFreeze);

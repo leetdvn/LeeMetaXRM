@@ -18,6 +18,7 @@
 #include <NiagaraDataInterfaceArrayFunctionLibrary.h>
 #include <NiagaraComponent.h>
 #include <NiagaraFunctionLibrary.h>
+#include "Actors/LeeXRGrabbableActor.h"
 
 using namespace LeeXRUltils;
 
@@ -59,6 +60,60 @@ UAnimInstance* ALeeXRCharacter::GetHandAnimInstance(bool isLeft)
 	return nullptr;
 }
 
+
+void ALeeXRCharacter::CalculateMotionControllerVelocities()
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	//Calculate Left Hand Velocity
+	LeftHandVelocity = XRHandLeft->GetMCLocationToWorld() - LastFrameLeftHandLocation;
+	LastFrameLeftHandLocation = LeftHandVelocity;
+
+	//Calculate Right Hand Velocity
+	RightHandVelocity = XRHandRight->GetMCLocationToWorld() - LastFrameRightHandLocation;
+	LastFrameRightHandLocation = RightHandVelocity;
+
+}
+
+void ALeeXRCharacter::UpdateClimbing()
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	FVector AccumulatedClimbVelocity = FVector::ZeroVector;
+
+	if (IsValid(HeldLeftObject.Get()))
+	{
+		//Check if the player is climbing
+		isClimbing = HeldLeftObject->ActorHasTag(TEXT("Climb"));
+		
+		AccumulatedClimbVelocity += FVector(0.0f, 0.0f, 0.0f);	// MCLeffVelocity
+	}
+
+
+	if (IsValid(HeldRightObject.Get()))
+	{
+		//Check if the player is climbing
+		isClimbing = HeldRightObject->ActorHasTag(TEXT("Climb"));
+
+		AccumulatedClimbVelocity += FVector(0.0f, 0.0f, 0.0f);	// MCLeffVelocity
+
+
+		GetCapsuleComponent()->AddWorldOffset(AccumulatedClimbVelocity*-1, true);
+
+		LastFrameLeftHandLocation -= AccumulatedClimbVelocity;
+		LastFrameRightHandLocation -= AccumulatedClimbVelocity;
+		
+	}
+	//Check if the player is climbing
+
+
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	
+	Capsule->SetEnableGravity(!isClimbing);
+	ECollisionEnabled::Type CollisionType = isClimbing ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryAndPhysics;
+	Capsule->SetCollisionEnabled(CollisionType);
+
+}
 
 // Called when the game starts or when spawned
 void ALeeXRCharacter::BeginPlay()
@@ -130,6 +185,12 @@ void ALeeXRCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+	///Climbing Option
+	/*{
+		CalculateMotionControllerVelocities();
+		UpdateClimbing();
+	}*/
 }
 
 // Called to bind functionality to input

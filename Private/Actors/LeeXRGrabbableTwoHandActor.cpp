@@ -25,11 +25,11 @@ void ALeeXRGrabbableTwoHandActor::InitSettings()
 
 	FName CollisionProfile = GrabableType == ELeeXRGrabableType::LeeXROneHand ? TEXT("NoCollision") : TEXT("Grabbable");
 
-	if (!MainSocketName.IsEmpty())
-		MainGribCollision->AttachToComponent(RootSkeletal, FAttachmentTransformRules::SnapToTargetIncludingScale, *MainSocketName);
+	if (!Sockets.MainSocketName.IsEmpty())
+		MainGribCollision->AttachToComponent(RootSkeletal, FAttachmentTransformRules::SnapToTargetIncludingScale, *Sockets.MainSocketName);
 
-	if (!SecondarySocketName.IsEmpty())
-		SecondaryGribCollision->AttachToComponent(RootSkeletal, FAttachmentTransformRules::SnapToTargetIncludingScale, *SecondarySocketName);
+	if (!Sockets.SecondarySocketName.IsEmpty())
+		SecondaryGribCollision->AttachToComponent(RootSkeletal, FAttachmentTransformRules::SnapToTargetIncludingScale, *Sockets.SecondarySocketName);
 
 	//MainGribCollision->SetCollisionProfileName(CollisionProfile);
 	//SecondaryGribCollision->SetCollisionProfileName(CollisionProfile);
@@ -67,8 +67,7 @@ void ALeeXRGrabbableTwoHandActor::PostEditChangeProperty(FPropertyChangedEvent& 
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
-	if (PROPERTYCHANGED(ALeeXRGrabbableTwoHandActor, MainSocketName) ||
-		PROPERTYCHANGED(ALeeXRGrabbableTwoHandActor,SecondarySocketName))
+	if (PROPERTYCHANGED(ALeeXRGrabbableTwoHandActor,Sockets))
 	{
 		InitSettings();
 	}
@@ -96,16 +95,15 @@ void ALeeXRGrabbableTwoHandActor::OnGrabObjects(UMotionControllerComponent* inCo
 
 	float SecondarySphere = SecondaryGribCollision->GetScaledSphereRadius();
 
-	FString MainSocket = TEXT("GripPoint");
 
 	if (MainDist <= MainSphere) {
 		MainController = inComponent;
 
 
 		//Attach the Actor to the Controller
-		RootSkeletal->K2_AttachToComponent(inComponent, NAME_None, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
+		RootSkeletal->K2_AttachToComponent(inComponent, *Sockets.MainSocketName, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
 		//Set the Socket
-		SetActorRelativeTransform(RootSkeletal->GetSocketTransform(*MainSocket, ERelativeTransformSpace::RTS_Actor));
+		SetActorRelativeTransform(RootSkeletal->GetSocketTransform(*Sockets.MainSocketName, ERelativeTransformSpace::RTS_Actor));
 
 	}
 	else if (SecondaryDist <= SecondarySphere) {
@@ -134,7 +132,7 @@ void ALeeXRGrabbableTwoHandActor::OnReleaseObjects(UMotionControllerComponent* i
 		if (IsValid(MainController)) {
 
 			///Socket Mant Socket
-			SetActorRelativeTransform(RootSkeletal->GetSocketTransform(TEXT("MainGripPoint"), ERelativeTransformSpace::RTS_Actor));
+			SetActorRelativeTransform(RootSkeletal->GetSocketTransform(*Sockets.SecondarySocketName, ERelativeTransformSpace::RTS_Actor));
 		}
 		else {
 			DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);

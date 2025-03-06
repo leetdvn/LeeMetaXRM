@@ -70,6 +70,9 @@ public:
 	FVector GetMotionControllerLocation() { return MotionController->GetComponentLocation(); }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	FVector GetMCLocationToWorld() { return LeeXRGetWorldLocation(MotionController); }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	FVector GetMotionControllerForwardVector() { return MotionController->GetForwardVector(); }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
