@@ -31,9 +31,75 @@ FRotator ALeeXRGrabbableActor::GetTwoHandRotation(const  UMotionControllerCompon
 	//Get the world rotation of the second controller
 	FRotator LookAt =  UKismetMathLibrary::FindLookAtRotation(FirstWorldLoc, SecondWorldLoc);
 	//Combine the rotation of the first controller and the look at rotation
-	FRotator CombineRotator = UKismetMathLibrary::ComposeRotators(LookAt, FRotator(0, 0, -90));
+	FRotator CombineRotator = UKismetMathLibrary::ComposeRotators(LookAt, SecondaryOffset);
+	return  FRotator(FistWorldRot.Roll, CombineRotator.Yaw, CombineRotator.Pitch*-1);
+}
 
-	return  FRotator(FistWorldRot.Roll, CombineRotator.Yaw, CombineRotator.Pitch * -1.f);
+bool ALeeXRGrabbableActor::TryFindHandMeshOnController(UMotionControllerComponent* inController, USkeletalMeshComponent*& outMesh)
+{
+	TArray<USceneComponent*> Components{};
+	inController->GetChildrenComponents(true, Components);
+
+	if (Components.IsEmpty()) return false;
+
+	for (auto Child : Components)
+	{
+		USkeletalMeshComponent* SkeletalMesh = Cast<USkeletalMeshComponent>(Child);
+		if (SkeletalMesh) {
+			outMesh = SkeletalMesh;
+			return IsValid(outMesh);
+		}
+	}
+	return false;
+}
+
+void ALeeXRGrabbableActor::CaptureHandMesh(UMotionControllerComponent* inController,bool isLeft)
+{
+	bool isSnapHand = TryFindHandMeshOnController(inController, HandSkeletalMesh);
+
+	//Link Anim Layers Blueprint
+	
+	if (IsValid(AnimLayerClimb)) {
+		HandSkeletalMesh->LinkAnimClassLayers(AnimLayerClimb);
+	}
+
+
+	if (SnapHandMesh) {
+		CacheHandTransform = HandSkeletalMesh->GetRelativeTransform();
+		
+		
+		//Required to snap the Socket name to the Hand Mesh
+		if (SocketName.IsEmpty()) {
+			FString msg = __FUNCTION__;
+			UE_LOG(LogTemp, Warning, TEXT("Socket Name is Empty %s"), *msg);
+		}
+		HandSkeletalMesh->K2_AttachToComponent(HandSkeletalMesh->GetAttachParent(), *SocketName, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
+	}
+		
+}
+
+void ALeeXRGrabbableActor::ReleaseHandMesh(UMotionControllerComponent*& inController, bool isLeft)
+{
+	//UnLink Anim Layers Blueprint
+	if (IsValid(AnimLayerClimb)) {
+		HandSkeletalMesh->UnlinkAnimClassLayers(AnimLayerClimb);
+	}
+
+
+	if (SnapHandMesh) {
+		//Release the Hand Mesh
+				//Required to snap the Socket name to the Hand Mesh
+		if (SocketName.IsEmpty()) {
+			FString func =  __FUNCTION__;
+
+			LEE_LOG(LeeXRMacro, Warning, "Socket Name is Empty %s", *func);
+		}
+
+		HandSkeletalMesh->K2_AttachToComponent(inController, *SocketName, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, true);
+
+		HandSkeletalMesh->SetRelativeTransform(CacheHandTransform);
+		//HandSkeletalMesh->SetRelativeTransform(CacheHandTransform);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -54,10 +120,15 @@ void ALeeXRGrabbableActor::OnRelease(UObject* inComponent)
 
 void ALeeXRGrabbableActor::OnGrabObjects(UMotionControllerComponent* inComponent)
 {
+	LeeScreenLog("Abstract Act Grabs ", FColor::Green);
+	LeeXROnGrabObject.Broadcast();
 }
 
 void ALeeXRGrabbableActor::OnReleaseObjects(UMotionControllerComponent* inComponent)
 {
+	LeeScreenLog("Abstract Act Release ", FColor::Green);
+	LeeXROnReleaseObject.Broadcast();
+
 }
 
 void ALeeXRGrabbableActor::InitSettings()

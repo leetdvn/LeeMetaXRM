@@ -31,8 +31,7 @@ void ALeeXRTeleportActor::BeginPlay()
 	Super::BeginPlay();
 	
 	FVector2D AreaBounds = UHeadMountedDisplayFunctionLibrary::GetPlayAreaBounds(EHMDTrackingOrigin::Stage);
-	FString UserArea = TEXT("User.PlayAreaBounds");
-	NSPlayAreaBound->SetNiagaraVariableVec3(UserArea, FVector(AreaBounds.X, AreaBounds.Y, 0));
+	NSPlayAreaBound->SetVariableVec3(TEXT("User.PlayAreaBounds"), FVector(AreaBounds.X, AreaBounds.Y, 0));
 }
 
 // Called every frame

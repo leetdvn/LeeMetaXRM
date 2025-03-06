@@ -46,6 +46,15 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	ELeeXRGrabableType GrabableType;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Required")
+	TSubclassOf<UAnimInstance> AnimLayerClimb;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
+	FRotator SecondaryOffset;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
+	FString SocketName;
+
 	UPROPERTY(BlueprintAssignable, Category = "LeeXR Settings|Delegates")
 	FLeeXROnGrabObject LeeXROnGrabObject;
 
@@ -61,6 +70,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	FRotator GetTwoHandRotation(const  UMotionControllerComponent* FirstController, const  UMotionControllerComponent* SecondController);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	bool TryFindHandMeshOnController(UMotionControllerComponent* inController, USkeletalMeshComponent*& outMesh);
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void CaptureHandMesh(UMotionControllerComponent* inController,bool isLeft=true);
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void ReleaseHandMesh(UMotionControllerComponent*& inController, bool isLeft = true);
 
 protected:
 	// Called when the game starts or when spawned
@@ -86,5 +103,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
 	bool FrezzeOnSnap = false;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
+	bool SnapHandMesh = false;
 
+
+private:
+
+	USkeletalMeshComponent* HandSkeletalMesh = nullptr;
+
+	FTransform CacheHandTransform;
+
+	
 };

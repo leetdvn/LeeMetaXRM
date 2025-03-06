@@ -37,7 +37,8 @@ public class LeeMetaXRM : ModuleRules
             "Niagara",
             "OculusHandPoseRecognition",
             "GameplayAbilities",
-            "OculusUtils"
+            "OculusUtils",
+            "AnimGraph"
         });
 
         //PrivateIncludePaths.AddRange(new string[] {
@@ -60,7 +61,6 @@ public class LeeMetaXRM : ModuleRules
                 "AnimGraph",
                 "AnimationModifiers",
                 "AnimationBlueprintLibrary",
-                "UnrealEd",
                 "UMGEditor",
                 "Localization",
 				"AssetTools",
@@ -70,7 +70,7 @@ public class LeeMetaXRM : ModuleRules
                 "IKRigEditor",
                 "AIGraph",
                 "AIModule",
-                "Niagara"
+                "Niagara",
 
             });
 

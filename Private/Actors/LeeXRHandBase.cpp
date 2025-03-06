@@ -270,6 +270,9 @@ void ALeeXRHandBase::GraspObject()
 
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 
+	//Hand Controller Grabs Objects
+	//==============================================
+
 	if (HandSkeletal == nullptr || 
 		ControllerType == ELeeXRHandType::LeeXRHandTracking) return;
 
@@ -282,7 +285,9 @@ void ALeeXRHandBase::GraspObject()
 			if (CurrentGrabObject) {
 				bIsHeld = true;
 				FVector GrabLocation = HandSkeletal->GetComponentLocation();
+				OnHandGrabledEvent.Broadcast();
 				CurrentGrabObject->OnGrabObjects(MotionController);
+
 			}
 		}
 	}
@@ -316,6 +321,7 @@ void ALeeXRHandBase::OnGrabObject()
 			CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(Actor);
 			if (CurrentGrabObject) {
 				bIsHeld = true;
+				OnHandGrabledEvent.Broadcast();
 				CurrentGrabObject->OnGrabObjects(MotionController);
 				break;
 			}
@@ -331,6 +337,8 @@ void ALeeXRHandBase::OnReleaseObject()
 		HandSkeletal == nullptr) {
 		return;
 	}
+	
+	OnHandReleaseEvent.Broadcast();
 	CurrentGrabObject->OnReleaseObjects(MotionController);
 	CurrentGrabObject = nullptr;
 	bIsHeld = false;
@@ -351,6 +359,7 @@ void ALeeXRHandBase::GraspRelease()
 		return;
 	}
 
+	OnHandReleaseEvent.Broadcast();
 	CurrentGrabObject->OnReleaseObjects(MotionController);
 	CurrentGrabObject = nullptr;
 	bIsHeld = false;

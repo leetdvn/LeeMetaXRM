@@ -43,6 +43,8 @@ DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT("HandController"), STAT_HandController, S
 UDELEGATE()
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLogRecognizer);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLeeXROnHandGrabled);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLeeXROnHandRelease);
 
 UCLASS(Abstract)
 class LEEMETAXRM_API ALeeXRHandBase : public AActor
@@ -188,6 +190,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LeeXR Settings")
 	ELeeXRHandType ControllerType;
+
+	UPROPERTY(BlueprintAssignable, Category = "LeeXR Settings|Delegates")
+	FLeeXROnHandGrabled OnHandGrabledEvent;
+
+	UPROPERTY(BlueprintAssignable, Category = "LeeXR Settings|Delegates")
+	FLeeXROnHandRelease OnHandReleaseEvent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings")
 	bool bMirrorAnimation = false;
