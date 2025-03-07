@@ -98,7 +98,7 @@ void ALeeXRCharacter::UpdateClimbing()
 		AccumulatedClimbVelocity += FVector(0.0f, 0.0f, 0.0f);	// MCLeffVelocity
 
 
-		GetCapsuleComponent()->AddWorldOffset(AccumulatedClimbVelocity*-1, true);
+		//GetCapsuleComponent()->AddWorldOffset(AccumulatedClimbVelocity*-1, true);
 
 		LastFrameLeftHandLocation -= AccumulatedClimbVelocity;
 		LastFrameRightHandLocation -= AccumulatedClimbVelocity;
@@ -110,8 +110,8 @@ void ALeeXRCharacter::UpdateClimbing()
 	UCapsuleComponent* Capsule = GetCapsuleComponent();
 	
 	Capsule->SetEnableGravity(!isClimbing);
-	ECollisionEnabled::Type CollisionType = isClimbing ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryAndPhysics;
-	Capsule->SetCollisionEnabled(CollisionType);
+	//ECollisionEnabled::Type CollisionType = isClimbing ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryAndPhysics;
+	//Capsule->SetCollisionEnabled(CollisionType);
 
 }
 
@@ -146,6 +146,7 @@ void ALeeXRCharacter::BeginPlay()
 #if !UE_BUILD_SHIPPING
 	//LeeScreenLog("Hand Type %s", FColor::Green, *HandType.ToString());
 	UKismetSystemLibrary::ExecuteConsoleCommand(this, TEXT("ShowFlag.Collision"));
+	UKismetSystemLibrary::ExecuteConsoleCommand(this, TEXT("Show collision"));
 
 #endif
 }

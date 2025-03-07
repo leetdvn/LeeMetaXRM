@@ -99,17 +99,23 @@ void ALeeXRGrabbableTwoHandActor::OnGrabObjects(UMotionControllerComponent* inCo
 	if (MainDist <= MainSphere) {
 		MainController = inComponent;
 
-
 		//Attach the Actor to the Controller
-		RootSkeletal->K2_AttachToComponent(inComponent, *Sockets.MainSocketName, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
+		RootSkeletal->K2_AttachToComponent(
+			inComponent, 
+			NAME_None,
+			EAttachmentRule::SnapToTarget,
+			EAttachmentRule::SnapToTarget,
+			EAttachmentRule::KeepWorld, true);
 		//Set the Socket
 		SetActorRelativeTransform(RootSkeletal->GetSocketTransform(*Sockets.MainSocketName, ERelativeTransformSpace::RTS_Actor));
 
 	}
-	else if (SecondaryDist <= SecondarySphere) {
-
-		//Attach the Actor to the Controller  
-		SecondaryController = inComponent;
+	else {
+		if (SecondaryDist <= SecondarySphere) 
+		{
+			//Attach the Actor to the Controller  
+			SecondaryController = inComponent;
+		}
 
 	}
 
@@ -122,7 +128,8 @@ void ALeeXRGrabbableTwoHandActor::OnReleaseObjects(UMotionControllerComponent* i
 
 	if (MainController == inComponent)
 	{
-		MainController = SecondaryController = nullptr;
+		MainController = nullptr;
+		SecondaryController = nullptr;
 		DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	}
 
@@ -130,7 +137,6 @@ void ALeeXRGrabbableTwoHandActor::OnReleaseObjects(UMotionControllerComponent* i
 	{
 		SecondaryController = nullptr;
 		if (IsValid(MainController)) {
-
 			///Socket Mant Socket
 			SetActorRelativeTransform(RootSkeletal->GetSocketTransform(*Sockets.SecondarySocketName, ERelativeTransformSpace::RTS_Actor));
 		}

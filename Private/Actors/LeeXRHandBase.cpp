@@ -286,7 +286,8 @@ void ALeeXRHandBase::GraspObject()
 				bIsHeld = true;
 				FVector GrabLocation = HandSkeletal->GetComponentLocation();
 				OnHandGrabledEvent.Broadcast();
-				CurrentGrabObject->OnGrabObjects(MotionController);
+				//Hand Controller Grabs Objects
+				CurrentGrabObject->OnGrab(HandSkeletal, GrabLocation);
 
 			}
 		}
@@ -297,6 +298,7 @@ void ALeeXRHandBase::GraspObject()
 /// Grab Object 2
 void ALeeXRHandBase::OnGrabObject()
 {
+
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 	TArray<AActor*> OverlappingActors;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{};
@@ -339,7 +341,7 @@ void ALeeXRHandBase::OnReleaseObject()
 	}
 	
 	OnHandReleaseEvent.Broadcast();
-	CurrentGrabObject->OnReleaseObjects(MotionController);
+	CurrentGrabObject->OnRelease(HandSkeletal);
 	CurrentGrabObject = nullptr;
 	bIsHeld = false;
 
@@ -360,7 +362,9 @@ void ALeeXRHandBase::GraspRelease()
 	}
 
 	OnHandReleaseEvent.Broadcast();
-	CurrentGrabObject->OnReleaseObjects(MotionController);
+
+	//Controller Release
+	CurrentGrabObject->OnRelease(HandSkeletal);
 	CurrentGrabObject = nullptr;
 	bIsHeld = false;
 }

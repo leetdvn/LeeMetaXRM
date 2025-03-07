@@ -101,13 +101,13 @@ void ALeeXRGrabActors::OnGrabObjects(UMotionControllerComponent* inComponent)
 {
 	Super::OnGrabObjects(inComponent);
 
-
-
-
+	LeeScreenLog("Child class %s", FColor::Green, *GetName());
 }
 
 void ALeeXRGrabActors::OnReleaseObjects(UMotionControllerComponent* inComponent)
 {
+	Super::OnReleaseObjects(inComponent);
+	LeeScreenLog("Child class %s", FColor::Green, *GetName());
 }
 
 void ALeeXRGrabActors::InitSettings()

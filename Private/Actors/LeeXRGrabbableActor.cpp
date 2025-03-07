@@ -66,14 +66,18 @@ void ALeeXRGrabbableActor::CaptureHandMesh(UMotionControllerComponent* inControl
 
 	if (SnapHandMesh) {
 		CacheHandTransform = HandSkeletalMesh->GetRelativeTransform();
-		
-		
+
 		//Required to snap the Socket name to the Hand Mesh
 		if (Sockets.MainSocketName.IsEmpty()) {
 			FString msg = __FUNCTION__;
 			UE_LOG(LogTemp, Warning, TEXT("Socket Name is Empty %s"), *msg);
 		}
-		HandSkeletalMesh->K2_AttachToComponent(HandSkeletalMesh->GetAttachParent(), *Sockets.MainSocketName, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
+		HandSkeletalMesh->K2_AttachToComponent(
+			HandSkeletalMesh->GetAttachParent(),
+			*Sockets.MainSocketName,
+			EAttachmentRule::SnapToTarget,
+			EAttachmentRule::SnapToTarget,
+			EAttachmentRule::KeepWorld, true);
 	}
 		
 }
@@ -95,7 +99,12 @@ void ALeeXRGrabbableActor::ReleaseHandMesh(UMotionControllerComponent*& inContro
 			LEE_LOG(LeeXRMacro, Warning, "Socket Name is Empty %s", *func);
 		}
 
-		HandSkeletalMesh->K2_AttachToComponent(inController, *Sockets.MainSocketName, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, true);
+		HandSkeletalMesh->K2_AttachToComponent(
+			inController,
+			*Sockets.MainSocketName, 
+			EAttachmentRule::KeepWorld,
+			EAttachmentRule::KeepWorld,
+			EAttachmentRule::KeepWorld, true);
 
 		HandSkeletalMesh->SetRelativeTransform(CacheHandTransform);
 		//HandSkeletalMesh->SetRelativeTransform(CacheHandTransform);
