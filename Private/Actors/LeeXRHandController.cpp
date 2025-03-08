@@ -18,16 +18,16 @@ ALeeXRHandController::ALeeXRHandController(const FObjectInitializer& ObjectIniti
 	ControllerType = ELeeXRHandType::LeeXRController;
 }
 
-void ALeeXRHandController::GraspObject()
+void ALeeXRHandController::OnGrabOneHand()
 {
-	Super::GraspObject();
+	Super::OnGrabOneHand();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 
 }
 
-void ALeeXRHandController::GraspRelease()
+void ALeeXRHandController::OnGrabOneHandRelease()
 {
-	Super::GraspRelease();
+	Super::OnGrabOneHandRelease();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 
 }
@@ -114,8 +114,10 @@ void ALeeXRHandController::InittializeSetup()
 {
 	Super::InittializeSetup();
 
-	GrabSphere->AttachToComponent(HandSkeletal, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "palm_r");
+	if(HandSkeletal->DoesSocketExist(TEXT("palm_r")))
+		GrabSphere->AttachToComponent(HandSkeletal, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "palm_r");
 	GrabSphere->SetRelativeLocation(FVector(0.0f, 2.5f, -2.5f));
 
-	WidgetInteraction->SetupAttachment(HandSkeletal,TEXT("Index3"));
+	if(HandSkeletal->DoesSocketExist(TEXT("Index3")))
+		WidgetInteraction->SetupAttachment(HandSkeletal,TEXT("Index3"));
 }

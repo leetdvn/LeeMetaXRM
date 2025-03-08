@@ -29,6 +29,9 @@ public:
 	bool IsTag(const FGameplayTag inObjectTag) const { return ObjectTags == inObjectTag; }
 
 	UFUNCTION(BlueprintCallable)
+	FString ObjectTag() const { return ObjectTags.ToString(); }
+
+	UFUNCTION(BlueprintCallable)
 	bool IsSimulation() { return ActorMesh->IsSimulatingPhysics(); }
 
 	UFUNCTION(BlueprintCallable)
@@ -39,14 +42,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
-	EGrabType GrabType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	TObjectPtr<class UStaticMeshComponent> ActorMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
-	bool bIsheld;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	TObjectPtr<class UBoxComponent> GrabRegion;
@@ -73,7 +72,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	UObject* GrabUObject;
 
 	void OnBeginOverlap(
 		UPrimitiveComponent* OverlappedComponent,

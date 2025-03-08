@@ -26,13 +26,6 @@ public:
 	ALeeXRHandController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	/// <summary>
-	/// Get Skeeletal Mesh Component
-	/// </summary>
-	/// <returns></returns>
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
-	USkeletalMeshComponent* GetHandSkeletal() const { return HandSkeletal.Get(); }
-
-	/// <summary>
 	/// Get Animation Blueprint Instance
 	/// </summary>
 	/// <returns></returns>
@@ -42,12 +35,12 @@ public:
 	/// <summary>
 	///	Grap Object
 	/// </summary>
-	virtual void GraspObject() override;
+	virtual void OnGrabOneHand() override;
 
 	/// <summary>
 	/// Grasp Release
 	/// </summary>
-	virtual void GraspRelease() override;
+	virtual void OnGrabOneHandRelease() override;
 
 	virtual void OnGrabObject() override;
 

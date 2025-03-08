@@ -16,6 +16,7 @@ enum class EGrabType : uint8
 {
 	EGT_Free UMETA(DisplayName = "Free"),
 	EGT_Snap UMETA(DisplayName = "Snap"),
+	EGT_Weighted UMETA(DisplayName = "Weighted"),
 	EGT_None UMETA(DisplayName = "None")
 };
 
@@ -43,8 +44,10 @@ public:
 	FLeeXRGrabbableSockets() : MainSocketName(TEXT("")), SubSocketName(TEXT("")), OptionalSocketName(TEXT("")) {}
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLeeXROnGrabObject);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLeeXROnReleaseObject);
+
+DECLARE_MEMORY_STAT_EXTERN(TEXT("LeeXRGrabable"), STAT_LeeXRGrabable, STATGROUP_ICTUMV, );
+DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT("LeeXRGrabableMemory"), STAT_LeeXRGrabableMemory, STATGROUP_ICTUMV, );
+
 
 using namespace LeeXRUltils;
 /**
@@ -64,6 +67,12 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	ELeeXRGrabableType GrabableType;
 
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties",meta =(DisplayName="Mass"))
+	float LeePhysicMass;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties", meta = (DisplayName = "PhysicThreshold"))
+	float PhysicsGrabThreshold;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Required")
 	TSubclassOf<UAnimInstance> AnimLayerClimb;
 
@@ -75,12 +84,6 @@ public:
 
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	TObjectPtr<UHapticFeedbackEffect_Base> HapticEffect;
-
-	UPROPERTY(BlueprintAssignable, Category = "LeeXR Settings|Delegates",meta=(DisplayName="OnGrabObject"))
-	FLeeXROnGrabObject LeeXROnGrabObject;
-
-	UPROPERTY(BlueprintAssignable, Category = "LeeXR Settings|Delegates", meta = (DisplayName = "OnReleaseObject"))
-	FLeeXROnReleaseObject LeeXROnReleaseObject;
 
 	void SetFreeze(bool bFreeze);
 
@@ -100,20 +103,38 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void ReleaseHandMesh(UMotionControllerComponent*& inController, bool isLeft = true);
 
+	
 protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	EGrabType GrabType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	bool bIsheld;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	virtual void OnGrab(UObject* inComponent, const FVector& InGrabLocation) override;
 
 	virtual void OnRelease(UObject* inComponent) override;
 
+	//Base Grab Object
 	virtual void OnGrabObjects(UMotionControllerComponent* inComponent) override;
 
+	//Base Release Object
 	virtual void OnReleaseObjects(UMotionControllerComponent* inComponent) override;
 
+	/// <summary>
+	///Settitng Init When Game Start
+	/// </summary>
 	virtual void InitSettings();
 
+	void PhysicsContraintImplementation(class UPhysicsConstraintComponent* inPhysicsContraint, ALeeXRHandBase*& inHandSkeletal);
+
+	void DetachWhenHandThresholdExceed();
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -128,11 +149,27 @@ protected:
 	bool SnapHandMesh = false;
 
 
-private:
+	UMotionControllerComponent*MainControllerRef;
 
-	USkeletalMeshComponent* HandSkeletalMesh = nullptr;
+	UMotionControllerComponent* SecondaryControllerRef;
+
+	class UPhysicsConstraintComponent* PhysicsContraintRef;
+
+	USkeletalMeshComponent* HandSkeletalMeshRef = nullptr;
 
 	FTransform CacheHandTransform;
 
+	USceneComponent* MeshComponent;
+
+
+private:
+
+
+	void FreeGrababled(UMotionControllerComponent* inMotionController);
+
+	FTimerHandle TimerWeighted;
+
+	///Grab One Hand
+	
 	
 };

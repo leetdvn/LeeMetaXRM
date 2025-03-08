@@ -38,7 +38,6 @@ public class LeeMetaXRM : ModuleRules
             "OculusHandPoseRecognition",
             "GameplayAbilities",
             "OculusUtils",
-            "AnimGraph"
         });
 
         //PrivateIncludePaths.AddRange(new string[] {

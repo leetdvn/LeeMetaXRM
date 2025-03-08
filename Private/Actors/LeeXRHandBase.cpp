@@ -11,6 +11,7 @@
 #include <NavigationSystem.h>
 #include "Actors/LeeXRTeleportActor.h"
 #include "APawn/LeeXRCharacter.h"
+#include "PhysicsEngine/PhysicsConstraintComponent.h"
 
 
 DEFINE_STAT(STAT_ICTUController);
@@ -28,7 +29,10 @@ ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 	WidgetInteraction = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("WidgetInteraction"));
 	WidgetInteraction->SetupAttachment(MotionController);
 
-	
+	PhysicContraint = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("PhysicContraint"));
+
+	PhysicContraint->SetupAttachment(MotionController);
+
 	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
 }
 
@@ -78,7 +82,7 @@ void ALeeXRHandBase::OnConstruction(const FTransform& Transform)
 
 }
 
-//
+// Set Up Input Action Funtion
 void ALeeXRHandBase::SetInputComponent()
 {
 	UInputComponent* PlayerInputComponent = GetWorld()->GetFirstPlayerController()->InputComponent;
@@ -111,7 +115,7 @@ void ALeeXRHandBase::SetInputComponent()
 	}
 }
 
-//
+// Initialize the setup
 void ALeeXRHandBase::InittializeSetup()
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
@@ -147,12 +151,14 @@ void ALeeXRHandBase::InittializeSetup()
 
 }
 
+// Finger Animation type Hand Controller Only
 void ALeeXRHandBase::OnFingerAnimation(const FInputActionInstance& ActionInstance)
 {
 	
 	SetFingerAnimationPose(HandSkeletal, ActionInstance);
 }
 
+//Has Overlap Actor Func
 AActor* ALeeXRHandBase::HasOverlapActor(const USphereComponent* inSphere)
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
@@ -162,6 +168,7 @@ AActor* ALeeXRHandBase::HasOverlapActor(const USphereComponent* inSphere)
 	return OverlappingActors.IsEmpty() ? nullptr : OverlappingActors[0];
 }
 
+// Set Finger Animation Pose
 void ALeeXRHandBase::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance)
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
@@ -203,12 +210,12 @@ void ALeeXRHandBase::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, 
 		AnimIns->PoseAlphaGrasp = PoseValueCancelCompleted;
 
 		PoseValueCancelCompleted == 1 ?
-			GraspObject() : GraspRelease();
+			OnGrabOneHand() : OnGrabOneHandRelease();
 	}
 
 }
 
-// Called when the hand is interacted
+// Switch Hand Type
 void ALeeXRHandBase::SetHandSwitch(bool isLeft)
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
@@ -265,7 +272,7 @@ void ALeeXRHandBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
 #endif
 
 /// Grab Object
-void ALeeXRHandBase::GraspObject()
+void ALeeXRHandBase::OnGrabOneHand()
 {
 
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
@@ -287,7 +294,9 @@ void ALeeXRHandBase::GraspObject()
 				FVector GrabLocation = HandSkeletal->GetComponentLocation();
 				OnHandGrabledEvent.Broadcast();
 				//Hand Controller Grabs Objects
-				CurrentGrabObject->OnGrab(HandSkeletal, GrabLocation);
+				//CurrentGrabObject->OnGrab(HandSkeletal, GrabLocation);
+
+				CurrentGrabObject->OnGrabObjects(MotionController);
 
 			}
 		}
@@ -325,8 +334,10 @@ void ALeeXRHandBase::OnGrabObject()
 				bIsHeld = true;
 				OnHandGrabledEvent.Broadcast();
 				CurrentGrabObject->OnGrabObjects(MotionController);
+				LeeScreenLog("Grabbing 2 %s", FColor::Green, *Actor->GetName());
 				break;
 			}
+
 		}
 	}
 }
@@ -341,14 +352,14 @@ void ALeeXRHandBase::OnReleaseObject()
 	}
 	
 	OnHandReleaseEvent.Broadcast();
-	CurrentGrabObject->OnRelease(HandSkeletal);
+	CurrentGrabObject->OnReleaseObjects(MotionController);
 	CurrentGrabObject = nullptr;
 	bIsHeld = false;
 
 }
 
 /// Grab Release
-void ALeeXRHandBase::GraspRelease()
+void ALeeXRHandBase::OnGrabOneHandRelease()
 {
 
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
@@ -364,7 +375,7 @@ void ALeeXRHandBase::GraspRelease()
 	OnHandReleaseEvent.Broadcast();
 
 	//Controller Release
-	CurrentGrabObject->OnRelease(HandSkeletal);
+	CurrentGrabObject->OnReleaseObjects(MotionController);
 	CurrentGrabObject = nullptr;
 	bIsHeld = false;
 }
@@ -408,6 +419,7 @@ void ALeeXRHandBase::OnHandTypeChanged()
 	}
 }
 
+#pragma region Input Actions
 // Called when the player is grabbing
 void ALeeXRHandBase::OnHandGrabing(const FInputActionInstance& ActionInstance)
 {
@@ -436,7 +448,7 @@ void ALeeXRHandBase::OnHandRelease(const FInputActionInstance& ActionInstance)
 	//	XRHandRight;
 
 	if (IsValidControllerType(ELeeXRHandType::LeeXRController)) {
-		GraspRelease();
+		OnReleaseObject();
 	}
 }
 
@@ -485,6 +497,8 @@ void ALeeXRHandBase::OnHandTrigger(const FInputActionInstance& ActionInstance)
 
 	//	}
 }
+
+#pragma endregion Input Actions
 
 #pragma region Teleport
 

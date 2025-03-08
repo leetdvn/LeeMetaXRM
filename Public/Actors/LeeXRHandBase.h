@@ -57,32 +57,92 @@ public:
 	// Sets default values for this actor's properties
 	ALeeXRHandBase(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	/// <summary>
+	/// Get Hand Anim Instance
+	/// </summary>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UAnimInstance* GetHandAnimInstance() { return HandSkeletal->GetAnimInstance(); }
 
+	/// <summary>
+	/// Valid Controller Type
+	/// </summary>
+	/// <param name="inType"></param>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	bool IsValidControllerType(ELeeXRHandType inType);
 
+	/// <summary>
+	/// Valid Grab Function
+	/// </summary>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	bool IsValidGrab() { return bIsHeld; }
 
+	/// <summary>
+	/// Get Motion Controller Location
+	/// </summary>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	FVector GetMotionControllerLocation() { return MotionController->GetComponentLocation(); }
 
+	/// <summary>
+	/// Get MC Location to World
+	/// </summary>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	FVector GetMCLocationToWorld() { return LeeXRGetWorldLocation(MotionController); }
 
+	/// <summary>
+	/// Get Motion Controller Forward Vector
+	/// </summary>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	FVector GetMotionControllerForwardVector() { return MotionController->GetForwardVector(); }
 
+	/// <summary>
+	/// Get Widget Interaction Component
+	/// </summary>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UWidgetInteractionComponent* GetWidgetInteraction() { return WidgetInteraction; }
 
-	virtual void GraspObject();
+	/// <summary>
+	/// Get Skeletal Mesh Component
+	/// </summary>
+	/// <returns></returns>
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	USkeletalMeshComponent* GetHandSkeletal() const { return HandSkeletal.Get(); }
+
+	/// <summary>
+	/// Get Physics Constraint Component
+	/// </summary>
+	/// <returns></returns>
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UPhysicsConstraintComponent* GetPhysicsConstraint() const { return PhysicContraint.Get(); }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	EControllerHand GetHandType() const { return HandType; }
+	/// <summary>
+	/// Grab One Hand
+	/// </summary>
+	virtual void OnGrabOneHand();
+
+	/// <summary>
+	/// Grab Two Hand
+	/// </summary>
 	virtual void OnGrabObject();
 
-	virtual void GraspRelease();
+	/// <summary>
+	/// Grab One Hand Release
+	/// </summary>
+	virtual void OnGrabOneHandRelease();
+
+	/// <summary>
+	/// Grab Two Hand Release
+	/// </summary>
 	virtual void OnReleaseObject();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -184,6 +244,8 @@ protected:
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UHandPoseRecognizer> HandPoseRecognizer = nullptr;
 
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
+	TObjectPtr<class UPhysicsConstraintComponent> PhysicContraint = nullptr;
 
 #pragma endregion
 
@@ -247,6 +309,7 @@ protected:
 	TObjectPtr<class UInputAction> IA_Move;
 
 #pragma endregion
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

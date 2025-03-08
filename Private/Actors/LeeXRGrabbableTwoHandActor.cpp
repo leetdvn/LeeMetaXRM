@@ -2,6 +2,7 @@
 
 
 #include "Actors/LeeXRGrabbableTwoHandActor.h"
+#include <Actors/LeeXRHandBase.h>
 
 ALeeXRGrabbableTwoHandActor::ALeeXRGrabbableTwoHandActor()
 {
@@ -48,9 +49,9 @@ void ALeeXRGrabbableTwoHandActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (IsValid(MainController) && IsValid(SecondaryController))
+	if (IsValid(MainControllerRef) && IsValid(SecondaryControllerRef))
 	{
-		FRotator TwoHandRotation = GetTwoHandRotation(MainController, SecondaryController);
+		FRotator TwoHandRotation = GetTwoHandRotation(MainControllerRef, SecondaryControllerRef);
 		SetActorRotation(TwoHandRotation);
 	}
 }
@@ -97,7 +98,7 @@ void ALeeXRGrabbableTwoHandActor::OnGrabObjects(UMotionControllerComponent* inCo
 
 
 	if (MainDist <= MainSphere) {
-		MainController = inComponent;
+		MainControllerRef = inComponent;
 
 		//Attach the Actor to the Controller
 		RootSkeletal->K2_AttachToComponent(
@@ -114,7 +115,7 @@ void ALeeXRGrabbableTwoHandActor::OnGrabObjects(UMotionControllerComponent* inCo
 		if (SecondaryDist <= SecondarySphere) 
 		{
 			//Attach the Actor to the Controller  
-			SecondaryController = inComponent;
+			SecondaryControllerRef = inComponent;
 		}
 
 	}
@@ -123,25 +124,30 @@ void ALeeXRGrabbableTwoHandActor::OnGrabObjects(UMotionControllerComponent* inCo
 
 void ALeeXRGrabbableTwoHandActor::OnReleaseObjects(UMotionControllerComponent* inComponent)
 {
-	if (inComponent == nullptr) return;
+	
+	ALeeXRHandBase* HandBase = inComponent->GetOwner<ALeeXRHandBase>();
+	if (!HandBase || !inComponent) return;
 
 
-	if (MainController == inComponent)
+
+	if (MainControllerRef == inComponent)
 	{
-		MainController = nullptr;
-		SecondaryController = nullptr;
+		MainControllerRef = nullptr;
+		SecondaryControllerRef = nullptr;
 		DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		//HandBase->GetHandSkeletal()->SetSimulatePhysics(true);
 	}
 
-	if (SecondaryController == inComponent)
+	if (SecondaryControllerRef == inComponent)
 	{
-		SecondaryController = nullptr;
-		if (IsValid(MainController)) {
+		SecondaryControllerRef = nullptr;
+		if (IsValid(MainControllerRef)) {
 			///Socket Mant Socket
 			SetActorRelativeTransform(RootSkeletal->GetSocketTransform(*Sockets.SecondarySocketName, ERelativeTransformSpace::RTS_Actor));
 		}
 		else {
 			DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+
 		}
 	}
 

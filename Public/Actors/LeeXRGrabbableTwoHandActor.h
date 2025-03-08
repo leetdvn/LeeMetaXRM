@@ -8,6 +8,10 @@
 #include "CoreMinimal.h"
 #include "LeeXRGrabbableTwoHandActor.generated.h"
 
+
+DEFINE_LOG_CATEGORY_STATIC(LogLeeXRGrabbableTwoHandActor, Log, All)
+
+
 /**
  * 
  */
@@ -45,8 +49,5 @@ protected:
 	virtual void OnReleaseObjects(UMotionControllerComponent* inComponent) override;
 
 private:
-	TObjectPtr<UMotionControllerComponent> MainController;
-
-	TObjectPtr<UMotionControllerComponent> SecondaryController;
 
 };

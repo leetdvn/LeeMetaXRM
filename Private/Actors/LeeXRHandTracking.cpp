@@ -39,7 +39,7 @@ ALeeXRHandTracking::ALeeXRHandTracking(const FObjectInitializer& ObjectInitializ
 
 /// <summary>
 /// Grasp Object
-void ALeeXRHandTracking::GraspObject()
+void ALeeXRHandTracking::OnGrabOneHand()
 {
 	//Grasp Object Hand Tracking
 	CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(HitThumbActor);
@@ -59,7 +59,7 @@ void ALeeXRHandTracking::GraspObject()
 
 }
 
-void ALeeXRHandTracking::GraspRelease()
+void ALeeXRHandTracking::OnGrabOneHandRelease()
 {
 	//Grasp Release Hand Tracking
 	if (CurrentGrabObject == nullptr)	return;
@@ -187,7 +187,7 @@ void ALeeXRHandTracking::OnBeginOverlap(
 	//OtherComp->GetOverlappingActors(OverlappingActors);
 
 	if (HitIndexActor == HitThumbActor)
-		GraspObject();
+		OnGrabOneHand();
 }
 
 void ALeeXRHandTracking::OnEndOverlap(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -225,6 +225,6 @@ void ALeeXRHandTracking::TrackingGrasp()
 		SphereThumb->GetComponentToWorld().GetLocation());
 
 	if (dist >= 4.5f) {
-		GraspRelease();
+		OnGrabOneHandRelease();
 	}
 }

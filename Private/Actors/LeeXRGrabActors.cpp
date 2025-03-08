@@ -47,8 +47,6 @@ void ALeeXRGrabActors::OnGrab(UObject* inComponent,const FVector& InGrabLocation
 	*/
 	if (inComponent == nullptr || FrezzeOnSnap) return;
 
-	//Execute Grab Delegate
-	LeeXROnGrabObject.Broadcast();
 	FAttachmentTransformRules AttachRules = GrabType == EGrabType::EGT_Free ?
 		FAttachmentTransformRules::KeepWorldTransform : 
 		FAttachmentTransformRules::SnapToTargetNotIncludingScale;
@@ -59,7 +57,7 @@ void ALeeXRGrabActors::OnGrab(UObject* inComponent,const FVector& InGrabLocation
 
 	bIsheld = ActorMesh->AttachToComponent(Cast<USceneComponent>(inComponent), AttachRules, NAME_None);
 	if (bIsheld) {
-		GrabUObject = inComponent;
+		//MainControllerRef = inComponent;
 	}
 }
 
@@ -72,10 +70,9 @@ void ALeeXRGrabActors::OnRelease(UObject* inComponent)
 	if (bIsheld)
 	{
 		//LeeScreenLog("Releasing Object %s", FColor::Green, *GrabUObject->GetName());
-		if (inComponent == GrabUObject) {
+		if (inComponent == MainControllerRef) {
 			
 			//Execute Release Delegate
-			LeeXROnReleaseObject.Broadcast();
 			ActorMesh->SetSimulatePhysics(true);
 			this->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 			bIsheld = false;
@@ -101,13 +98,12 @@ void ALeeXRGrabActors::OnGrabObjects(UMotionControllerComponent* inComponent)
 {
 	Super::OnGrabObjects(inComponent);
 
-	LeeScreenLog("Child class %s", FColor::Green, *GetName());
 }
 
 void ALeeXRGrabActors::OnReleaseObjects(UMotionControllerComponent* inComponent)
 {
 	Super::OnReleaseObjects(inComponent);
-	LeeScreenLog("Child class %s", FColor::Green, *GetName());
+
 }
 
 void ALeeXRGrabActors::InitSettings()

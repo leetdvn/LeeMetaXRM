@@ -43,9 +43,9 @@ public:
 	ALeeXRHandTracking(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	
-	virtual void GraspObject() override;
+	virtual void OnGrabOneHand() override;
 
-	virtual void GraspRelease() override;
+	virtual void OnGrabOneHandRelease() override;
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func", meta = (Latent, WorldContext = "WorldContextObject", LatentInfo = "LatentInfo", Keywords = "sleep", ExpandEnumAsExecs = "InputPin"))
 	void TickUntilGrasp(const UObject* WorldContextObject, ELeeTickUntilInputPin InputPin, struct FLatentActionInfo LatentInfo);
