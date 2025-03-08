@@ -33,8 +33,6 @@ class LEEMETAXRM_API ALeeXRCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Actors", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<AActor> ActorToSpawn;
 
 public:
 	// Sets default values for this character's properties

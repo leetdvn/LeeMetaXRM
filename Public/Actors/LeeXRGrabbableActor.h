@@ -63,7 +63,7 @@ public:
 	// Sets default values for this actor's properties
 	ALeeXRGrabbableActor();
 
-
+#pragma region Properties
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	ELeeXRGrabableType GrabableType;
 
@@ -71,7 +71,7 @@ public:
 	float LeePhysicMass;
 
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties", meta = (DisplayName = "PhysicThreshold"))
-	float PhysicsGrabThreshold;
+	float PhysicsGrabThreshold=30.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Required")
 	TSubclassOf<UAnimInstance> AnimLayerClimb;
@@ -85,6 +85,9 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	TObjectPtr<UHapticFeedbackEffect_Base> HapticEffect;
 
+#pragma endregion Properties
+
+#pragma region Functions
 	void SetFreeze(bool bFreeze);
 
 	UFUNCTION(BlueprintCallable)
@@ -103,6 +106,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void ReleaseHandMesh(UMotionControllerComponent*& inController, bool isLeft = true);
 
+	void SetHandSkeletalMesh(USkeletalMeshComponent* inSkeletal) { HandSkeletalMeshRef = inSkeletal; };
+#pragma endregion Functions
 	
 protected:
 
@@ -132,9 +137,11 @@ protected:
 	/// </summary>
 	virtual void InitSettings();
 
-	void PhysicsContraintImplementation(class UPhysicsConstraintComponent* inPhysicsContraint, ALeeXRHandBase*& inHandSkeletal);
+	void PhysicsContraintImplementation(UMotionControllerComponent *inMCComponent);
 
-	void DetachWhenHandThresholdExceed();
+	void DetachWhenHandThresholdExceed(USkeletalMeshComponent* inSkeletal);
+
+	void DetachWhenHandThresholdExceed(UStaticMeshComponent* inStatiMesh);
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -165,7 +172,7 @@ protected:
 private:
 
 
-	void FreeGrababled(UMotionControllerComponent* inMotionController);
+	void FreeGrababled(UMotionControllerComponent* inMotionController,bool isWeighted=false);
 
 	FTimerHandle TimerWeighted;
 

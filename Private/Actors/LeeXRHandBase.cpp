@@ -34,6 +34,7 @@ ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 	PhysicContraint->SetupAttachment(MotionController);
 
 	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
+
 }
 
 bool ALeeXRHandBase::IsValidControllerType(ELeeXRHandType inType)
@@ -210,7 +211,7 @@ void ALeeXRHandBase::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, 
 		AnimIns->PoseAlphaGrasp = PoseValueCancelCompleted;
 
 		PoseValueCancelCompleted == 1 ?
-			OnGrabOneHand() : OnGrabOneHandRelease();
+			OnGrabObject() : OnReleaseObject();
 	}
 
 }
@@ -313,6 +314,7 @@ void ALeeXRHandBase::OnGrabObject()
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{};
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic));
 	TArray<AActor*> ActorToIgnore;
+	ActorToIgnore.Add(this);
 
 	bool isOverlaped = UKismetSystemLibrary::SphereOverlapActors(
 		GetWorld(),

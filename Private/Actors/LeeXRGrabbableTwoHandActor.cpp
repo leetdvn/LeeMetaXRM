@@ -141,15 +141,16 @@ void ALeeXRGrabbableTwoHandActor::OnReleaseObjects(UMotionControllerComponent* i
 	if (SecondaryControllerRef == inComponent)
 	{
 		SecondaryControllerRef = nullptr;
-		if (IsValid(MainControllerRef)) {
+		if (IsValid(SecondaryControllerRef)) {
 			///Socket Mant Socket
 			SetActorRelativeTransform(RootSkeletal->GetSocketTransform(*Sockets.SecondarySocketName, ERelativeTransformSpace::RTS_Actor));
 		}
 		else {
 			DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-
+			//RootSkeletal->SetSimulatePhysics(true);
 		}
 	}
 
+	
 }
 

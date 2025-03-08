@@ -123,6 +123,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	EControllerHand GetHandType() const { return HandType; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UPhysicsConstraintComponent* GetPhysicsContraint() const { return PhysicContraint.Get(); }
 	/// <summary>
 	/// Grab One Hand
 	/// </summary>
@@ -246,6 +249,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UPhysicsConstraintComponent> PhysicContraint = nullptr;
+
 
 #pragma endregion
 
