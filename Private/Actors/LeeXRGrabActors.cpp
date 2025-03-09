@@ -37,7 +37,8 @@ void ALeeXRGrabActors::BeginPlay()
 	AbilityComponent->InitAbilityActorInfo(this, this);
 
 	LEE_SCOPE_CYCLE_COUNTER(LeeXRGrabable);
-	INC_MEMORY_STAT_BY(STAT_LeeXRGrabableMemory, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
+	
+	ADDMEMORYSTAT(this, STAT_LeeXRGrabable);
 
 	//AbilityComponent->AddGameplayCue(ObjectTags);
 }

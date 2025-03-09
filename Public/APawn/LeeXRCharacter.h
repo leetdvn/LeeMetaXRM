@@ -14,7 +14,7 @@
 DEFINE_LOG_CATEGORY_STATIC(LogLeeXRCharacter,Log,All)
 
 DECLARE_MEMORY_STAT_EXTERN(TEXT("ICTUCharacter"), STAT_ICTUCharacter, STATGROUP_ICTUMV, );
-DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT("ICTUCharacterMemory"), STAT_ICTUCharacterMemory, STATGROUP_ICTUMV, );
+DECLARE_MEMORY_STAT_POOL_EXTERN(TEXT("ICTUCharacterMemory"), STAT_ICTUCharacterMemory, STATGROUP_ICTUMV,FPlatformMemory::MCR_PhysicalLLM, );
 
 
 
@@ -24,6 +24,8 @@ enum class ELeeXRTeleportHandAction : uint8
 	LeeXRLeft UMETA(DisplayName = "Left Action"),
 	LeeXRRight UMETA(DisplayName = "Right Action")
 };
+
+
 
 /**
  * XR Character Class

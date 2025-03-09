@@ -11,6 +11,8 @@
 #include "LeeXRGrabbableActor.generated.h"
 
 
+
+
 UENUM(BlueprintType)
 enum class EGrabType : uint8
 {
@@ -46,7 +48,7 @@ public:
 
 
 DECLARE_MEMORY_STAT_EXTERN(TEXT("LeeXRGrabable"), STAT_LeeXRGrabable, STATGROUP_ICTUMV, );
-DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT("LeeXRGrabableMemory"), STAT_LeeXRGrabableMemory, STATGROUP_ICTUMV, );
+DECLARE_MEMORY_STAT_POOL_EXTERN(TEXT("LeeXRGrabableMemory"), STAT_LeeXRGrabableMemory, STATGROUP_ICTUMV, FPlatformMemory::MCR_PhysicalLLM,);
 
 
 using namespace LeeXRUltils;

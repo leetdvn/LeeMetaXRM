@@ -43,6 +43,10 @@ void ALeeXRGrabbableTwoHandActor::InitSettings()
 void ALeeXRGrabbableTwoHandActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	LEE_SCOPE_CYCLE_COUNTER(LeeXRGrabable);
+	
+	ADDMEMORYSTAT(this, STAT_LeeXRGrabable);
 }
 
 void ALeeXRGrabbableTwoHandActor::Tick(float DeltaTime)

@@ -49,7 +49,9 @@ void ALeeXRHandBase::BeginPlay()
 	
 	///PROFILE
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
-	INC_MEMORY_STAT_BY(STAT_HandController, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
+
+	///Memory Stat
+	ADDMEMORYSTAT(this, STAT_ICTUController);
 
 	///Mapping Context
 	if (MenuContext) {

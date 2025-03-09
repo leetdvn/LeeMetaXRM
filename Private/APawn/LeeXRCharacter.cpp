@@ -26,6 +26,8 @@ using namespace LeeXRUltils;
 
 DEFINE_STAT(STAT_ICTUCharacter);
 DEFINE_STAT(STAT_ICTUCharacterMemory);
+
+
 // Sets default values
 ALeeXRCharacter::ALeeXRCharacter()
 {
@@ -141,9 +143,7 @@ void ALeeXRCharacter::BeginPlay()
 
 		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
 	}
-
-
-	INC_MEMORY_STAT_BY(STAT_ICTUCharacterMemory, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
+	ADDMEMORYSTAT(this, STAT_ICTUCharacter);
 
 #if !UE_BUILD_SHIPPING
 	//LeeScreenLog("Hand Type %s", FColor::Green, *HandType.ToString());
@@ -164,7 +164,7 @@ void ALeeXRCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	///Reset Profile Memories
 	SET_MEMORY_STAT(STAT_ICTUCharacter, 0);
-
+	SET_MEMORY_STAT(STAT_ICTUMV_TotalMemories, 0);
 }
 
 #if WITH_EDITOR

@@ -61,8 +61,7 @@ void ALeeXRHandController::BeginPlay()
 
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 	
-	INC_MEMORY_STAT_BY(STAT_HandController, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
-
+	ADDMEMORYSTAT(this, STAT_ICTUController);
 }
 
 void ALeeXRHandController::SetInputComponent()

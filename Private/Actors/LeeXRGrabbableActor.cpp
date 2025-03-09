@@ -189,10 +189,9 @@ void ALeeXRGrabbableActor::PhysicsContraintImplementation(UMotionControllerCompo
 			GrabledContraintRef = inPhysicsContraint;
 			GrabledConstraintsRefs.AddUnique(inPhysicsContraint);
 
-				//LeeScreenLog("Two Hand Constraint", FColor::Purple);
+			//LeeScreenLog("Two Hand Constraint", FColor::Purple);
 			float MassChanged = LeeMassDefault / GrabledConstraintsRefs.Num();
 			StaticMeshComp->SetMassScale(NAME_None, MassChanged);
-			LeeScreenLog("Mass Changed : %f", FColor::Purple,MassChanged);
 		}
 	}
 
@@ -235,9 +234,10 @@ void ALeeXRGrabbableActor::BeginPlay()
 {
 	Super::BeginPlay();	
 
-	LEE_SCOPE_CYCLE_COUNTER(LeeXRGrabable);
-	INC_MEMORY_STAT_BY(STAT_LeeXRGrabableMemory, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
 
+	LEE_SCOPE_CYCLE_COUNTER(LeeXRGrabable);
+
+	ADDMEMORYSTAT(this, STAT_LeeXRGrabableMemory);
 	if (UStaticMeshComponent* StaticMeshComp = FindComponentByClass<UStaticMeshComponent>()) {
 		StaticMeshComp->SetMassOverrideInKg(NAME_None, LeeMassDefault);
 	}
