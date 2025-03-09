@@ -4,7 +4,6 @@
 #include "Actors/LeeXRHandBase.h"
 #include <Components/SkeletalMeshComponent.h>
 #include <Components/SphereComponent.h>
-#include <Components/ArrowComponent.h>
 #include <Definitions.h>
 #include <EnhancedInputComponent.h>
 #include <NiagaraDataInterfaceArrayFunctionLibrary.h>
@@ -23,6 +22,7 @@ ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+
 	MotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("MotionController"));
 	SetRootComponent(MotionController);
 
@@ -34,7 +34,7 @@ ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 	PhysicContraint->SetupAttachment(MotionController);
 
 	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
-
+	NiagaraComponent->SetupAttachment(MotionController);
 }
 
 bool ALeeXRHandBase::IsValidControllerType(ELeeXRHandType inType)
@@ -316,10 +316,11 @@ void ALeeXRHandBase::OnGrabObject()
 	TArray<AActor*> ActorToIgnore;
 	ActorToIgnore.Add(this);
 
+	float radius = GrabSphere != nullptr ? GrabSphere->GetScaledSphereRadius() : 10.f;
 	bool isOverlaped = UKismetSystemLibrary::SphereOverlapActors(
 		GetWorld(),
 		LeeXRGetWorldLocation(MotionController),
-		GrabSphere->GetScaledSphereRadius(),
+		radius,
 		ObjectTypes,
 		nullptr, 
 		ActorToIgnore, 
@@ -336,7 +337,7 @@ void ALeeXRHandBase::OnGrabObject()
 				bIsHeld = true;
 				OnHandGrabledEvent.Broadcast();
 				CurrentGrabObject->OnGrabObjects(MotionController);
-				LeeScreenLog("Grabbing 2 %s", FColor::Green, *Actor->GetName());
+				//LeeScreenLog("Grabbing 2 %s", FColor::Green, *Actor->GetName());
 				break;
 			}
 
@@ -475,7 +476,7 @@ void ALeeXRHandBase::OnHandInteract(const FInputActionInstance& ActionInstance)
 	//}
 	WidgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
 	WidgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
-	LeeScreenLog("Interact :%s", FColor::Green, *GetName());
+	//LeeScreenLog("Interact :%s", FColor::Green, *GetName());
 }
 
 // Called when the player is triggering
@@ -607,6 +608,7 @@ void ALeeXRHandBase::TryTeleport()
 		if (TeleportLocation.IsNearlyZero(0.0001f)) {
 			LeeScreenLog("Teleport Location is Zero", FColor::Red);
 		}
+		if (TeleportLocation.Z <= 0) TeleportLocation.Z = 10;
 		XRCharacter->TeleportTo(TeleportLocation, FRotator(0.0f, XRCharacter->GetActorRotation().Yaw, 0.0f), false, true);
 		if(TeleportRef)
 			TeleportRef->SetActorHiddenInGame(true);

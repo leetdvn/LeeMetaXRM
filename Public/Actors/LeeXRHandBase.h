@@ -17,7 +17,8 @@ UENUM(BlueprintType)
 enum class ELeeXRHandType : uint8
 {
 	LeeXRController UMETA(DisplayName = "Controller"),
-	LeeXRHandTracking UMETA(DisplayName = "HandTracking")
+	LeeXRHandTracking UMETA(DisplayName = "HandTracking"),
+	LeeXRHandPhysics UMETA(DisplayName = "HandPhysics")
 };
 
 UENUM(BlueprintType)
@@ -126,6 +127,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UPhysicsConstraintComponent* GetPhysicsContraint() const { return PhysicContraint.Get(); }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UPhysicsConstraintComponent* GetGrabsContraint() const { return GrabsContraint.Get(); }
 	/// <summary>
 	/// Grab One Hand
 	/// </summary>
@@ -224,7 +228,6 @@ protected:
 
 #pragma region Components
 
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UOculusXRHandComponent> OculusHand;
 
@@ -249,6 +252,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UPhysicsConstraintComponent> PhysicContraint = nullptr;
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
+	TObjectPtr<class UPhysicsConstraintComponent> GrabsContraint = nullptr;
 
 
 #pragma endregion

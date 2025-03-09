@@ -67,11 +67,11 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	ELeeXRGrabableType GrabableType;
 
-	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties",meta =(DisplayName="Mass"))
-	float LeePhysicMass;
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties",meta =(DisplayName="Mass Default"))
+	float LeeMassDefault;
 
-	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties", meta = (DisplayName = "PhysicThreshold"))
-	float PhysicsGrabThreshold=30.f;
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties", meta = (DisplayName = "PhysicThreshold",ClampMin=50,ClampMax=100,DefaultsValue=75))
+	float PhysicsGrabThreshold=75.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Required")
 	TSubclassOf<UAnimInstance> AnimLayerClimb;
@@ -120,6 +120,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void Tick(float DeltaTime) override;
+
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	virtual void OnGrab(UObject* inComponent, const FVector& InGrabLocation) override;
@@ -139,9 +141,9 @@ protected:
 
 	void PhysicsContraintImplementation(UMotionControllerComponent *inMCComponent);
 
-	void DetachWhenHandThresholdExceed(USkeletalMeshComponent* inSkeletal);
+	void DetachWhenHandThresholdExceed(UMotionControllerComponent* inMCComponent,USkeletalMeshComponent* inSkeletal);
 
-	void DetachWhenHandThresholdExceed(UStaticMeshComponent* inStatiMesh);
+	void DetachWhenHandThresholdExceed(UMotionControllerComponent* inMCComponent,UStaticMeshComponent* inStatiMesh);
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -160,7 +162,7 @@ protected:
 
 	UMotionControllerComponent* SecondaryControllerRef;
 
-	class UPhysicsConstraintComponent* PhysicsContraintRef;
+	class UPhysicsConstraintComponent* GrabledContraintRef;
 
 	USkeletalMeshComponent* HandSkeletalMeshRef = nullptr;
 
@@ -173,6 +175,9 @@ private:
 
 
 	void FreeGrababled(UMotionControllerComponent* inMotionController,bool isWeighted=false);
+
+	
+	TArray<class UPhysicsConstraintComponent*> GrabledConstraintsRefs;
 
 	FTimerHandle TimerWeighted;
 

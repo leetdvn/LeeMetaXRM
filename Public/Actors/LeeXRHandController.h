@@ -32,6 +32,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UAnimInstance* GetABPInstance() const { return HandSkeletal->GetAnimInstance(); }
 
+	UPROPERTY(EditAnyWhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
+	TObjectPtr<UStaticMeshComponent> CubeConstraint;
+
+
 	/// <summary>
 	///	Grap Object
 	/// </summary>
@@ -50,7 +54,7 @@ public:
 	/// </summary>
 	virtual void InittializeSetup() override;
 
-
+	void InitPhysicSetup();
 
 protected:
 

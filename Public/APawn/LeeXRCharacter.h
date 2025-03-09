@@ -89,8 +89,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	ELeeXRHandType HandType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
-	TObjectPtr<class USceneComponent> XROrigin;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
+	TObjectPtr<class USceneComponent> LeeXROrigin;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<ALeeXRHandBase> XRHandLeft;
@@ -180,7 +180,7 @@ inline ALeeXRHandBase* ALeeXRCharacter::InitializeHandActor(const FString inHand
 	// Spawn the hands
 	ALeeXRHandBase* HandBase = LeeXRSPawnActorBP<T>(this, inHandPath);
 	if (HandBase == nullptr) return nullptr;
-	HandBase->AttachToComponent(XROrigin, AttachRules);
+	HandBase->AttachToComponent(LeeXROrigin, AttachRules);
 
 	return nullptr;
 }
@@ -195,7 +195,10 @@ inline ALeeXRHandBase* ALeeXRCharacter::InitializeHandActor(TSubclassOf<T> inCla
 	// Spawn the hands
 	ALeeXRHandBase* HandBase = LeeXRSPawnActorBP<T>(this,inClass);
 	if (HandBase == nullptr) return nullptr;
-	HandBase->AttachToComponent(XROrigin, AttachRules);
+	bool isSuccess = HandBase->K2_AttachToComponent(LeeXROrigin,NAME_None,EAttachmentRule::SnapToTarget,EAttachmentRule::SnapToTarget,EAttachmentRule::KeepWorld,true);
+	if (!isSuccess) {
+		LeeScreenLog("Hand Attach Failed", FColor::Red);
+	}
 
 	return HandBase;
 }

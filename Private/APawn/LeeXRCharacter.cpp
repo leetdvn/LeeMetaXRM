@@ -19,6 +19,8 @@
 #include <NiagaraComponent.h>
 #include <NiagaraFunctionLibrary.h>
 #include "Actors/LeeXRGrabbableActor.h"
+#include "Actors/LeeXRHandPhysics.h"
+
 
 using namespace LeeXRUltils;
 
@@ -31,12 +33,12 @@ ALeeXRCharacter::ALeeXRCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 
-	XROrigin = CreateDefaultSubobject<USceneComponent>(TEXT("LeeXROrigin"));
-	XROrigin->SetupAttachment(GetMesh());
+	LeeXROrigin = CreateDefaultSubobject<USceneComponent>(TEXT("LeeXROrigin"));
+	LeeXROrigin->SetupAttachment(GetMesh());
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 
-	Camera->SetupAttachment(XROrigin);
+	Camera->SetupAttachment(LeeXROrigin);
 
 	DisplayMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DisplayMesh"));
 	DisplayMesh->SetupAttachment(Camera);
@@ -147,8 +149,12 @@ void ALeeXRCharacter::BeginPlay()
 	//LeeScreenLog("Hand Type %s", FColor::Green, *HandType.ToString());
 	UKismetSystemLibrary::ExecuteConsoleCommand(this, TEXT("ShowFlag.Collision"));
 	UKismetSystemLibrary::ExecuteConsoleCommand(this, TEXT("Show collision"));
+	UKismetSystemLibrary::ExecuteConsoleCommand(this, TEXT("STAT ICTUMV"));
 
 #endif
+
+
+
 }
 
 void ALeeXRCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -278,11 +284,21 @@ ALeeXRHandBase* ALeeXRCharacter::HandInitialize(ELeeXRHandType inType,bool isLef
 	
 	ULeeXRHandDataAsset* Data = isLeft ? DataLeft : DataRight;
 
-	 ALeeXRHandBase* Hand = inType == ELeeXRHandType::LeeXRController ?
-		InitializeHandActor<ALeeXRHandController>(Data->Assets.Controller) :
-		InitializeHandActor<ALeeXRHandTracking>(Data->Assets.Tracking);
+	// Initialize the hand actor
+	switch (inType)
+	{
+		case ELeeXRHandType::LeeXRController: {
+			return InitializeHandActor<ALeeXRHandController>(Data->Assets.Controller);
+		}
+		case ELeeXRHandType::LeeXRHandTracking: {
+			return InitializeHandActor<ALeeXRHandTracking>(Data->Assets.Tracking);
+		}
+		case ELeeXRHandType::LeeXRHandPhysics: {
+			return InitializeHandActor<ALeeXRHandPhysics>(Data->Assets.Physics);
+		}
+	}
+	return nullptr;
 
-	 return Hand;
 }
 
 

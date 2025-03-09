@@ -5,7 +5,7 @@
 #include <MotionControllerComponent.h>
 #include <Kismet/KismetMathLibrary.h>
 #include <SphereComponent.h>
-#include <Actors/LeeXRHandBase.h>
+#include "Actors/LeeXRHandController.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 
 
@@ -129,15 +129,16 @@ void ALeeXRGrabbableActor::FreeGrababled(UMotionControllerComponent* inMotionCon
 	if (isWeighted) {
 		PhysicsContraintImplementation(inMotionController);
 	}
+	else {
+		FAttachmentTransformRules AttachRules = GrabType == EGrabType::EGT_Weighted ?
+			FAttachmentTransformRules::KeepWorldTransform :
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale;
 
-	FAttachmentTransformRules AttachRules = GrabType == EGrabType::EGT_Weighted ?
-		FAttachmentTransformRules::KeepWorldTransform :
-		FAttachmentTransformRules::SnapToTargetNotIncludingScale;
-
-	if (auto* PrimitiveComp = FindComponentByClass<UStaticMeshComponent>()) {
-		//PrimitiveComp->SetSimulatePhysics(false);
-		if (PrimitiveComp->AttachToComponent(inMotionController, AttachRules, NAME_None))
-			MainControllerRef = inMotionController;
+		if (auto* PrimitiveComp = FindComponentByClass<UStaticMeshComponent>()) {
+			//PrimitiveComp->SetSimulatePhysics(false);
+			if (PrimitiveComp->AttachToComponent(inMotionController, AttachRules, NAME_None))
+				MainControllerRef = inMotionController;
+		}
 	}
 
 }
@@ -149,74 +150,82 @@ void ALeeXRGrabbableActor::PhysicsContraintImplementation(UMotionControllerCompo
 
 	if (auto* HandBase = inMCComponent->GetOwner<ALeeXRHandBase>()) {
 
-		if (auto inPhysicsContraint = HandBase->GetPhysicsConstraint()) {
+		if (auto inPhysicsContraint = HandBase->GetGrabsContraint()) {
 
+			//if (IsValid(GrabledContraintRef)){
+			//	if (GrabledContraintRef != inPhysicsContraint) {
+			//		GrabledContraintRef->BreakConstraint();
+			//	}
+			//}
 
-			//if (PhysicsContraintRef) PhysicsContraintRef->BreakConstraint();
+			//GrabledContraintRef = inPhysicsContraint;
 
 			FString HandSocket = HandBase->GetHandType() == EControllerHand::Left ? "hand_l" : "hand_r";
+			USkeletalMeshComponent* SkeletalComp = FindComponentByClass<USkeletalMeshComponent>();
+			UStaticMeshComponent* StaticMeshComp = FindComponentByClass<UStaticMeshComponent>();
 
 
-			if (auto HandSkeletal = HandBase->GetHandSkeletal()) {
+			if (auto* skeletal = HandBase->GetHandSkeletal()) {
+				//HandSkeletalMeshRef = skeletal;
 
-				USkeletalMeshComponent* SkeletalComp = FindComponentByClass<USkeletalMeshComponent>();
-				UStaticMeshComponent* StaticMeshComp = FindComponentByClass<UStaticMeshComponent>();
 
 				if (StaticMeshComp) {
-					inPhysicsContraint->SetConstrainedComponents(HandSkeletalMeshRef, *HandSocket, StaticMeshComp, NAME_None);
-					GetWorld()->GetTimerManager().SetTimer(TimerWeighted, [this, StaticMeshComp]() {
-						DetachWhenHandThresholdExceed(StaticMeshComp);
-						}, 0.02f, true);
+					inPhysicsContraint->SetConstrainedComponents(skeletal, *HandSocket, StaticMeshComp, NAME_None);
+					GetWorld()->GetTimerManager().SetTimer(TimerWeighted, [this, inMCComponent,StaticMeshComp]() {
+						DetachWhenHandThresholdExceed(inMCComponent,StaticMeshComp);
+						}, 0.01f, true);
 
 				}
 				else if (SkeletalComp) {
 
-					inPhysicsContraint->SetConstrainedComponents(HandSkeletalMeshRef, *HandSocket, SkeletalComp, NAME_None);
-					GetWorld()->GetTimerManager().SetTimer(TimerWeighted, [this, SkeletalComp]() {
-						DetachWhenHandThresholdExceed(SkeletalComp);
-						}, 0.02f, true);
+					inPhysicsContraint->SetConstrainedComponents(skeletal, *HandSocket, SkeletalComp, NAME_None);
+					GetWorld()->GetTimerManager().SetTimer(TimerWeighted, [this, inMCComponent, SkeletalComp]() {
+						DetachWhenHandThresholdExceed(inMCComponent,SkeletalComp);
+						}, 0.01f, true);
 
 				}
-				PhysicsContraintRef = inPhysicsContraint;
-				HandSkeletalMeshRef = HandSkeletal;
+				HandSkeletalMeshRef = skeletal;
 			}
+			GrabledContraintRef = inPhysicsContraint;
+			GrabledConstraintsRefs.AddUnique(inPhysicsContraint);
 
+				//LeeScreenLog("Two Hand Constraint", FColor::Purple);
+			float MassChanged = LeeMassDefault / GrabledConstraintsRefs.Num();
+			StaticMeshComp->SetMassScale(NAME_None, MassChanged);
+			LeeScreenLog("Mass Changed : %f", FColor::Purple,MassChanged);
 		}
 	}
 
 }
 
 //Detaching the Object when the Hand Threshold Exceed
-void ALeeXRGrabbableActor::DetachWhenHandThresholdExceed(USkeletalMeshComponent* inSkeletal)
+void ALeeXRGrabbableActor::DetachWhenHandThresholdExceed(UMotionControllerComponent* inMCComponent,USkeletalMeshComponent* inSkeletal)
 {
-	if (inSkeletal == nullptr) return;
+	if (inSkeletal == nullptr || inMCComponent == nullptr) return;
 	LEE_SCOPE_CYCLE_COUNTER(LeeXRGrabable);
 
+
 	FVector HMeshLoc = LeeXRGetWorldLocation(inSkeletal);
-	if (MainControllerRef) {
-		FVector MCloc = LeeXRGetWorldLocation(MainControllerRef);
-		float Distance = FVector::Dist(HMeshLoc, MCloc);
-		LEE_LOG(LeeXRMacro, Log, "Distance %f", Distance);
-		if (Distance > PhysicsGrabThreshold) {
-			OnReleaseObjects(MainControllerRef);
-		}
+	FVector MCloc = LeeXRGetWorldLocation(inMCComponent);
+	float Distance = FVector::Dist(HMeshLoc, MCloc);
+	LEE_LOG(LeeXRMacro, Log, "Distance %f", Distance);
+	if (Distance > PhysicsGrabThreshold) {
+		OnReleaseObjects(inMCComponent);
 	}
 }
 
 //Detaching the Object when the Hand Threshold Exceed
-void ALeeXRGrabbableActor::DetachWhenHandThresholdExceed(UStaticMeshComponent* inStatiMesh)
+void ALeeXRGrabbableActor::DetachWhenHandThresholdExceed(UMotionControllerComponent* inMCComponent,UStaticMeshComponent* inStatiMesh)
 {
-	if (inStatiMesh == nullptr) return;
+	if (inStatiMesh == nullptr || inMCComponent==nullptr) return;
 	LEE_SCOPE_CYCLE_COUNTER(LeeXRGrabable);
 
 	FVector HMeshLoc = LeeXRGetWorldLocation(inStatiMesh);
-	if (MainControllerRef) {
-		FVector MCloc = LeeXRGetWorldLocation(MainControllerRef);
-		float Distance = FVector::Dist(HMeshLoc, MCloc);
-		LEE_LOG(LeeXRMacro, Log, "Distance %f", Distance);
-		if (Distance > PhysicsGrabThreshold) {
-			OnReleaseObjects(MainControllerRef);
-		}
+	FVector MCloc = LeeXRGetWorldLocation(inMCComponent);
+	float Distance = FVector::Dist(HMeshLoc, MCloc);
+	LEE_LOG(LeeXRMacro, Log, "Distance %f", Distance);
+	if (Distance > PhysicsGrabThreshold) {
+		OnReleaseObjects(inMCComponent);
 	}
 }
 
@@ -229,8 +238,27 @@ void ALeeXRGrabbableActor::BeginPlay()
 	LEE_SCOPE_CYCLE_COUNTER(LeeXRGrabable);
 	INC_MEMORY_STAT_BY(STAT_LeeXRGrabableMemory, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
 
+	if (UStaticMeshComponent* StaticMeshComp = FindComponentByClass<UStaticMeshComponent>()) {
+		StaticMeshComp->SetMassOverrideInKg(NAME_None, LeeMassDefault);
+	}
 	//Settitng Init When Game Starts
 	InitSettings();
+}
+
+void ALeeXRGrabbableActor::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	//if (GrabledConstraintsRefs.IsEmpty()) return;
+
+	//if (GrabledConstraintsRefs.IsValidIndex(2))
+	//{
+	//	if (GrabledConstraintsRefs.Num() == 2)
+	//	{
+	//		LeeScreenLog("Two Hand Constraint",FColor::Purple);
+	//	}
+	//}
+
 }
 
 void ALeeXRGrabbableActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -281,7 +309,7 @@ void ALeeXRGrabbableActor::OnGrabObjects(UMotionControllerComponent* inComponent
 			break;
 		}
 		case EGrabType::EGT_Weighted: {
-			FreeGrababled(inComponent,true);
+			PhysicsContraintImplementation(inComponent);
 			break;
 		}
 	}
@@ -298,38 +326,59 @@ void ALeeXRGrabbableActor::OnReleaseObjects(UMotionControllerComponent* inCompon
 	///Release Object
 	if (inComponent == nullptr || FrezzeOnSnap) return;
 
-
-
 	//if (PhysicsContraintRef) PhysicsContraintRef->BreakConstraint();
 
 	///release the object
-	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	bIsheld = false;
-	if (auto* PrimitiveComp = FindComponentByClass<UStaticMeshComponent>())
-		PrimitiveComp->SetSimulatePhysics(true);
 
-	if (auto Skeletal = FindComponentByClass<USkeletalMeshComponent>()) {
-		Skeletal->SetSimulatePhysics(true);
-	}
+	if(bIsheld){
 
-	switch (GrabType)
-	{
-		case EGrabType::EGT_Free: { break; }
-		case EGrabType::EGT_Snap:
-			break;
-		case EGrabType::EGT_Weighted: {
-			if (TimerWeighted.IsValid()) {
-				UE_LOG(LogTemp, Warning, TEXT("Timer Release"));
-				GetWorld()->GetTimerManager().ClearTimer(TimerWeighted);
+		switch (GrabType)
+		{
+			case EGrabType::EGT_Free: {
+				DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+				bIsheld = false;
+				if (auto* PrimitiveComp = FindComponentByClass<UStaticMeshComponent>())
+					PrimitiveComp->SetSimulatePhysics(true);
+
+				if (auto Skeletal = FindComponentByClass<USkeletalMeshComponent>()) {
+					Skeletal->SetSimulatePhysics(true);
+				}
+				break;
 			}
 
-			break;
+			case EGrabType::EGT_Snap:
+				break;
+			case EGrabType::EGT_Weighted: {
+				if (TimerWeighted.IsValid()) {
+					//UE_LOG(LogTemp, Warning, TEXT("Timer Release"));
+					GetWorld()->GetTimerManager().ClearTimer(TimerWeighted);
+					if (auto* HandBase = inComponent->GetOwner<ALeeXRHandBase>()) {
+						if (auto inPhysicsContraint = HandBase->GetGrabsContraint()) {
+							inPhysicsContraint->BreakConstraint();
+							GrabledConstraintsRefs.Remove(inPhysicsContraint);
+						}
+					}
+				}
+
+				break;
+			}
+			case EGrabType::EGT_None:
+				break;
+
 		}
-		case EGrabType::EGT_None:
-			break;
 
 	}
+	else {
+		if (TimerWeighted.IsValid())
+			GetWorld()->GetTimerManager().ClearTimer(TimerWeighted);
 
+		if (auto* HandBase = inComponent->GetOwner<ALeeXRHandBase>()) {
+			if (auto inPhysicsContraint = HandBase->GetGrabsContraint()) {
+				inPhysicsContraint->BreakConstraint();
+				GrabledConstraintsRefs.Remove(inPhysicsContraint);
+			}
+		}
+	}
 	//GrabableType == ELeeXRGrabableType::LeeXROneHand ?
 	//	OnRelease(HandBase->GetHandSkeletal()) :
 	//	OnReleaseObjects(inComponent);

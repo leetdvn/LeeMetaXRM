@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <Actors/LeeXRHandPhysics.h>
 #include "Actors/LeeXRHandController.h"
 #include "Actors/LeeXRHandTracking.h"
 #include "CoreMinimal.h"
@@ -23,9 +24,13 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ALeeXRHandTracking> Tracking;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ALeeXRHandPhysics> Physics;
 
 	FLeeHandData() :
-		Controller(nullptr), Tracking(nullptr)
+		Controller(nullptr),
+		Tracking(nullptr),
+		Physics(nullptr)
 	{
 	}
 };

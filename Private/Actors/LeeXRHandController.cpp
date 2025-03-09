@@ -4,6 +4,8 @@
 #include "Actors/LeeXRHandController.h"
 #include "Definitions.h"
 #include <EnhancedInputComponent.h>
+#include "UObject/ConstructorHelpers.h"
+
 
 ALeeXRHandController::ALeeXRHandController(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -11,9 +13,16 @@ ALeeXRHandController::ALeeXRHandController(const FObjectInitializer& ObjectIniti
 	HandSkeletal = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandSkeletal"));
 	HandSkeletal->SetupAttachment(MotionController);
 
-	GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphereCollison"));
-	GrabSphere->SetupAttachment(HandSkeletal);
+	//GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphereCollison"));
+	//GrabSphere->SetupAttachment(HandSkeletal);
 	//Set Init Hand Left or Right
+	
+	CubeConstraint = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CubeConstraint"));
+	CubeConstraint->SetupAttachment(MotionController);
+	CubeConstraint->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+	GrabsContraint = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("GrabsContraint"));
+	GrabsContraint->SetupAttachment(MotionController);
 
 	ControllerType = ELeeXRHandType::LeeXRController;
 }
@@ -114,10 +123,15 @@ void ALeeXRHandController::InittializeSetup()
 {
 	Super::InittializeSetup();
 
-	if(HandSkeletal->DoesSocketExist(TEXT("palm_r")))
-		GrabSphere->AttachToComponent(HandSkeletal, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "palm_r");
-	GrabSphere->SetRelativeLocation(FVector(0.0f, 2.5f, -2.5f));
+	//if(HandSkeletal->DoesSocketExist(TEXT("palm_r")))
+	//	GrabSphere->AttachToComponent(HandSkeletal, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "palm_r");
+	//GrabSphere->SetRelativeLocation(FVector(0.0f, 2.5f, -2.5f));
 
 	if(HandSkeletal->DoesSocketExist(TEXT("Index3")))
 		WidgetInteraction->SetupAttachment(HandSkeletal,TEXT("Index3"));
+}
+
+void ALeeXRHandController::InitPhysicSetup()
+{
+
 }
