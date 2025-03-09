@@ -42,7 +42,9 @@ class LEEMETAXRM_API ALeeXRHandTracking : public ALeeXRHandBase
 public:
 	ALeeXRHandTracking(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
+	TSubclassOf<class APhysicsConstraintActor> ConstraintAct;
+
 	virtual void OnGrabOneHand() override;
 
 	virtual void OnGrabOneHandRelease() override;
@@ -51,6 +53,7 @@ public:
 	void TickUntilGrasp(const UObject* WorldContextObject, ELeeTickUntilInputPin InputPin, struct FLatentActionInfo LatentInfo);
 
 
+	void ConstrainsActor(AActor* inActor);
 
 protected:
 

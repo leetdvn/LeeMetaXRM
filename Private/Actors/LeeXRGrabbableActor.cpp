@@ -166,7 +166,7 @@ void ALeeXRGrabbableActor::PhysicsContraintImplementation(UMotionControllerCompo
 			UStaticMeshComponent* StaticMeshComp = FindComponentByClass<UStaticMeshComponent>();
 
 
-			if (auto* skeletal = HandBase->GetHandSkeletal()) {
+			if (auto* skeletal = HandBase->GetPrimitiveComponent()) {
 				//HandSkeletalMeshRef = skeletal;
 
 
@@ -185,7 +185,7 @@ void ALeeXRGrabbableActor::PhysicsContraintImplementation(UMotionControllerCompo
 						}, 0.01f, true);
 
 				}
-				HandSkeletalMeshRef = skeletal;
+				HandSkeletalMeshRef = Cast<USkeletalMeshComponent>(skeletal);
 			}
 			GrabledContraintRef = inPhysicsContraint;
 			GrabledConstraintsRefs.AddUnique(inPhysicsContraint);

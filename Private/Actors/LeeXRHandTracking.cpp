@@ -5,6 +5,7 @@
 #include "OculusXRHandComponent.h"
 #include "HandPoseRecognizer.h"
 #include "Common/LeeXRUltils.h"
+#include "PhysicsEngine/PhysicsConstraintActor.h"
 
 
 using namespace LeeXRUltils;
@@ -12,6 +13,21 @@ using namespace LeeXRUltils;
 void ALeeXRHandTracking::TickUntilGrasp(const UObject* WorldContextObject, ELeeTickUntilInputPin InputPin, FLatentActionInfo LatentInfo)
 {
 	return TickUntil(WorldContextObject, InputPin, LatentInfo);
+}
+
+void ALeeXRHandTracking::ConstrainsActor(AActor* inActor)
+{
+	if (APhysicsConstraintActor* NewPhys = LeeXRSPawnActorBP<APhysicsConstraintActor>(this, ConstraintAct)) {
+
+		if (UPhysicsConstraintComponent* PhysicComp = NewPhys->GetConstraintComp()) {
+			//PhysicComp->SetConstrainedComponents(HandSkeletal, NAME_None,inActor, NAME_None);
+			//NewPhys->ConstraintActor1_DEPRECATED = this->GetOwner();
+			//NewPhys->ConstraintActor2_DEPRECATED = inActor;
+			//NewPhys->bDisableCollision_DEPRECATED = true;
+			//HandTrackingComp->SetPhysicsAsset(HandSkeletal->SkeletalMesh->PhysicsAsset);
+		}
+	}
+
 }
 
 
@@ -121,6 +137,7 @@ void ALeeXRHandTracking::Tick(float DeltaTime)
 		case LeeHandPose::LHandGrasp:
 			//if(!bIsHeld)
 				//GraspObject();
+			GrabsContraint =  PhysicContraint;
 			OnGrabObject();
 			if (bTeleportTraceActive) {
 				bTeleportTraceActive = false;
@@ -163,6 +180,7 @@ void ALeeXRHandTracking::InittializeSetup()
 		},1.f, false, 1.f);
 
 	
+
 	SphereIndex->SetSphereRadius(1.f);
 	SphereThumb->SetSphereRadius(1.f);
 }
@@ -191,6 +209,9 @@ void ALeeXRHandTracking::OnBeginOverlap(
 
 	if (HitIndexActor == HitThumbActor)
 		OnGrabOneHand();
+
+	LeeScreenLog("Overlap %s", FColor::Green, *OtherActor->GetName());
+	ConstrainsActor(OtherActor);
 }
 
 void ALeeXRHandTracking::OnEndOverlap(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)

@@ -128,6 +128,7 @@ void ALeeXRCharacter::BeginPlay()
 	Super::BeginPlay();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
+	ADDMEMORYSTAT(this, STAT_ICTUCharacterMemory);
 	InitializationContext(GetWorld(), DefaultMappingContext);
 	InitializationContext(GetWorld(), HandMappingContext, 1);
 
@@ -143,7 +144,6 @@ void ALeeXRCharacter::BeginPlay()
 
 		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
 	}
-	ADDMEMORYSTAT(this, STAT_ICTUCharacter);
 
 #if !UE_BUILD_SHIPPING
 	//LeeScreenLog("Hand Type %s", FColor::Green, *HandType.ToString());

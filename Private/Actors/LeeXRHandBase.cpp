@@ -51,7 +51,7 @@ void ALeeXRHandBase::BeginPlay()
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 
 	///Memory Stat
-	ADDMEMORYSTAT(this, STAT_ICTUController);
+	ADDMEMORYSTAT(this, STAT_HandController);
 
 	///Mapping Context
 	if (MenuContext) {
@@ -73,7 +73,7 @@ void ALeeXRHandBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 	///Reset Profile Memories
-	SET_MEMORY_STAT(STAT_ICTUController, 0);
+	SET_MEMORY_STAT(STAT_HandController, 0);
 
 
 }
@@ -273,6 +273,17 @@ void ALeeXRHandBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChang
 	}
 }
 #endif
+
+UPrimitiveComponent* ALeeXRHandBase::GetPrimitiveComponent(bool isController) const
+{
+	UPrimitiveComponent* PrimitiveComp = FindComponentByClass<UPrimitiveComponent>();
+
+	if (PrimitiveComp==nullptr) {
+		
+		LeeScreenLog("Primitive %s", FColor::Red,*PrimitiveComp->GetName());
+	}
+	return PrimitiveComp;
+}
 
 /// Grab Object
 void ALeeXRHandBase::OnGrabOneHand()

@@ -119,6 +119,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	USkeletalMeshComponent* GetHandSkeletal() const { return HandSkeletal.Get(); }
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UPrimitiveComponent* GetPrimitiveComponent(bool isController = true) const;
+
 	/// <summary>
 	/// Get Physics Constraint Component
 	/// </summary>
