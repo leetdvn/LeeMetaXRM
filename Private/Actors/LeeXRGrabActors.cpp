@@ -40,7 +40,15 @@ void ALeeXRGrabActors::BeginPlay()
 	
 	ADDMEMORYSTAT(this, STAT_LeeXRGrabable);
 
+
 	//AbilityComponent->AddGameplayCue(ObjectTags);
+}
+
+void ALeeXRGrabActors::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	SET_MEMORY_STAT(STAT_LeeXRGrabable, 0);
 }
 
 void ALeeXRGrabActors::OnGrab(UObject* inComponent,const FVector& InGrabLocation)

@@ -345,6 +345,7 @@ void ALeeXRHandBase::OnGrabObject()
 
 		}
 	}
+	LeeScreenLog("GTracking 2 %s", FColor::Green, *GetName());
 }
 
 /// Release Object 2
@@ -600,6 +601,7 @@ void ALeeXRHandBase::StartTeleportTrace()
 		TeleportRef = LeeXRSPawnActorBP<AActor>(this, TeleportVisualizer);
 	}
 }
+
 void ALeeXRHandBase::TryTeleport()
 {
 	UWorld* World = GetWorld();

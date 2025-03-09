@@ -141,10 +141,25 @@ protected:
 	/// </summary>
 	virtual void InitSettings();
 
+	/// <summary>
+	/// Physics Contraint Implementation
+	/// </summary>
+	/// <param name="inMCComponent"></param>
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void PhysicsContraintImplementation(UMotionControllerComponent *inMCComponent);
 
+	/// <summary>
+	/// Detach the object when the hand threshold exceed
+	/// </summary>
+	/// <param name="inMCComponent"></param>
+	/// <param name="inSkeletal"></param>
 	void DetachWhenHandThresholdExceed(UMotionControllerComponent* inMCComponent,USkeletalMeshComponent* inSkeletal);
 
+	/// <summary>
+	/// Detach the object when the hand threshold exceed
+	/// </summary>
+	/// <param name="inMCComponent"></param>
+	/// <param name="inStatiMesh"></param>
 	void DetachWhenHandThresholdExceed(UMotionControllerComponent* inMCComponent,UStaticMeshComponent* inStatiMesh);
 
 #if WITH_EDITOR

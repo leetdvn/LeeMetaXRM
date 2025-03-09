@@ -178,6 +178,12 @@ namespace LeeXRUltils
 		//Instance->UpdateStaticPermutation(StaticParameters);
 	}
 
+	/// <summary>
+	/// Set Material Instance Scalar Parameter Value
+	/// </summary>
+	/// <param name="Instance"></param>
+	/// <param name="ParameterName"></param>
+	/// <param name="Value"></param>
 	FORCEINLINE	void SetMaterialInstanceVectorParameterValue(UMaterialInstance* Instance, FName ParameterName, FColor Value)
 	{
 		TArray<FVectorParameterValue> StaticParameters = Instance->VectorParameterValues;
@@ -192,6 +198,12 @@ namespace LeeXRUltils
 		//Instance->UpdateOverridableBaseProperties();
 	}
 
+	/// <summary>
+	/// Set Material Instance Scalar Parameter Value
+	/// </summary>
+	/// <param name="Instance"></param>
+	/// <param name="ParameterName"></param>
+	/// <param name="Value"></param>
 	FORCEINLINE	void SetMaterialInstanceVectorParameterValue(UMaterialInstance* Instance, FName ParameterName, FLinearColor Value)
 	{
 		TArray<FVectorParameterValue> StaticParameters = Instance->VectorParameterValues;

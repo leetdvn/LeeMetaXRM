@@ -80,6 +80,8 @@ void ALeeXRHandController::SetInputComponent()
 
 void ALeeXRHandController::OnInputActionMove(const FInputActionInstance& ActionInstance)
 {
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+	
 	
 	ETriggerEvent TriggerEvent = ActionInstance.GetTriggerEvent();
 
@@ -88,7 +90,7 @@ void ALeeXRHandController::OnInputActionMove(const FInputActionInstance& ActionI
 	case ETriggerEvent::Triggered: {
 		if (TeleportValid()) {
 			bTeleportTraceActive = true;
-			FVector StartPos = HandSkeletal->GetComponentToWorld().GetLocation();
+			FVector StartPos = LeeXRGetWorldLocation(HandSkeletal);
 			FVector ForwardVec = NiagaraComponent->GetForwardVector();
 			TeleportTrace(StartPos, ForwardVec);
 		}

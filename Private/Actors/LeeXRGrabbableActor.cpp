@@ -7,6 +7,7 @@
 #include <SphereComponent.h>
 #include "Actors/LeeXRHandController.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
+#include "PhysicsEngine/PhysicsAsset.h"
 
 
 DEFINE_STAT(STAT_LeeXRGrabable);
@@ -147,7 +148,7 @@ void ALeeXRGrabbableActor::PhysicsContraintImplementation(UMotionControllerCompo
 {
 	LEE_SCOPE_CYCLE_COUNTER(LeeXRGrabable);
 
-
+	///Physics Contraint Implementation
 	if (auto* HandBase = inMCComponent->GetOwner<ALeeXRHandBase>()) {
 
 		if (auto inPhysicsContraint = HandBase->GetGrabsContraint()) {
@@ -189,9 +190,12 @@ void ALeeXRGrabbableActor::PhysicsContraintImplementation(UMotionControllerCompo
 			GrabledContraintRef = inPhysicsContraint;
 			GrabledConstraintsRefs.AddUnique(inPhysicsContraint);
 
-			//LeeScreenLog("Two Hand Constraint", FColor::Purple);
-			float MassChanged = LeeMassDefault / GrabledConstraintsRefs.Num();
-			StaticMeshComp->SetMassScale(NAME_None, MassChanged);
+			if (USkeletalMeshComponent* SkeletalMesh = HandBase->GetHandSkeletal()) {
+				float MassChanged = .386f * GrabledConstraintsRefs.Num();
+				SkeletalMesh->SetMassOverrideInKg(NAME_None, MassChanged);
+				//SkeletalMesh->SetSimulatePhysics(false);
+				//SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			}
 		}
 	}
 
@@ -265,6 +269,7 @@ void ALeeXRGrabbableActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	SET_MEMORY_STAT(STAT_LeeXRGrabableMemory, 0);
+	MemoriesSize = 0;
 }
 
 void ALeeXRGrabbableActor::OnGrab(UObject* inComponent, const FVector& InGrabLocation)

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <PhysicsEngine/PhysicsAsset.h>
 #include <NiagaraComponent.h>
 #include <LeeXRUltils.h>
 #include <Interfaces/LeeXRInteraction.h>

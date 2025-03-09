@@ -23,6 +23,7 @@ void ALeeXRGrabbableTwoHandActor::InitSettings()
 {
 	Super::InitSettings();
 
+	LEE_SCOPE_CYCLE_COUNTER(LeeXRGrabable);
 
 	FName CollisionProfile = GrabableType == ELeeXRGrabableType::LeeXROneHand ? TEXT("NoCollision") : TEXT("Grabbable");
 

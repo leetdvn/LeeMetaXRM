@@ -121,6 +121,7 @@ void ALeeXRHandTracking::Tick(float DeltaTime)
 		case LeeHandPose::LHandGrasp:
 			//if(!bIsHeld)
 				//GraspObject();
+			OnGrabObject();
 			if (bTeleportTraceActive) {
 				bTeleportTraceActive = false;
 				TryTeleport();
@@ -153,7 +154,10 @@ void ALeeXRHandTracking::InittializeSetup()
 	GetWorld()->GetTimerManager().SetTimer(AttachHandle, [this]() {
 			this->AttachOculusHandTracking(EOculusXRBone::Index_Tip, this->SphereIndex);
 			this->AttachOculusHandTracking(EOculusXRBone::Thumb_Tip, this->SphereThumb);
-			NiagaraComponent->SetupAttachment(HandTrackingComp, *UOculusXRInputFunctionLibrary::GetBoneName(EOculusXRBone::Wrist_Root));
+			if (HandTrackingComp->DoesSocketExist(*UOculusXRInputFunctionLibrary::GetBoneName(EOculusXRBone::Wrist_Root))) {
+				if(IsValid(NiagaraComponent))
+					NiagaraComponent->SetupAttachment(HandTrackingComp, *UOculusXRInputFunctionLibrary::GetBoneName(EOculusXRBone::Wrist_Root));
+			}
 			GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
 
 		},1.f, false, 1.f);
