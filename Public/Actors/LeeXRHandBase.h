@@ -137,6 +137,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UPhysicsConstraintComponent* GetGrabsContraint() const { return GrabsContraint.Get(); }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UWidgetInteractionComponent* GetWidgetInteractionComponent() const { return WidgetInteraction.Get(); }
 	/// <summary>
 	/// Grab One Hand
 	/// </summary>

@@ -10,7 +10,7 @@
 DEFINE_LOG_CATEGORY_STATIC(LogLeeXRPlayerController, Log, All)
 
 DECLARE_MEMORY_STAT_EXTERN(TEXT("ICTUPlayerController"), STAT_ICTUPlayerController, STATGROUP_ICTUMV, );
-DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT("ICTUPlayerControllerMemories"), ICTUPlayerControllerMemories, STATGROUP_ICTUMV, );
+DECLARE_MEMORY_STAT_POOL_EXTERN(TEXT("ICTUPlayerControllerMemories"), ICTUPlayerControllerMemories, STATGROUP_ICTUMV, FPlatformMemory::MCR_PhysicalLLM,);
 /**
  * Class for the player controller
  *
@@ -27,6 +27,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 };

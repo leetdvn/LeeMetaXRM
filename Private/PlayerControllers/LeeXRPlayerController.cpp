@@ -20,7 +20,17 @@ void ALeeXRPlayerController::BeginPlay()
 	LEE_SCOPE_CYCLE_COUNTER(ICTUPlayerController);
 
 	///Memory Stat
-	INC_MEMORY_STAT_BY(ICTUPlayerControllerMemories, this->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal));
+	ADDMEMORYSTAT(this, ICTUPlayerControllerMemories);
+
+
+}
+
+void ALeeXRPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	SET_CYCLE_COUNTER(STAT_ICTUPlayerController, 0);
+	SET_MEMORY_STAT(ICTUPlayerControllerMemories, 0);
 
 
 }

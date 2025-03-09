@@ -53,17 +53,17 @@ void ALeeXRHandBase::BeginPlay()
 	///Memory Stat
 	ADDMEMORYSTAT(this, STAT_HandController);
 
-	///Mapping Context
+	///Mapping Context input
 	if (MenuContext) {
 		InitializationContext(GetWorld(),DefaultContext ,0);
 		InitializationContext(GetWorld(), MenuContext, 0);
 		InitializationContext(GetWorld(), HandContext, 1);
 
 	}
-
-
+	///Set Up input Component
 	SetInputComponent();
 
+	///Initialize the setup
 	InittializeSetup();
 
 }

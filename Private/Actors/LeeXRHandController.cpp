@@ -130,6 +130,13 @@ void ALeeXRHandController::InittializeSetup()
 
 	if(HandSkeletal->DoesSocketExist(TEXT("Index3")))
 		WidgetInteraction->SetupAttachment(HandSkeletal,TEXT("Index3"));
+
+	//Set Up Bone Physisc
+	FString BoneName = HandType == EControllerHand::Right ? "hand_r" : "hand_l";
+	if (HandSkeletal) {
+		HandSkeletal->SetAllBodiesBelowSimulatePhysics(*BoneName, true, true);
+		HandSkeletal->SetAllBodiesBelowPhysicsBlendWeight(*BoneName, .15f, true);
+	}
 }
 
 void ALeeXRHandController::InitPhysicSetup()
