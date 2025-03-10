@@ -7,7 +7,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include <HeadMountedDisplayFunctionLibrary.h>
-
+#include "APawn/LeeXRCharacter.h"
 
 ALeeXRHandController::ALeeXRHandController(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -15,41 +15,17 @@ ALeeXRHandController::ALeeXRHandController(const FObjectInitializer& ObjectIniti
 	HandSkeletal = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandSkeletal"));
 	HandSkeletal->SetupAttachment(MotionController);
 
-	HandDebug = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandDebug"));
-	HandDebug->SetupAttachment(MotionController);
-	//GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphereCollison"));
-	//GrabSphere->SetupAttachment(HandSkeletal);
-	//Set Init Hand Left or Right
-	
-	CubeConstraint = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CubeConstraint"));
-	CubeConstraint->SetupAttachment(MotionController);
-	CubeConstraint->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-
 	GrabsContraint = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("GrabsContraint"));
 	GrabsContraint->SetupAttachment(MotionController);
 
 	ControllerType = ELeeXRHandType::LeeXRController;
 
-	//HandSkeletal->bBlendPhysics = true;
+	HandSkeletal->bBlendPhysics = 0;
 
 }
 
-void ALeeXRHandController::SetPhysicsAllBodyBlendWeight(float inWeight)
-{
-	//Set Up Bone Physisc
-	FString BoneName = HandType == EControllerHand::Right ? "hand_r" : "hand_l";
-	if (HandSkeletal) {
-		
-		HandSkeletal->SetPhysicsBlendWeight(inWeight);
-		HandSkeletal->SetAllBodiesBelowSimulatePhysics(*BoneName, true);
-		HandSkeletal->SetAllBodiesBelowPhysicsBlendWeight(*BoneName, inWeight, false, true);
-		HandSkeletal->AccumulateAllBodiesBelowPhysicsBlendWeight(*BoneName, .15f);
-		LEE_LOG(LogLeeXRHandController, Log, "Set Physics All Body Blend Weight %f", inWeight);
-	
 
 
-	}
-}
 
 void ALeeXRHandController::OnGrabOneHand()
 {
@@ -155,7 +131,6 @@ void ALeeXRHandController::InittializeSetup()
 	if(HandSkeletal->DoesSocketExist(TEXT("Index3")))
 		WidgetInteraction->SetupAttachment(HandSkeletal,TEXT("Index3"));
 
-	//SetPhysicsAllBodyBlendWeight(BodyWeighted);
 }
 
 void ALeeXRHandController::InitPhysicSetup()

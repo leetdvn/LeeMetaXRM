@@ -58,6 +58,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	ALeeXRHandBase* GetHand(bool isLeft) const { return isLeft ? XRHandLeft : XRHandRight; }
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	USkeletalMeshComponent* GetHandPhysics(bool isLeft) const { return isLeft ? HandPhysicsLeft.Get() : HandPhysicsRight.Get(); }
+
 	UFUNCTION(BlueprintCallable,  Category = "LeeXR|Func")
 	void SetHandType(ELeeXRHandType inType) { HandType = inType; }
 
@@ -66,6 +69,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void UpdateClimbing();
+
+	void SetPhysicsAllBodyBlendWeight(float inWeight,bool isLeft);
+
+	void PauseHandPhysics(bool isEnable = true,bool isLeft = true);
 
 protected:
 	// Called when the game starts or when spawned
@@ -99,6 +106,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<ALeeXRHandBase> XRHandRight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
+	TObjectPtr <USkeletalMeshComponent> HandPhysicsLeft;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
+	TObjectPtr<USkeletalMeshComponent> HandPhysicsRight;
 
 	UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "LeeXR Settings|Data")
 	ULeeXRHandDataAsset* DataLeft;

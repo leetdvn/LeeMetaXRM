@@ -20,6 +20,7 @@
 #include <NiagaraFunctionLibrary.h>
 #include "Actors/LeeXRGrabbableActor.h"
 #include "Actors/LeeXRHandPhysics.h"
+#include "PhysicsEngine/PhysicsConstraintComponent.h"
 
 
 using namespace LeeXRUltils;
@@ -45,6 +46,11 @@ ALeeXRCharacter::ALeeXRCharacter()
 	DisplayMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DisplayMesh"));
 	DisplayMesh->SetupAttachment(Camera);
 
+	HandPhysicsLeft = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandPhysicsLeft"));
+	HandPhysicsRight = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandPhysicsRight"));
+
+	HandPhysicsLeft->SetupAttachment(LeeXROrigin);
+	HandPhysicsRight->SetupAttachment(LeeXROrigin);
 }
 
 
@@ -119,6 +125,34 @@ void ALeeXRCharacter::UpdateClimbing()
 
 }
 
+void ALeeXRCharacter::SetPhysicsAllBodyBlendWeight(float inWeight,bool isLeft)
+{
+	//Set Up Bone Physisc
+	FString BoneName = isLeft ? "hand_r" : "hand_l";
+	USkeletalMeshComponent* Hand = isLeft ? HandPhysicsLeft : HandPhysicsRight;
+	if (Hand) {
+		Hand->SetAllBodiesBelowSimulatePhysics(*BoneName, true);
+		Hand->SetAllBodiesBelowPhysicsBlendWeight(*BoneName, inWeight, false, true);
+		LEE_LOG(LogLeeXRHandController, Log, "Set Physics All Body Blend Weight %f", inWeight);
+	}
+}
+
+void ALeeXRCharacter::PauseHandPhysics(bool isEnable, bool isLeft)
+{
+	FString BoneName = isLeft ? "hand_r" : "hand_l";
+
+	float Weight = isEnable ? 1.f : 0.f;
+	USkeletalMeshComponent* Hand = isLeft ? HandPhysicsLeft : HandPhysicsRight;
+	ALeeXRHandBase* HandBase = isLeft ? XRHandLeft : XRHandRight;
+	Hand->SetAllBodiesBelowSimulatePhysics(*BoneName, isEnable, true);
+	Hand->SetAllBodiesBelowPhysicsBlendWeight(*BoneName, Weight);
+
+	if (isEnable)
+		Hand->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	else
+		Hand->AttachToComponent(HandBase->GetHandSkeletal(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, *BoneName);
+}
+
 // Called when the game starts or when spawned
 void ALeeXRCharacter::BeginPlay()
 {
@@ -146,6 +180,21 @@ void ALeeXRCharacter::BeginPlay()
 	}
 
 
+	//init COntraints
+
+	TArray<ALeeXRHandBase*> Hands = { XRHandLeft,XRHandRight };
+	for (auto Hand : Hands)
+	{
+		if (IsValid(Hand)) {
+			if (UPhysicsConstraintComponent* PhysicContraint = Hand->GetPhysicsContraint()) {
+				USkeletalMeshComponent* HandPhys= Hand->IsHandLeft() ? HandPhysicsLeft : HandPhysicsRight;
+				PhysicContraint->SetConstrainedComponents(Hand->GetHandSkeletal(), TEXT("hand_r"), HandPhys, TEXT("hand_r"));
+			}
+		}
+	}
+
+	HandPhysicsRight->SetAllBodiesBelowSimulatePhysics(TEXT("hand_r"), true);
+	HandPhysicsRight->SetAllBodiesBelowPhysicsBlendWeight(TEXT("hand_r"), 0.2f);
 }
 
 void ALeeXRCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)

@@ -156,9 +156,9 @@ void ALeeXRHandBase::InittializeSetup()
 
 
 	//Set Show Debug
-	HandDebug->SetActive(bShowDebug);
-	HandDebug->SetVisibility(bShowDebug);
-	HandDebug->SetHiddenInGame(!bShowDebug);
+	//HandDebug->SetActive(bShowDebug);
+	//HandDebug->SetVisibility(bShowDebug);
+	//HandDebug->SetHiddenInGame(!bShowDebug);
 }
 
 // Finger Animation type Hand Controller Only
@@ -166,7 +166,7 @@ void ALeeXRHandBase::OnFingerAnimation(const FInputActionInstance& ActionInstanc
 {
 	
 	SetFingerAnimationPose(HandSkeletal, ActionInstance);
-	SetFingerAnimationPose(HandDebug, ActionInstance);
+	//SetFingerAnimationPose(HandDebug, ActionInstance);
 }
 
 //Has Overlap Actor Func

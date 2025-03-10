@@ -32,14 +32,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UAnimInstance* GetABPInstance() const { return HandSkeletal->GetAnimInstance(); }
 
-	UPROPERTY(EditAnyWhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
-	TObjectPtr<UStaticMeshComponent> CubeConstraint;
-
 	UPROPERTY(EditAnyWhere, BluePrintReadWrite, Category = "LeeXR Settings|Properties", meta = (ClampMin = "0", ClampMax = "1"))
 	float BodyWeighted=.25f;
-
-	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
-	void SetPhysicsAllBodyBlendWeight(float inWeight);
 
 	/// <summary>
 	///	Grap Object

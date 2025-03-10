@@ -29,7 +29,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-#ifdef WITH_EDITOR
+#if WITH_EDITOR
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

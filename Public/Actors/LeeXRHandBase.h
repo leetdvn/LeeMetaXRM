@@ -140,6 +140,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UWidgetInteractionComponent* GetWidgetInteractionComponent() const { return WidgetInteraction.Get(); }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	bool IsHandLeft() const { return HandType == EControllerHand::Left ? true : false; }
+
 	/// <summary>
 	/// Grab One Hand
 	/// </summary>
@@ -257,7 +261,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UOculusXRHandComponent> HandTrackingComp;
 
-	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
+	UPROPERTY(Instanced,EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components", meta = (ExposeOnSpawn = true))
 	TObjectPtr<class USkeletalMeshComponent> HandSkeletal=nullptr;
 
 	UPROPERTY(EditAnyWhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
