@@ -20,6 +20,7 @@
 #include <NiagaraFunctionLibrary.h>
 #include "Actors/LeeXRGrabbableActor.h"
 #include "Actors/LeeXRHandPhysics.h"
+#include "PhysicsEngine/PhysicsConstraintComponent.h"
 
 
 using namespace LeeXRUltils;
@@ -174,7 +175,7 @@ void ALeeXRCharacter::PauseHandPhysics(bool isEnable, bool isLeft)
 	if (isEnable)
 		Hand->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	else
-		Hand->AttachToComponent(HandBase->GetHandSkeletal(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, *BoneName);
+		Hand->AttachToComponent(LeeXROrigin, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 
 // Called when the game starts or when spawned
