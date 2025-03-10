@@ -6,6 +6,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "LeeXRMeshSocket.generated.h"
 
+UDELEGATE()
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMeshSocketUpdate);
 
 struct FGameplayTag;
 /**
@@ -41,6 +43,8 @@ public:
 	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	bool IsDone = false;
 
+	UPROPERTY(EditAnyWhere, BlueprintAssignable,Category = "LeeXR|Delegate", meta = (DisplayName = "On Mesh Snap"))
+	FOnMeshSocketUpdate OnMeshSocketUpdate;
 
 	UFUNCTION(BlueprintCallable)
 	void SetFlicker(bool isTurnOn);

@@ -166,7 +166,7 @@ void ALeeXRGrabbableActor::PhysicsContraintImplementation(UMotionControllerCompo
 			UStaticMeshComponent* StaticMeshComp = FindComponentByClass<UStaticMeshComponent>();
 
 
-			if (auto* skeletal = HandBase->GetPrimitiveComponent()) {
+			if (auto* skeletal = HandBase->GetHandSkeletal()) {
 				//HandSkeletalMeshRef = skeletal;
 
 
@@ -186,16 +186,19 @@ void ALeeXRGrabbableActor::PhysicsContraintImplementation(UMotionControllerCompo
 
 				}
 				HandSkeletalMeshRef = Cast<USkeletalMeshComponent>(skeletal);
-			}
-			GrabledContraintRef = inPhysicsContraint;
-			GrabledConstraintsRefs.AddUnique(inPhysicsContraint);
 
-			if (USkeletalMeshComponent* SkeletalMesh = HandBase->GetHandSkeletal()) {
-				float MassChanged = .386f * GrabledConstraintsRefs.Num();
-				SkeletalMesh->SetMassOverrideInKg(NAME_None, MassChanged);
-				//SkeletalMesh->SetSimulatePhysics(false);
-				//SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				GrabledContraintRef = inPhysicsContraint;
+				GrabledConstraintsRefs.AddUnique(inPhysicsContraint);
+
+				if (USkeletalMeshComponent* SkeletalMesh = HandBase->GetHandSkeletal()) {
+					float MassChanged = .386f * GrabledConstraintsRefs.Num();
+					SkeletalMesh->SetMassOverrideInKg(NAME_None, MassChanged);
+					//SkeletalMesh->SetSimulatePhysics(false);
+					//SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				}
+
 			}
+
 		}
 	}
 

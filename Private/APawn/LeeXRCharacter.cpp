@@ -145,15 +145,6 @@ void ALeeXRCharacter::BeginPlay()
 		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
 	}
 
-#if !UE_BUILD_SHIPPING
-	//LeeScreenLog("Hand Type %s", FColor::Green, *HandType.ToString());
-	UKismetSystemLibrary::ExecuteConsoleCommand(this, TEXT("ShowFlag.Collision"));
-	UKismetSystemLibrary::ExecuteConsoleCommand(this, TEXT("Show collision"));
-	UKismetSystemLibrary::ExecuteConsoleCommand(this, TEXT("STAT ICTUMV"));
-
-#endif
-
-
 
 }
 
@@ -164,7 +155,6 @@ void ALeeXRCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	///Reset Profile Memories
 	SET_MEMORY_STAT(STAT_ICTUCharacter, 0);
-	SET_MEMORY_STAT(STAT_ICTUMV_TotalMemories, 0);
 }
 
 #if WITH_EDITOR

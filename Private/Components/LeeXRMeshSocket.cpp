@@ -69,6 +69,7 @@ void ULeeXRMeshSocket::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
 	if (SphereCollision) return;
 
 
+	///Check if the object is a grabbable object
 	if (SweepResult.HasValidHitObjectHandle())
 	{
 		ALeeXRGrabActors* GrabActor = CastChecked<ALeeXRGrabActors>(OtherActor);
@@ -78,7 +79,7 @@ void ULeeXRMeshSocket::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
 		{
 			SetCorrectShape(true);
 			//if (!GrabActor->IsSimulation()) return;
-
+			OnMeshSocketUpdate.Broadcast();
 			{
 				GrabActor->SetSimulation(false);
 				GrabActor->SetFreeze(GrabActor->IsFreeze());

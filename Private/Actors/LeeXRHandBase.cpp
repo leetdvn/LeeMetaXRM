@@ -114,7 +114,8 @@ void ALeeXRHandBase::SetInputComponent()
 		EnhancedInputComponent->BindAction(IA_FingerPoint, ETriggerEvent::Completed, this, &ALeeXRHandBase::OnFingerAnimation);
 
 		EnhancedInputComponent->BindAction(IA_HandLog, ETriggerEvent::Started, this, &ALeeXRHandBase::LogReconize);
-		LeeScreenLog("Setting Input Component",FColor::Blue);
+		//LeeScreenLog("Setting Input Component",FColor::Blue);
+		LEE_LOG(LogLeeXRHandBase, Log, "Setting Input Component");
 	}
 }
 
@@ -152,6 +153,12 @@ void ALeeXRHandBase::InittializeSetup()
 		}
 	}
 
+
+
+	//Set Show Debug
+	HandDebug->SetActive(bShowDebug);
+	HandDebug->SetVisibility(bShowDebug);
+	HandDebug->SetHiddenInGame(!bShowDebug);
 }
 
 // Finger Animation type Hand Controller Only
@@ -159,6 +166,7 @@ void ALeeXRHandBase::OnFingerAnimation(const FInputActionInstance& ActionInstanc
 {
 	
 	SetFingerAnimationPose(HandSkeletal, ActionInstance);
+	SetFingerAnimationPose(HandDebug, ActionInstance);
 }
 
 //Has Overlap Actor Func
@@ -193,29 +201,27 @@ void ALeeXRHandBase::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, 
 
 	FString ActName = ActionInstance.GetSourceAction()->GetName();
 
-	ULeeXRAnimInstance* AnimIns = CastChecked<ULeeXRAnimInstance>(inComponet->GetAnimInstance());
-	if (!AnimIns) return;
+	if (ULeeXRAnimInstance* AnimIns = Cast<ULeeXRAnimInstance>(inComponet->GetAnimInstance())) {
+		if (ActName == this->IA_FingerPoint->GetName())
+		{
+			AnimIns->PoseAlphaPoint = PoseValueStartCancel;
+		}
+		else if (ActName == this->IA_CurlIndex->GetName())
+		{
+			AnimIns->PoseAlphaIndexCurl = PoseValueCancelCompleted;
+		}
+		else if (ActName == this->IA_HandThumpUp->GetName())
+		{
+			AnimIns->PoseAlphaThumbUp = PoseValueStartCancel;
+		}
+		else if (ActName == this->IA_Grasp->GetName())
+		{
+			AnimIns->PoseAlphaGrasp = PoseValueCancelCompleted;
 
-	if (ActName == this->IA_FingerPoint->GetName())
-	{
-		AnimIns->PoseAlphaPoint = PoseValueStartCancel;
+			PoseValueCancelCompleted == 1 ?
+				OnGrabObject() : OnReleaseObject();
+		}
 	}
-	else if (ActName == this->IA_CurlIndex->GetName())
-	{
-		AnimIns->PoseAlphaIndexCurl = PoseValueCancelCompleted;
-	}
-	else if (ActName == this->IA_HandThumpUp->GetName())
-	{
-		AnimIns->PoseAlphaThumbUp = PoseValueStartCancel;
-	}
-	else if (ActName == this->IA_Grasp->GetName())
-	{
-		AnimIns->PoseAlphaGrasp = PoseValueCancelCompleted;
-
-		PoseValueCancelCompleted == 1 ?
-			OnGrabObject() : OnReleaseObject();
-	}
-
 }
 
 // Switch Hand Type
@@ -252,37 +258,27 @@ void ALeeXRHandBase::SetHandSwitch(bool isLeft)
 void ALeeXRHandBase::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-	if (PropertyChangedEvent.Property)
+
+	if (PROPERTYCHANGED(ALeeXRHandBase, ControllerType)) {
+		if (ControllerType == ELeeXRHandType::LeeXRHandTracking)
+		{
+			//Do Something With Hand Tracking Editor Mode
+			
+		}
+		else {
+			//Do Something With Hand Controller Editor Mode
+		}
+	}
+	else if (PROPERTYCHANGED(ALeeXRHandBase, HandType))
 	{
-		FName PropertyName = PropertyChangedEvent.Property->GetFName();
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(ALeeXRHandBase,ControllerType))
-		{
-			if (ControllerType == ELeeXRHandType::LeeXRHandTracking)
-			{
-				//Do Something With Hand Tracking Editor Mode
-	
-			}
-			else {
-				//Do Something With Hand Controller Editor Mode
-			}
-		}
-		else if (PropertyName == GET_MEMBER_NAME_CHECKED(ALeeXRHandBase, HandType))
-		{
-			OnHandTypeChanged();
-		}
+		OnHandTypeChanged();
 	}
 }
 #endif
 
 UPrimitiveComponent* ALeeXRHandBase::GetPrimitiveComponent(bool isController) const
 {
-	UPrimitiveComponent* PrimitiveComp = FindComponentByClass<UPrimitiveComponent>();
-
-	if (PrimitiveComp==nullptr) {
-		
-		LeeScreenLog("Primitive %s", FColor::Red,*PrimitiveComp->GetName());
-	}
-	return PrimitiveComp;
+	return FindComponentByClass<UPrimitiveComponent>();
 }
 
 /// Grab Object
@@ -356,7 +352,9 @@ void ALeeXRHandBase::OnGrabObject()
 
 		}
 	}
-	LeeScreenLog("GTracking 2 %s", FColor::Green, *GetName());
+	FString msg = __FUNCTION__;
+	LEE_LOG(LogLeeXRHandBase, Log, "Func %s", *msg);
+	//LeeScreenLog("GTracking 2 %s", FColor::Green, *GetName());
 }
 
 /// Release Object 2

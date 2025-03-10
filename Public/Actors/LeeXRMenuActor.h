@@ -31,6 +31,7 @@ public:
 private:
 
 	TObjectPtr<class UWidgetInteractionComponent> WGInteractionRefLeft=nullptr;
+
 	TObjectPtr<class UWidgetInteractionComponent> WGInteractionRefRight=nullptr;
 
 	TObjectPtr<class UMOtionControllerComponent> MotionControllerRef;

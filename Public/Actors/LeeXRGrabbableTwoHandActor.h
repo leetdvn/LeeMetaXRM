@@ -11,8 +11,6 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogLeeXRGrabbableTwoHandActor, Log, All)
 
-
-
 /**
  * 
  */

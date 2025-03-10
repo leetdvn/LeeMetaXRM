@@ -226,6 +226,9 @@ protected:
 	bool bTeleportTraceActive;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Varibles")
+	bool bShowDebug=true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Varibles")
 	TObjectPtr<AActor> TeleportRef;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Actors")
@@ -256,6 +259,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class USkeletalMeshComponent> HandSkeletal=nullptr;
+
+	UPROPERTY(EditAnyWhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
+	TObjectPtr<class USkeletalMeshComponent> HandDebug=nullptr;
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UHandPoseRecognizer> HandPoseRecognizer = nullptr;
