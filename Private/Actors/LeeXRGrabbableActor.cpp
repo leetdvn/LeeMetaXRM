@@ -8,6 +8,7 @@
 #include "Actors/LeeXRHandController.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "PhysicsEngine/PhysicsAsset.h"
+#include "APawn/LeeXRCharacter.h"
 
 
 DEFINE_STAT(STAT_LeeXRGrabable);
@@ -165,13 +166,16 @@ void ALeeXRGrabbableActor::PhysicsContraintImplementation(UMotionControllerCompo
 			USkeletalMeshComponent* SkeletalComp = FindComponentByClass<USkeletalMeshComponent>();
 			UStaticMeshComponent* StaticMeshComp = FindComponentByClass<UStaticMeshComponent>();
 
+			ALeeXRCharacter* XRCharacter = LeeXRGetCustomCharacter<ALeeXRCharacter>(this);
+			bool isLeft = HandBase->GetHandType() == EControllerHand::Left;
 
-			if (auto* skeletal = HandBase->GetHandSkeletal()) {
+			if (auto* skeletal = LeeXRGetCustomCharacter<ALeeXRCharacter>(this)->GetHandPhysics(isLeft)) {
 				//HandSkeletalMeshRef = skeletal;
 
-
+				LEE_LOG(LeeXRMacro, Log, "HandSkeletalMeshRef %s", *skeletal->GetName());
 				if (StaticMeshComp) {
 					inPhysicsContraint->SetConstrainedComponents(skeletal, *HandSocket, StaticMeshComp, NAME_None);
+					inPhysicsContraint->UpdateConstraintFrames();
 					GetWorld()->GetTimerManager().SetTimer(TimerWeighted, [this, inMCComponent,StaticMeshComp]() {
 						DetachWhenHandThresholdExceed(inMCComponent,StaticMeshComp);
 						}, 0.01f, true);

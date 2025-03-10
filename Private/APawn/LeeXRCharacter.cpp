@@ -45,6 +45,12 @@ ALeeXRCharacter::ALeeXRCharacter()
 	DisplayMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DisplayMesh"));
 	DisplayMesh->SetupAttachment(Camera);
 
+	HandPhysicsLeft = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandPhysicsLeft"));
+	HandPhysicsRight = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandPhysicsRight"));
+
+	HandPhysicsLeft->SetupAttachment(LeeXROrigin);
+	HandPhysicsRight->SetupAttachment(LeeXROrigin);
+
 }
 
 
@@ -119,6 +125,58 @@ void ALeeXRCharacter::UpdateClimbing()
 
 }
 
+void ALeeXRCharacter::InitPhysicsContraints()
+{
+	if (!IsValid(XRHandLeft) || !IsValid(XRHandRight)) return;
+
+	TArray<ALeeXRHandBase*> Hands = { XRHandLeft,XRHandRight };
+	for (auto Hand : Hands)
+	{
+		if (IsValid(Hand)) {
+			if (UPhysicsConstraintComponent* PhysicContraint = Hand->GetPhysicsContraint()) {
+				USkeletalMeshComponent* HandPhys = Hand->IsHandLeft() ? HandPhysicsLeft : HandPhysicsRight;
+				FString BoneName = Hand->IsHandLeft() ? "hand_l" : "hand_r";
+				PhysicContraint->SetConstrainedComponents(Hand->GetHandSkeletal(), *BoneName, HandPhys, *BoneName);
+			}
+		}
+	}
+}
+
+UAnimInstance* ALeeXRCharacter::GetPhysicsAnimInstance(bool isLeft)
+{
+	if (!IsValid(HandPhysicsLeft) || !IsValid(HandPhysicsRight)) return nullptr;
+
+	return isLeft ? HandPhysicsLeft->GetAnimInstance() : HandPhysicsRight->GetAnimInstance();
+}
+
+void ALeeXRCharacter::SetPhysicsAllBodyBlendWeight(float inWeight,bool isLeft)
+{
+	//Set Up Bone Physisc
+	FString BoneName = isLeft ? "hand_r" : "hand_l";
+	USkeletalMeshComponent* Hand = isLeft ? HandPhysicsLeft : HandPhysicsRight;
+	if (Hand) {
+		Hand->SetAllBodiesBelowSimulatePhysics(*BoneName, true);
+		Hand->SetAllBodiesBelowPhysicsBlendWeight(*BoneName, inWeight, false, true);
+		LEE_LOG(LogLeeXRHandController, Log, "Set Physics All Body Blend Weight %f", inWeight);
+	}
+}
+
+void ALeeXRCharacter::PauseHandPhysics(bool isEnable, bool isLeft)
+{
+	FString BoneName = isLeft ? "hand_r" : "hand_l";
+
+	float Weight = isEnable ? .2f : 0.f;
+	USkeletalMeshComponent* Hand = isLeft ? HandPhysicsLeft : HandPhysicsRight;
+	ALeeXRHandBase* HandBase = isLeft ? XRHandLeft : XRHandRight;
+	Hand->SetAllBodiesBelowSimulatePhysics(*BoneName, isEnable, true);
+	Hand->SetAllBodiesBelowPhysicsBlendWeight(*BoneName, Weight);
+
+	if (isEnable)
+		Hand->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	else
+		Hand->AttachToComponent(HandBase->GetHandSkeletal(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, *BoneName);
+}
+
 // Called when the game starts or when spawned
 void ALeeXRCharacter::BeginPlay()
 {
@@ -146,6 +204,12 @@ void ALeeXRCharacter::BeginPlay()
 	}
 
 
+	//init COntraints
+	InitPhysicsContraints();
+
+	HandPhysicsRight->SetAllBodiesBelowSimulatePhysics(TEXT("hand_r"), true);
+	PauseHandPhysics(true, false);
+	//HandPhysicsRight->SetAllBodiesBelowPhysicsBlendWeight(TEXT("hand_r"), 0.15f);
 }
 
 void ALeeXRCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -201,7 +265,9 @@ void ALeeXRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	{
 		// Bind the action to the delegate
 		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Started, this, &ALeeXRCharacter::OnMoving);
-		//EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ALeeXRCharacter::OnMoving);
+
+		EnhancedInputComponent->BindAction(IA_RMenuToogle, ETriggerEvent::Started, this, &ALeeXRCharacter::OnResetOrientation);
+		EnhancedInputComponent->BindAction(IA_Turn, ETriggerEvent::Started, this, &ALeeXRCharacter::OnTurn);
 
 		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Started, this, &ALeeXRCharacter::OnHandGrabing);
 		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Completed, this, &ALeeXRCharacter::OnHandRelease);
@@ -260,6 +326,22 @@ void ALeeXRCharacter::OnHandGrabing(const FInputActionInstance& ActionInstance)
 		ETriggerEvent inEventType = ActionInstance.GetTriggerEvent();
 		LeeAnimIns->PoseAlphaGrasp = inEventType == ETriggerEvent::Started ? 1.0f : 0.0f;
 	}
+}
+
+void ALeeXRCharacter::OnResetOrientation()
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
+}
+
+void ALeeXRCharacter::OnTurn(const FInputActionInstance& ActionInstance)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	LeeScreenLog("Turn", FColor::Green);
+	//FRotator CurrentRotation = GetActorRotation();
+	//FRotator NewRotation = CurrentRotation + FRotator(0.0f, 90.0f, 0.0f);
+	//SetActorRotation(NewRotation);
 }
 
 // Initialize the hands

@@ -67,6 +67,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void UpdateClimbing();
 
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	USkeletalMeshComponent* GetHandPhysics(bool isLeft) const { return isLeft ? HandPhysicsLeft : HandPhysicsRight; }
+
+	void InitPhysicsContraints();
+
+	UAnimInstance* GetPhysicsAnimInstance(bool isLeft);
+
+	void SetPhysicsAllBodyBlendWeight(float inWeight,bool isLeft);
+
+	void PauseHandPhysics(bool isEnable = true,bool isLeft = true);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -100,11 +111,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<ALeeXRHandBase> XRHandRight;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
+	TObjectPtr<USkeletalMeshComponent> HandPhysicsLeft;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
+	TObjectPtr<USkeletalMeshComponent> HandPhysicsRight;
+
 	UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "LeeXR Settings|Data")
 	ULeeXRHandDataAsset* DataLeft;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Data")
 	ULeeXRHandDataAsset* DataRight;
+
 
 #pragma endregion Components
 
@@ -148,6 +166,12 @@ public:
 
 	UFUNCTION()
 	void OnHandGrabing(const FInputActionInstance& ActionInstance);
+
+	UFUNCTION()
+	void OnResetOrientation();
+
+	UFUNCTION()
+	void OnTurn(const FInputActionInstance& ActionInstance);
 private:
 
 	TObjectPtr<class ALeeXRGrabbableActor> HeldLeftObject;

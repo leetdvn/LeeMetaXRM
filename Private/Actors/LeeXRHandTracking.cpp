@@ -137,7 +137,6 @@ void ALeeXRHandTracking::Tick(float DeltaTime)
 		case LeeHandPose::LHandGrasp:
 			//if(!bIsHeld)
 				//GraspObject();
-			GrabsContraint =  PhysicContraint;
 			OnGrabObject();
 			if (bTeleportTraceActive) {
 				bTeleportTraceActive = false;

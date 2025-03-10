@@ -11,6 +11,7 @@
 #include "Actors/LeeXRTeleportActor.h"
 #include "APawn/LeeXRCharacter.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
+#include "StaticMeshComponent.h"
 
 
 DEFINE_STAT(STAT_ICTUController);
@@ -35,6 +36,7 @@ ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 
 	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
 	NiagaraComponent->SetupAttachment(MotionController);
+
 }
 
 bool ALeeXRHandBase::IsValidControllerType(ELeeXRHandType inType)
@@ -164,9 +166,14 @@ void ALeeXRHandBase::InittializeSetup()
 // Finger Animation type Hand Controller Only
 void ALeeXRHandBase::OnFingerAnimation(const FInputActionInstance& ActionInstance)
 {
-	
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 	SetFingerAnimationPose(HandSkeletal, ActionInstance);
-	SetFingerAnimationPose(HandDebug, ActionInstance);
+
+	if (XRCharacter) {
+		SetFingerAnimationPose(XRCharacter->GetHandPhysics(IsHandLeft()), ActionInstance);
+	}
+
+	//SetFingerAnimationPose(HandDebug, ActionInstance);
 }
 
 //Has Overlap Actor Func

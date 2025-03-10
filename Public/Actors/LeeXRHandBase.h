@@ -140,6 +140,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UWidgetInteractionComponent* GetWidgetInteractionComponent() const { return WidgetInteraction.Get(); }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	bool IsHandLeft() const { return HandType == EControllerHand::Left; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UPhysicsConstraintComponent* GetPhysicsContraints() const { return PhysicContraint.Get(); }
+
 	/// <summary>
 	/// Grab One Hand
 	/// </summary>
