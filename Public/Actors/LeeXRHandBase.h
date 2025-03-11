@@ -147,6 +147,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UPhysicsConstraintComponent* GetPhysicsContraints() const { return PhysicContraint.Get(); }
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UPoseableMeshComponent* GetPoseableMesh() const { return PoseableMesh.Get(); }
+
+	void PoseableSpawned(USceneComponent* inParent,USkeletalMesh* inAsset,USkeletalMeshComponent* inSkeletalRef);
+
 	/// <summary>
 	/// Grab One Hand
 	/// </summary>
@@ -185,6 +190,7 @@ protected:
 
 	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance);
 
+
 	void SetHandSwitch(bool isLeft);
 	bool bIsCanGrasp;
 
@@ -216,6 +222,7 @@ protected:
 	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	FVector GetTeleportLocation(const class ALeeXRCharacter* inXRCharacter);
+
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Varibles")
 	TArray<FVector> TeleportTracePathPositions;
@@ -267,9 +274,6 @@ protected:
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class USkeletalMeshComponent> HandSkeletal=nullptr;
 
-	UPROPERTY(EditAnyWhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
-	TObjectPtr<class USkeletalMeshComponent> HandDebug=nullptr;
-
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UHandPoseRecognizer> HandPoseRecognizer = nullptr;
 
@@ -278,6 +282,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UPhysicsConstraintComponent> GrabsContraint = nullptr;
+
+	UPROPERTY(Transient, EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
+	TObjectPtr<class UPoseableMeshComponent> PoseableMesh=nullptr;
 
 
 #pragma endregion

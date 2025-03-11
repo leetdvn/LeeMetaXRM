@@ -21,6 +21,7 @@
 #include "Actors/LeeXRGrabbableActor.h"
 #include "Actors/LeeXRHandPhysics.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
+#include <PoseableMeshComponent.h>
 
 
 using namespace LeeXRUltils;
@@ -70,7 +71,6 @@ UAnimInstance* ALeeXRCharacter::GetHandAnimInstance(bool isLeft)
 		return  HandController->GetABPInstance();
 	return nullptr;
 }
-
 
 void ALeeXRCharacter::CalculateMotionControllerVelocities()
 {
@@ -141,6 +141,7 @@ void ALeeXRCharacter::InitPhysicsContraints()
 			}
 		}
 	}
+
 }
 
 UAnimInstance* ALeeXRCharacter::GetPhysicsAnimInstance(bool isLeft)
@@ -178,6 +179,27 @@ void ALeeXRCharacter::PauseHandPhysics(bool isEnable, bool isLeft)
 		Hand->AttachToComponent(LeeXROrigin, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 
+void ALeeXRCharacter::HandPhysicBlendToPoseable(UPoseableMeshComponent* inPoseable, bool isLeft)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+	if (inPoseable == nullptr) return;
+	
+	USkeletalMeshComponent* Hand = isLeft ? HandPhysicsLeft : HandPhysicsRight;
+
+	//Set Physics Blend Weight
+	TArray<FName> BoneNames = Hand->GetAllSocketNames();
+
+	for (auto Bone : BoneNames)
+	{
+		FTransform BoneTrans = inPoseable->GetSocketTransform(Bone);
+		auto BoneIdx = Hand->GetBoneIndex(Bone);
+		Hand->GetBodyInstance(Bone)->SetBodyTransform(BoneTrans,ETeleportType::ResetPhysics);
+		LEE_LOG(LogLeeXRHandController, Log, "Bone Name %s", *Bone.ToString());
+	}
+	Hand->SetVisibility(true);
+
+}
+
 // Called when the game starts or when spawned
 void ALeeXRCharacter::BeginPlay()
 {
@@ -209,8 +231,7 @@ void ALeeXRCharacter::BeginPlay()
 	InitPhysicsContraints();
 
 	HandPhysicsRight->SetAllBodiesBelowSimulatePhysics(TEXT("hand_r"), true);
-	PauseHandPhysics(true, false);
-	//HandPhysicsRight->SetAllBodiesBelowPhysicsBlendWeight(TEXT("hand_r"), 0.15f);
+	//HandPhysicsRight->SetAllBodiesBelowPhysicsBlendWeight(TEXT("hand_r"), .15f);
 }
 
 void ALeeXRCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)

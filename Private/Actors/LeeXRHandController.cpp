@@ -15,8 +15,6 @@ ALeeXRHandController::ALeeXRHandController(const FObjectInitializer& ObjectIniti
 	HandSkeletal = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandSkeletal"));
 	HandSkeletal->SetupAttachment(MotionController);
 
-	HandDebug = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandDebug"));
-	HandDebug->SetupAttachment(MotionController);
 	//GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphereCollison"));
 	//GrabSphere->SetupAttachment(HandSkeletal);
 	//Set Init Hand Left or Right

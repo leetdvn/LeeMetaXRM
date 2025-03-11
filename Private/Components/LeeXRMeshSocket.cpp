@@ -82,7 +82,7 @@ void ULeeXRMeshSocket::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
 			OnMeshSocketUpdate.Broadcast();
 			{
 				GrabActor->SetSimulation(false);
-				GrabActor->SetFreeze(GrabActor->IsFreeze());
+				//GrabActor->SetFreeze(GrabActor->IsFreeze());
 				OtherActor->AttachToComponent(GetAttachParent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, GetAttachSocketName());
 				OtherActor->SetActorRelativeLocation(FVector::ZeroVector);
 				SetFlicker(false);

@@ -12,6 +12,7 @@
 #include "APawn/LeeXRCharacter.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "StaticMeshComponent.h"
+#include <PoseableMeshComponent.h>
 
 
 DEFINE_STAT(STAT_ICTUController);
@@ -155,12 +156,6 @@ void ALeeXRHandBase::InittializeSetup()
 		}
 	}
 
-
-
-	//Set Show Debug
-	HandDebug->SetActive(bShowDebug);
-	HandDebug->SetVisibility(bShowDebug);
-	HandDebug->SetHiddenInGame(!bShowDebug);
 }
 
 // Finger Animation type Hand Controller Only
@@ -229,6 +224,26 @@ void ALeeXRHandBase::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, 
 				OnGrabObject() : OnReleaseObject();
 		}
 	}
+}
+
+void ALeeXRHandBase::PoseableSpawned(USceneComponent* inParent,USkeletalMesh* inAsset, USkeletalMeshComponent* inSkeletalRef)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+	if (PoseableMesh) return;
+
+	PoseableMesh = NewObject<UPoseableMeshComponent>(this);
+	PoseableMesh->SetSkeletalMesh(inAsset);
+	PoseableMesh->RegisterComponent();
+	PoseableMesh->AttachToComponent(inParent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+
+	TArray<FName> BoneNames = PoseableMesh->GetAllSocketNames();
+	for (auto Bone : BoneNames)
+	{
+		FTransform BoneTrans = inSkeletalRef->GetSocketTransform(Bone);
+		PoseableMesh->SetBoneTransformByName(Bone, BoneTrans, EBoneSpaces::WorldSpace);
+		LEE_LOG(LogLeeXRHandController, Log, "Bone Name %s", *Bone.ToString());
+	}
+	inSkeletalRef->SetVisibility(false);
 }
 
 // Switch Hand Type
@@ -375,6 +390,12 @@ void ALeeXRHandBase::OnReleaseObject()
 	
 	OnHandReleaseEvent.Broadcast();
 	CurrentGrabObject->OnReleaseObjects(MotionController);
+
+	if (PoseableMesh) {
+		PoseableMesh->DestroyComponent();
+		PoseableMesh = nullptr;
+		XRCharacter->GetHandPhysics(IsHandLeft())->SetVisibility(true);
+	}
 	CurrentGrabObject = nullptr;
 	bIsHeld = false;
 
@@ -662,4 +683,5 @@ FVector ALeeXRHandBase::GetTeleportLocation(const ALeeXRCharacter* inXRCharacter
 
 	return FVector::ZeroVector;
 }
+
 #pragma endregion Teleport

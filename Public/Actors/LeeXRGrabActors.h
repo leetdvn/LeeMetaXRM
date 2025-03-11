@@ -37,6 +37,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetSimulation(bool bSimulate) { ActorMesh->SetSimulatePhysics(bSimulate); }
 
+	UStaticMeshComponent* GetActorMesh() { return ActorMesh; }
 
 protected:
 	// Called when the game starts or when spawned

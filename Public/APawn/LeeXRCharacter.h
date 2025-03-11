@@ -17,6 +17,7 @@ DECLARE_MEMORY_STAT_EXTERN(TEXT("ICTUCharacter"), STAT_ICTUCharacter, STATGROUP_
 DECLARE_MEMORY_STAT_POOL_EXTERN(TEXT("ICTUCharacterMemory"), STAT_ICTUCharacterMemory, STATGROUP_ICTUMV,FPlatformMemory::MCR_PhysicalLLM, );
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLeeXROnPoseMesh,AActor*,GrabableActor);
 
 UENUM(BlueprintType)
 enum class ELeeXRTeleportHandAction : uint8
@@ -70,6 +71,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	USkeletalMeshComponent* GetHandPhysics(bool isLeft) const { return isLeft ? HandPhysicsLeft : HandPhysicsRight; }
 
+	UPROPERTY(BlueprintAssignable)
+	FLeeXROnPoseMesh OnPoseMesh;
+
 	void InitPhysicsContraints();
 
 	UAnimInstance* GetPhysicsAnimInstance(bool isLeft);
@@ -77,6 +81,8 @@ public:
 	void SetPhysicsAllBodyBlendWeight(float inWeight,bool isLeft);
 
 	void PauseHandPhysics(bool isEnable = true,bool isLeft = true);
+
+	void HandPhysicBlendToPoseable(class UPoseableMeshComponent* inPoseable,bool isLeft=true);
 
 protected:
 	// Called when the game starts or when spawned

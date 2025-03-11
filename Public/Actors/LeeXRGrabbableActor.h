@@ -109,6 +109,8 @@ public:
 	void ReleaseHandMesh(UMotionControllerComponent*& inController, bool isLeft = true);
 
 	void SetHandSkeletalMesh(USkeletalMeshComponent* inSkeletal) { HandSkeletalMeshRef = inSkeletal; };
+
+	void SetSmoothGrabableRelease(bool isGrabable = true, float inAngleDamping = 0.0, float inLinearDamping = .1f);
 #pragma endregion Functions
 	
 protected:
@@ -196,7 +198,7 @@ private:
 	
 	TArray<class UPhysicsConstraintComponent*> GrabledConstraintsRefs;
 
-	FTimerHandle TimerWeighted;
+	FTimerHandle TimerWeighted, TimerGrabable;
 
 	///Grab One Hand
 	
