@@ -72,27 +72,28 @@ void ULeeXRMeshSocket::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
 	///Check if the object is a grabbable object
 	if (SweepResult.HasValidHitObjectHandle())
 	{
-		ALeeXRGrabActors* GrabActor = CastChecked<ALeeXRGrabActors>(OtherActor);
-
-		SetFlicker(true);
-		if (GrabActor &&  GrabActor->IsTag(SocketTag))
-		{
-			SetCorrectShape(true);
-			//if (!GrabActor->IsSimulation()) return;
-			OnMeshSocketUpdate.Broadcast();
+		if (auto* GrabActor = Cast<ALeeXRGrabActors>(OtherActor)) {
+			SetFlicker(true);
+			if (GrabActor && GrabActor->IsTag(SocketTag))
 			{
-				GrabActor->SetSimulation(false);
-				//GrabActor->SetFreeze(GrabActor->IsFreeze());
-				OtherActor->AttachToComponent(GetAttachParent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, GetAttachSocketName());
-				OtherActor->SetActorRelativeLocation(FVector::ZeroVector);
-				SetFlicker(false);
+				SetCorrectShape(true);
+				//if (!GrabActor->IsSimulation()) return;
+				OnMeshSocketUpdate.Broadcast();
+				{
+					GrabActor->SetSimulation(false);
+					//GrabActor->SetFreeze(GrabActor->IsFreeze());
+					OtherActor->AttachToComponent(GetAttachParent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, GetAttachSocketName());
+					OtherActor->SetActorRelativeLocation(FVector::ZeroVector);
+					SetFlicker(false);
+
+				}
 
 			}
+			else {
+				SetCorrectShape(false);
+			}
+		}
 
-		}
-		else {
-			SetCorrectShape(false);
-		}
 	}
 }
 
