@@ -41,33 +41,90 @@ public:
 	// Sets default values for this character's properties
 	ALeeXRCharacter();
 
+	/// <summary>
+	/// Get the hand animation instance
+	/// </summary>
+	/// <param name="isLeft"></param>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UAnimInstance* GetHandAnimInstance(bool isLeft);
 
+	/// <summary>
+	/// Get the hand animation instance
+	/// </summary>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	FVector GetCameraLocation() const { return Camera->GetRelativeLocation(); }
 
+	/// <summary>
+	///  Get the hand animation instance
+	/// </summary>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	ELeeXRTeleportHandAction GetTeleportHandAction() const { return TeleportHandAction; }
 
+	/// <summary>
+	/// Set Teleport Hand Action
+	/// </summary>
+	/// <param name="inAction"></param>
 	UFUNCTION(BlueprintCallable,  Category = "LeeXR|Func")
 	void SetTeleportHandAction(ELeeXRTeleportHandAction inAction) { TeleportHandAction = inAction; }
 
+	/// <summary>
+	/// Get Hand Type
+	/// </summary>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	ELeeXRHandType GetHandType() const { return HandType; }
 
+	/// <summary>
+	/// Get Hand Actor
+	/// </summary>
+	/// <param name="isLeft"></param>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	ALeeXRHandBase* GetHand(bool isLeft) const { return isLeft ? XRHandLeft : XRHandRight; }
 
+	/// <summary>
+	/// Get Widget Interaction
+	/// </summary>
+	/// <param name="isLeft"></param>
+	/// <returns></returns>
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UWidgetInteractionComponent* GetWidgetInteraction(bool isLeft) const { return isLeft ? XRHandLeft->GetWidgetInteraction() : XRHandRight->GetWidgetInteraction(); }
+
+	/// <summary>
+	///  Get the hand animation instance
+	/// </summary>
+	/// <param name="isLeft"></param>
+	/// <returns></returns>
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UMotionControllerComponent* GetMotionController(bool isLeft) const { return isLeft ? XRHandLeft->GetMotionController() : XRHandRight->GetMotionController(); }
+
+	/// <summary>
+	///  Set Hand Type
+	/// </summary>
+	/// <param name="inType"></param>
 	UFUNCTION(BlueprintCallable,  Category = "LeeXR|Func")
 	void SetHandType(ELeeXRHandType inType) { HandType = inType; }
 
+	/// <summary>
+	/// Calculate Motion Controller Velocities
+	/// </summary>
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void CalculateMotionControllerVelocities();
 
+	/// <summary>
+	/// Update Climbing
+	/// </summary>
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void UpdateClimbing();
 
+	/// <summary>
+	/// Get Hand Physiscs
+	/// </summary>
+	/// <param name="isLeft"></param>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	USkeletalMeshComponent* GetHandPhysics(bool isLeft) const { return isLeft ? HandPhysicsLeft : HandPhysicsRight; }
 
@@ -78,6 +135,7 @@ public:
 
 	void InitPhysicsAnimation();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UAnimInstance* GetPhysicsAnimInstance(bool isLeft);
 
 	void SetPhysicsAllBodyBlendWeight(float inWeight,bool isLeft);
