@@ -17,46 +17,13 @@ ALeeXRMenuActor::ALeeXRMenuActor()
 
 }
 
-
-
-void ALeeXRMenuActor::OnInputActiveMenu(const FInputActionInstance& ActionInstance)
-{
-	FString ActName = ActionInstance.GetSourceAction()->GetName();
-	ETriggerEvent TriggerEvent = ActionInstance.GetTriggerEvent();
-	LEE_LOG(LogLeeXRMenuActor, Warning, "Action Name %s", *ActName);
-
-	UWidgetInteractionComponent* MControl = ActName.EndsWith("Left") ? WGInteractionRefLeft : WGInteractionRefRight;
-	OnActionMenu(MControl, TriggerEvent);
-}
-
-void ALeeXRMenuActor::OnActionMenu(UWidgetInteractionComponent* inComponent, ETriggerEvent inEvent)
-{
-	if (!IsValid(inComponent)) return;
-
-	switch (inEvent)
-	{
-	case ETriggerEvent::None:
-		break;
-	case ETriggerEvent::Triggered:
-		break;
-	case ETriggerEvent::Started: { return inComponent->PressPointerKey(EKeys::LeftMouseButton); }
-	case ETriggerEvent::Ongoing:
-		break;
-	case ETriggerEvent::Canceled:
-		break;
-	case ETriggerEvent::Completed: { return inComponent->ReleasePointerKey(EKeys::LeftMouseButton); }
-
-	}
-}
-
 // Called when the game starts or when spawned
 void ALeeXRMenuActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
-
 	//Set Input Component
-	InitializationContext(GetWorld(), MenuActionContext,0);
+	InitializationContext(GetWorld(), MenuActionContext, 0);
 
 	SetReference();
 
@@ -66,9 +33,11 @@ void ALeeXRMenuActor::SetupActorInputComponent()
 {
 	UInputComponent* PlayerInputComponent = GetWorld()->GetFirstPlayerController()->InputComponent;
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
-	{
+		if (!IsValid(WGInteractionRefLeft) || !IsValid(WGInteractionRefRight))
+		{
 
-	}
+			LEE_LOG(LogLeeXRMenuActor, Warning, "Widget Interaction Reference Not Set");
+		}
 
 }
 
@@ -87,13 +56,40 @@ UWidgetInteractionComponent* ALeeXRMenuActor::FindWidgetInteractionReference(ECo
 		{
 			if (ALeeXRCharacter* Character = Cast<ALeeXRCharacter>(Pawn))
 			{
-				return Character->GetWidgetInteraction(inType == EControllerHand::Left);
+				return inType == EControllerHand::Left ?
+					Character->GetHand(true)->GetWidgetInteraction():
+					Character->GetHand(false)->GetWidgetInteraction();
 			}
 			LEE_LOG(LogLeeXRMenuActor,Warning,"Widget Interaction Reference Set");
 			
 		}
 	}
 	return nullptr;
+}
+
+void ALeeXRMenuActor::OnInputActiveMenu(const FInputActionInstance& ActionInstance)
+{
+	FString ActName = ActionInstance.GetSourceAction()->GetName();
+	ETriggerEvent TriggerEvent = ActionInstance.GetTriggerEvent();
+	LEE_LOG(LogLeeXRMenuActor, Warning, "Action Name %s", *ActName);
+
+	UWidgetInteractionComponent* MControl = ActName.EndsWith("Left") ? WGInteractionRefLeft : WGInteractionRefRight;
+	OnActionMenu(MControl, TriggerEvent);
+}
+
+void ALeeXRMenuActor::OnActionMenu(UWidgetInteractionComponent* inComponent, ETriggerEvent inEvent)
+{
+	if (!IsValid(inComponent)) return;
+
+	switch (inEvent)
+	{
+		case ETriggerEvent::Triggered: { break; }
+		case ETriggerEvent::Started: { return inComponent->PressPointerKey(EKeys::LeftMouseButton); }
+		case ETriggerEvent::Ongoing: { break; }
+		case ETriggerEvent::Canceled: { break; }
+		case ETriggerEvent::Completed: { return inComponent->ReleasePointerKey(EKeys::LeftMouseButton); }
+
+	}
 }
 
 UMotionControllerComponent* ALeeXRMenuActor::FindMotionControllerReference(bool isLeftHand)
@@ -120,7 +116,7 @@ void ALeeXRMenuActor::SetReference()
 
 	if (auto* XRCharacter = LeeXRGetCustomCharacter<ALeeXRCharacter>(this))
 	{
-		bool IsLeft =  XRCharacter->GetTeleportHandAction() == ELeeXRTeleportHandAction::LeeXRLeft ? true : false;
+		bool IsLeft = XRCharacter->GetTeleportHandAction() == ELeeXRTeleportHandAction::LeeXRLeft ? true : false;
 
 		MotionControllerRef = FindMotionControllerReference(IsLeft);
 

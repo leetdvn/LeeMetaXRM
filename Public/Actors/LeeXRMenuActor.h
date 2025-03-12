@@ -12,7 +12,6 @@ DEFINE_LOG_CATEGORY_STATIC(LogLeeXRMenuActor, Log, All);
 class UWidgetInteractionComponent;
 class UMotionControllerComponent;
 
-
 UCLASS()
 class LEEMETAXRM_API ALeeXRMenuActor : public AActor
 {
@@ -26,7 +25,6 @@ class LEEMETAXRM_API ALeeXRMenuActor : public AActor
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> IA_MenuAction_Right;
-
 public:	
 	// Sets default values for this actor's properties
 	ALeeXRMenuActor();
@@ -46,28 +44,27 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void OnInputActiveMenu(const FInputActionInstance& ActionInstance);
 
+	UWidgetInteractionComponent* FindWidgetInteractionReference(EControllerHand inType);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+
+public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupActorInputComponent();
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
-	UWidgetInteractionComponent* FindWidgetInteractionReference(EControllerHand inType);
-
-	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	UWidgetInteractionComponent* GetWidgetRef(bool isLeft) const { return isLeft ? WGInteractionRefLeft : WGInteractionRefRight; }
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
-	UMotionControllerComponent* FindMotionControllerReference(bool isLeftHand=true);
+	UMotionControllerComponent* FindMotionControllerReference(bool isLeftHand = true);
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void SetReference();
-
-
-
 
 private:
 
@@ -75,6 +72,5 @@ private:
 
 	TObjectPtr<class UWidgetInteractionComponent> WGInteractionRefRight=nullptr;
 
-	TObjectPtr<class UMotionControllerComponent> MotionControllerRef = nullptr;;
-
+	TObjectPtr<class UMotionControllerComponent> MotionControllerRef;
 };

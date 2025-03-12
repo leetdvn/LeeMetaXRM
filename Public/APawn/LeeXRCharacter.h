@@ -50,14 +50,14 @@ public:
 	UAnimInstance* GetHandAnimInstance(bool isLeft);
 
 	/// <summary>
-	/// Get the hand animation instance
+	/// Get Camera Location
 	/// </summary>
 	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	FVector GetCameraLocation() const { return Camera->GetRelativeLocation(); }
 
 	/// <summary>
-	///  Get the hand animation instance
+	/// Get Teleport Hand Action
 	/// </summary>
 	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
@@ -71,19 +71,20 @@ public:
 	void SetTeleportHandAction(ELeeXRTeleportHandAction inAction) { TeleportHandAction = inAction; }
 
 	/// <summary>
-	/// Get Hand Type
+	/// Get Hand Type 
 	/// </summary>
 	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	ELeeXRHandType GetHandType() const { return HandType; }
 
 	/// <summary>
-	/// Get Hand Actor
+	/// Get Hand Refercene
 	/// </summary>
 	/// <param name="isLeft"></param>
 	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	ALeeXRHandBase* GetHand(bool isLeft) const { return isLeft ? XRHandLeft : XRHandRight; }
+
 
 	/// <summary>
 	/// Get Widget Interaction
@@ -102,7 +103,7 @@ public:
 	UMotionControllerComponent* GetMotionController(bool isLeft) const { return isLeft ? XRHandLeft->GetMotionController() : XRHandRight->GetMotionController(); }
 
 	/// <summary>
-	///  Set Hand Type
+	/// Set Hand Type
 	/// </summary>
 	/// <param name="inType"></param>
 	UFUNCTION(BlueprintCallable,  Category = "LeeXR|Func")
@@ -114,6 +115,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void CalculateMotionControllerVelocities();
 
+
 	/// <summary>
 	/// Update Climbing
 	/// </summary>
@@ -121,7 +123,7 @@ public:
 	void UpdateClimbing();
 
 	/// <summary>
-	/// Get Hand Physiscs
+	/// Get Hand Physics
 	/// </summary>
 	/// <param name="isLeft"></param>
 	/// <returns></returns>
@@ -135,7 +137,7 @@ public:
 
 	void InitPhysicsAnimation();
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	UAnimInstance* GetPhysicsAnimInstance(bool isLeft);
 
 	void SetPhysicsAllBodyBlendWeight(float inWeight,bool isLeft);
@@ -143,6 +145,7 @@ public:
 	void PauseHandPhysics(bool isEnable = true,bool isLeft = true);
 
 	void HandPhysicBlendToPoseable(class UPoseableMeshComponent* inPoseable,bool isLeft=true);
+
 
 protected:
 	// Called when the game starts or when spawned

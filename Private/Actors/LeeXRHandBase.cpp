@@ -236,7 +236,7 @@ void ALeeXRHandBase::PoseableSpawned(USceneComponent* inParent,USkeletalMesh* in
 	if (PoseableMesh) return;
 
 	PoseableMesh = NewObject<UPoseableMeshComponent>(this);
-	PoseableMesh->SetSkeletalMesh(inAsset);
+	PoseableMesh->SetSkinnedAssetAndUpdate(inAsset);
 	PoseableMesh->RegisterComponent();
 	PoseableMesh->AttachToComponent(inParent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 

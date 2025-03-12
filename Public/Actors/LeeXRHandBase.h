@@ -114,7 +114,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UMotionControllerComponent* GetMotionController() { return MotionController; }
-
 	/// <summary>
 	/// Get Skeletal Mesh Component
 	/// </summary>
@@ -156,6 +155,7 @@ public:
 	void PoseableSpawned(USceneComponent* inParent,USkeletalMesh* inAsset,USkeletalMeshComponent* inSkeletalRef);
 
 	void PoseableDestroyed();
+
 	/// <summary>
 	/// Grab Two Hand
 	/// </summary>
