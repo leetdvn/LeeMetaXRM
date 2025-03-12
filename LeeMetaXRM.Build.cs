@@ -37,6 +37,8 @@ public class LeeMetaXRM : ModuleRules
             "Niagara",
             "OculusHandPoseRecognition",
             "GameplayAbilities",
+            "GameplayTasks",
+            "GameplayTags",
             "OculusUtils",
         });
 

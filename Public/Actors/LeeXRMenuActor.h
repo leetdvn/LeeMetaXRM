@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <GameplayTagContainer.h>
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "LeeXRMenuActor.generated.h"

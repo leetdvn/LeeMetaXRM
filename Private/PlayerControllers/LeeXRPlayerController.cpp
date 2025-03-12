@@ -10,6 +10,7 @@
 DEFINE_STAT(STAT_ICTUPlayerController);
 DEFINE_STAT(ICTUPlayerControllerMemories);
 
+
 ALeeXRPlayerController::ALeeXRPlayerController(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -40,7 +41,7 @@ void ALeeXRPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	//Reset Profile Memories Counter
 	SET_CYCLE_COUNTER(STAT_ICTUPlayerController, 0);
 	SET_MEMORY_STAT(ICTUPlayerControllerMemories, 0);
-	SET_MEMORY_STAT(STAT_ICTUMV_TotalMemories, 0);
+	//SET_MEMORY_STAT(STAT_ICTUMV_TotalMemories, 0);
 
 	FString Reason = UEnum::GetValueAsString(EndPlayReason);
 	LEE_LOG(LogLeeXRPlayerController, Log, "End Play %s",*Reason);

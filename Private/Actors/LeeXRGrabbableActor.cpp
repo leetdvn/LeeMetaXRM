@@ -286,7 +286,7 @@ void ALeeXRGrabbableActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	SET_MEMORY_STAT(STAT_LeeXRGrabableMemory, 0);
-	MemoriesSize = 0;
+	//MemoriesSize = 0;
 }
 
 void ALeeXRGrabbableActor::OnGrab(UObject* inComponent, const FVector& InGrabLocation)
