@@ -155,19 +155,9 @@ public:
 	void PoseableDestroyed();
 
 	/// <summary>
-	/// Grab One Hand
-	/// </summary>
-	virtual void OnGrabOneHand();
-
-	/// <summary>
 	/// Grab Two Hand
 	/// </summary>
 	virtual void OnGrabObject();
-
-	/// <summary>
-	/// Grab One Hand Release
-	/// </summary>
-	virtual void OnGrabOneHandRelease();
 
 	/// <summary>
 	/// Grab Two Hand Release

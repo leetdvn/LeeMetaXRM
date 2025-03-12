@@ -53,42 +53,6 @@ ALeeXRHandTracking::ALeeXRHandTracking(const FObjectInitializer& ObjectInitializ
 
 }
 
-/// <summary>
-/// Grasp Object
-void ALeeXRHandTracking::OnGrabOneHand()
-{
-	//Grasp Object Hand Tracking
-	CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(HitThumbActor);
-	if (CurrentGrabObject) {
-		bIsHeld = true;
-
-		FVector GrabLocation = HandTrackingComp->GetComponentLocation();
-		CurrentGrabObject->OnGrabObjects(MotionController);
-	}
-
-	///Timm Distance Count
-	if (TimerDelegate.IsBound()) TimerDelegate.Unbind();
-
-	TimerDelegate.BindLambda([this]() {TrackingGrasp(); });
-
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, 0.02f, true);
-
-}
-
-void ALeeXRHandTracking::OnGrabOneHandRelease()
-{
-	//Grasp Release Hand Tracking
-	if (CurrentGrabObject == nullptr)	return;
-
-	CurrentGrabObject->OnRelease(HandTrackingComp);
-	CurrentGrabObject = nullptr;
-	bIsHeld = false;
-
-	if (TimerHandle.IsValid())
-		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
-
-}
-
 void ALeeXRHandTracking::BeginPlay()
 {
 	Super::BeginPlay();
@@ -207,7 +171,7 @@ void ALeeXRHandTracking::OnBeginOverlap(
 	//OtherComp->GetOverlappingActors(OverlappingActors);
 
 	if (HitIndexActor == HitThumbActor)
-		OnGrabOneHand();
+		OnGrabObject();
 
 	LeeScreenLog("Overlap %s", FColor::Green, *OtherActor->GetName());
 	ConstrainsActor(OtherActor);
@@ -248,6 +212,6 @@ void ALeeXRHandTracking::TrackingGrasp()
 		SphereThumb->GetComponentToWorld().GetLocation());
 
 	if (dist >= 4.5f) {
-		OnGrabOneHandRelease();
+		OnReleaseObject();
 	}
 }

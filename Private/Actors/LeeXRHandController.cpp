@@ -44,20 +44,6 @@ void ALeeXRHandController::SetPhysicsAllBodyBlendWeight(float inWeight)
 	}
 }
 
-void ALeeXRHandController::OnGrabOneHand()
-{
-	Super::OnGrabOneHand();
-	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
-
-}
-
-void ALeeXRHandController::OnGrabOneHandRelease()
-{
-	Super::OnGrabOneHandRelease();
-	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
-
-}
-
 void ALeeXRHandController::OnGrabObject()
 {
 	Super::OnGrabObject();
@@ -140,10 +126,6 @@ void ALeeXRHandController::SetFingerAnimationPose(USkeletalMeshComponent* inComp
 void ALeeXRHandController::InittializeSetup()
 {
 	Super::InittializeSetup();
-
-	//if(HandSkeletal->DoesSocketExist(TEXT("palm_r")))
-	//	GrabSphere->AttachToComponent(HandSkeletal, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "palm_r");
-	//GrabSphere->SetRelativeLocation(FVector(0.0f, 2.5f, -2.5f));
 
 	if(HandSkeletal->DoesSocketExist(TEXT("Index3")))
 		WidgetInteraction->SetupAttachment(HandSkeletal,TEXT("Index3"));

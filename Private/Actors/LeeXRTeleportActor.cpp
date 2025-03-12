@@ -39,19 +39,20 @@ void ALeeXRTeleportActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UWorld* World = GetWorld();
-	if (World == nullptr) return;
+	if (UWorld* World = GetWorld()) {
 
-	APawn* pawn =  UGameplayStatics::GetPlayerPawn(World, 0);
+		if (APawn* pawn = UGameplayStatics::GetPlayerPawn(World, 0)) {
 
-	FVector CameeraLocation = UGameplayStatics::GetPlayerCameraManager(World, 0)->GetCameraLocation();
+			FVector CameeraLocation = UGameplayStatics::GetPlayerCameraManager(World, 0)->GetCameraLocation();
 
-	FVector InverseVec = UKismetMathLibrary::InverseTransformLocation(pawn->GetTransform(), CameeraLocation);
+			FVector InverseVec = UKismetMathLibrary::InverseTransformLocation(pawn->GetTransform(), CameeraLocation);
 
-	FVector NegateVec = UKismetMathLibrary::NegateVector(InverseVec);
+			FVector NegateVec = UKismetMathLibrary::NegateVector(InverseVec);
 
-	NSPlayAreaBound->SetRelativeLocation(FVector(NegateVec.X,NegateVec.Y,0));
+			NSPlayAreaBound->SetRelativeLocation(FVector(NegateVec.X, NegateVec.Y, 0));
 
-	SetActorRotation(pawn->GetActorRotation());
+			SetActorRotation(pawn->GetActorRotation());
+		}
+	}
 }
 

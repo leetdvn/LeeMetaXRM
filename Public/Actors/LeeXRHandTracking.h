@@ -45,10 +45,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
 	TSubclassOf<class APhysicsConstraintActor> ConstraintAct;
 
-	virtual void OnGrabOneHand() override;
-
-	virtual void OnGrabOneHandRelease() override;
-
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func", meta = (Latent, WorldContext = "WorldContextObject", LatentInfo = "LatentInfo", Keywords = "sleep", ExpandEnumAsExecs = "InputPin"))
 	void TickUntilGrasp(const UObject* WorldContextObject, ELeeTickUntilInputPin InputPin, struct FLatentActionInfo LatentInfo);
 

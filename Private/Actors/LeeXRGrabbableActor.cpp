@@ -318,18 +318,6 @@ void ALeeXRGrabbableActor::OnGrabObjects(UMotionControllerComponent* inComponent
 	ALeeXRHandBase* HandBase = inComponent->GetOwner<ALeeXRHandBase>();
 	if (!HandBase) return;
 	
-	//SetSmoothGrabableRelease();
-
-	//GetWorld()->GetTimerManager().SetTimer(TimerGrabable, [this]() {
-	//		SetSmoothGrabableRelease(false);
-	//		if(TimerGrabable.IsValid())
-	//			GetWorld()->GetTimerManager().ClearTimer(TimerGrabable);
-	//	}, .1f, false,.2f);
-
-	//GrabableType == ELeeXRGrabableType::LeeXROneHand ?
-	//	OnGrab(HandBase->GetHandSkeletal(), HandBase->GetHandSkeletal()->GetComponentLocation()) :
-	//	OnGrabObjects(inComponent);
-
 	switch (GrabType)
 	{
 		case EGrabType::EGT_Free: {

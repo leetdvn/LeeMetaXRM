@@ -248,7 +248,7 @@ void ALeeXRHandBase::PoseableSpawned(USceneComponent* inParent,USkeletalMesh* in
 		LEE_LOG(LogLeeXRHandController, Log, "Bone Name %s", *Bone.ToString());
 	}
 	
-	//inSkeletalRef->SetVisibility(false);
+	inSkeletalRef->SetVisibility(false);
 }
 
 void ALeeXRHandBase::PoseableDestroyed()
@@ -318,39 +318,6 @@ UPrimitiveComponent* ALeeXRHandBase::GetPrimitiveComponent(bool isController) co
 	return FindComponentByClass<UPrimitiveComponent>();
 }
 
-/// Grab Object
-void ALeeXRHandBase::OnGrabOneHand()
-{
-
-	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
-
-	//Hand Controller Grabs Objects
-	//==============================================
-
-	if (HandSkeletal == nullptr || 
-		ControllerType == ELeeXRHandType::LeeXRHandTracking) return;
-
-	AActor* OverlappingActor = HasOverlapActor(GrabSphere);
-	if (OverlappingActor)
-	{
-		if (OverlappingActor)
-		{
-			CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(OverlappingActor);
-			if (CurrentGrabObject) {
-				bIsHeld = true;
-				FVector GrabLocation = HandSkeletal->GetComponentLocation();
-				OnHandGrabledEvent.Broadcast();
-				//Hand Controller Grabs Objects
-				//CurrentGrabObject->OnGrab(HandSkeletal, GrabLocation);
-
-				CurrentGrabObject->OnGrabObjects(MotionController);
-
-			}
-		}
-	}
-
-}
-
 /// Grab Object 2
 void ALeeXRHandBase::OnGrabObject()
 {
@@ -410,36 +377,11 @@ void ALeeXRHandBase::OnReleaseObject()
 	OnHandReleaseEvent.Broadcast();
 	CurrentGrabObject->OnReleaseObjects(MotionController);
 
-	if (PoseableMesh) {
-		PoseableMesh->DestroyComponent();
-		PoseableMesh = nullptr;
-		XRCharacter->GetHandPhysics(IsHandLeft())->SetVisibility(true);
-	}
+	PoseableDestroyed();
+
 	CurrentGrabObject = nullptr;
 	bIsHeld = false;
 
-}
-
-/// Grab Release
-void ALeeXRHandBase::OnGrabOneHandRelease()
-{
-
-	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
-
-	if (ControllerType == ELeeXRHandType::LeeXRHandTracking) return;
-
-	if (CurrentGrabObject == nullptr ||
-		HandSkeletal == nullptr) {
-		
-		return;
-	}
-
-	OnHandReleaseEvent.Broadcast();
-
-	//Controller Release
-	CurrentGrabObject->OnReleaseObjects(MotionController);
-	CurrentGrabObject = nullptr;
-	bIsHeld = false;
 }
 
 // Called every frame

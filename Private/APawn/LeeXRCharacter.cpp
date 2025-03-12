@@ -58,8 +58,6 @@ ALeeXRCharacter::ALeeXRCharacter()
 
 }
 
-
-
 // Get the hand animation instance
 UAnimInstance* ALeeXRCharacter::GetHandAnimInstance(bool isLeft)
 {

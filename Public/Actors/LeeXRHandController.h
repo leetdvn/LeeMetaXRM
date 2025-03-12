@@ -40,15 +40,8 @@ public:
 	void SetPhysicsAllBodyBlendWeight(float inWeight);
 
 	/// <summary>
-	///	Grap Object
+	/// On Grab Object
 	/// </summary>
-	virtual void OnGrabOneHand() override;
-
-	/// <summary>
-	/// Grasp Release
-	/// </summary>
-	virtual void OnGrabOneHandRelease() override;
-
 	virtual void OnGrabObject() override;
 
 	virtual void OnReleaseObject() override;
