@@ -152,6 +152,8 @@ public:
 
 	void PoseableSpawned(USceneComponent* inParent,USkeletalMesh* inAsset,USkeletalMeshComponent* inSkeletalRef);
 
+	void PoseableDestroyed();
+
 	/// <summary>
 	/// Grab One Hand
 	/// </summary>

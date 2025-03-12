@@ -18,11 +18,6 @@ ALeeXRHandController::ALeeXRHandController(const FObjectInitializer& ObjectIniti
 	//GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphereCollison"));
 	//GrabSphere->SetupAttachment(HandSkeletal);
 	//Set Init Hand Left or Right
-	
-	CubeConstraint = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CubeConstraint"));
-	CubeConstraint->SetupAttachment(MotionController);
-	CubeConstraint->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-
 	GrabsContraint = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("GrabsContraint"));
 	GrabsContraint->SetupAttachment(MotionController);
 

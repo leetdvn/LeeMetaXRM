@@ -186,7 +186,7 @@ void ALeeXRGrabbableActor::PhysicsContraintImplementation(UMotionControllerCompo
 
 				LEE_LOG(LeeXRMacro, Log, "HandSkeletalMeshRef %s", *skeletal->GetName());
 				if (StaticMeshComp) {
-					HandBase->PoseableSpawned(RootComponent,XRCharacter->GetHandPhysics(isLeft)->SkeletalMesh,XRCharacter->GetHandPhysics(isLeft));
+					HandBase->PoseableSpawned(RootComponent,XRCharacter->GetHandPhysics(isLeft)->GetSkeletalMeshAsset(), XRCharacter->GetHandPhysics(isLeft));
 					inPhysicsContraint->SetConstrainedComponents(skeletal, *HandSocket, StaticMeshComp, NAME_None);
 					GetWorld()->GetTimerManager().SetTimer(TimerWeighted, [this, inMCComponent,StaticMeshComp]() {
 						DetachWhenHandThresholdExceed(inMCComponent,StaticMeshComp);
@@ -206,11 +206,9 @@ void ALeeXRGrabbableActor::PhysicsContraintImplementation(UMotionControllerCompo
 				GrabledContraintRef = inPhysicsContraint;
 				GrabledConstraintsRefs.AddUnique(inPhysicsContraint);
 
-				if (USkeletalMeshComponent* SkeletalMesh = HandBase->GetHandSkeletal()) {
+				if (GrabledConstraintsRefs.Num()==2) {
 					float MassChanged = .386f * GrabledConstraintsRefs.Num();
-					SkeletalMesh->SetMassOverrideInKg(NAME_None, MassChanged);
-					//SkeletalMesh->SetSimulatePhysics(false);
-					//SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+					skeletal->SetMassOverrideInKg(NAME_None, MassChanged);
 				}
 
 			}
@@ -233,6 +231,7 @@ void ALeeXRGrabbableActor::DetachWhenHandThresholdExceed(UMotionControllerCompon
 	LEE_LOG(LeeXRMacro, Log, "Distance %f", Distance);
 	if (Distance > PhysicsGrabThreshold) {
 		OnReleaseObjects(inMCComponent);
+
 	}
 }
 
@@ -319,13 +318,13 @@ void ALeeXRGrabbableActor::OnGrabObjects(UMotionControllerComponent* inComponent
 	ALeeXRHandBase* HandBase = inComponent->GetOwner<ALeeXRHandBase>();
 	if (!HandBase) return;
 	
-	SetSmoothGrabableRelease();
+	//SetSmoothGrabableRelease();
 
-	GetWorld()->GetTimerManager().SetTimer(TimerGrabable, [this]() {
-			SetSmoothGrabableRelease(false);
-			if(TimerGrabable.IsValid())
-				GetWorld()->GetTimerManager().ClearTimer(TimerGrabable);
-		}, .1f, false,.2f);
+	//GetWorld()->GetTimerManager().SetTimer(TimerGrabable, [this]() {
+	//		SetSmoothGrabableRelease(false);
+	//		if(TimerGrabable.IsValid())
+	//			GetWorld()->GetTimerManager().ClearTimer(TimerGrabable);
+	//	}, .1f, false,.2f);
 
 	//GrabableType == ELeeXRGrabableType::LeeXROneHand ?
 	//	OnGrab(HandBase->GetHandSkeletal(), HandBase->GetHandSkeletal()->GetComponentLocation()) :
@@ -384,6 +383,7 @@ void ALeeXRGrabbableActor::OnReleaseObjects(UMotionControllerComponent* inCompon
 						if (auto inPhysicsContraint = HandBase->GetGrabsContraint()) {
 							inPhysicsContraint->BreakConstraint();
 							GrabledConstraintsRefs.Remove(inPhysicsContraint);
+							HandBase->PoseableDestroyed();
 						}
 					}
 			
@@ -405,6 +405,7 @@ void ALeeXRGrabbableActor::OnReleaseObjects(UMotionControllerComponent* inCompon
 			if (auto inPhysicsContraint = HandBase->GetGrabsContraint()) {
 				inPhysicsContraint->BreakConstraint();
 				GrabledConstraintsRefs.Remove(inPhysicsContraint);
+				HandBase->PoseableDestroyed();
 			}
 		}
 	}

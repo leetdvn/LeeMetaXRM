@@ -22,7 +22,7 @@
 #include "Actors/LeeXRHandPhysics.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include <PoseableMeshComponent.h>
-
+#include "PhysicsEngine/PhysicalAnimationComponent.h"
 
 using namespace LeeXRUltils;
 
@@ -52,6 +52,9 @@ ALeeXRCharacter::ALeeXRCharacter()
 
 	HandPhysicsLeft->SetupAttachment(LeeXROrigin);
 	HandPhysicsRight->SetupAttachment(LeeXROrigin);
+
+	AnimPhysicsLeft = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("AnimPhysicsLeft"));
+	AnimPhysicsRight = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("AnimPhysicsRight"));
 
 }
 
@@ -144,6 +147,35 @@ void ALeeXRCharacter::InitPhysicsContraints()
 
 }
 
+void ALeeXRCharacter::InitPhysicsAnimation()
+{
+	if (!IsValid(AnimPhysicsLeft) || !IsValid(AnimPhysicsRight)) return;
+
+	TArray<UPhysicalAnimationComponent*> AnimPhysics = { AnimPhysicsLeft,AnimPhysicsRight };
+	TArray<FName> SideName = { TEXT("hand_l"),TEXT("hand_r")};
+
+
+	int32 count = 0;
+	for (auto Anim : AnimPhysics)
+	{
+		if (IsValid(Anim)) {
+
+			FPhysicalAnimationData* AnimData = new FPhysicalAnimationData();
+			AnimData->OrientationStrength = 10000.f;
+			AnimData->PositionStrength = 1000.f;
+			AnimData->VelocityStrength = 150.f;
+			AnimData->AngularVelocityStrength = 150.f;
+
+			USkeletalMeshComponent* Hand = count == 0 ? HandPhysicsLeft : HandPhysicsRight;
+			Anim->SetSkeletalMeshComponent(Hand);
+			Anim->SetStrengthMultiplyer(1.0f);
+			//LEE_LOG()
+			Anim->ApplyPhysicalAnimationSettingsBelow(SideName[count], *AnimData);
+		}
+		count++;
+	}
+}
+
 UAnimInstance* ALeeXRCharacter::GetPhysicsAnimInstance(bool isLeft)
 {
 	if (!IsValid(HandPhysicsLeft) || !IsValid(HandPhysicsRight)) return nullptr;
@@ -231,6 +263,9 @@ void ALeeXRCharacter::BeginPlay()
 	InitPhysicsContraints();
 
 	HandPhysicsRight->SetAllBodiesBelowSimulatePhysics(TEXT("hand_r"), true);
+	HandPhysicsLeft->SetAllBodiesBelowSimulatePhysics(TEXT("hand_l"), true);
+
+	InitPhysicsAnimation();
 	//HandPhysicsRight->SetAllBodiesBelowPhysicsBlendWeight(TEXT("hand_r"), .15f);
 }
 

@@ -13,6 +13,7 @@
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include "StaticMeshComponent.h"
 #include <PoseableMeshComponent.h>
+#include "Components/ArrowComponent.h"
 
 
 DEFINE_STAT(STAT_ICTUController);
@@ -164,7 +165,7 @@ void ALeeXRHandBase::OnFingerAnimation(const FInputActionInstance& ActionInstanc
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 	SetFingerAnimationPose(HandSkeletal, ActionInstance);
 
-	if (XRCharacter) {
+	if (IsValid(XRCharacter)) {
 		SetFingerAnimationPose(XRCharacter->GetHandPhysics(IsHandLeft()), ActionInstance);
 	}
 
@@ -204,6 +205,9 @@ void ALeeXRHandBase::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, 
 	FString ActName = ActionInstance.GetSourceAction()->GetName();
 
 	if (ULeeXRAnimInstance* AnimIns = Cast<ULeeXRAnimInstance>(inComponet->GetAnimInstance())) {
+
+		if (IsHandLeft()) AnimIns->bMirror = true;
+
 		if (ActName == this->IA_FingerPoint->GetName())
 		{
 			AnimIns->PoseAlphaPoint = PoseValueStartCancel;
@@ -243,7 +247,18 @@ void ALeeXRHandBase::PoseableSpawned(USceneComponent* inParent,USkeletalMesh* in
 		PoseableMesh->SetBoneTransformByName(Bone, BoneTrans, EBoneSpaces::WorldSpace);
 		LEE_LOG(LogLeeXRHandController, Log, "Bone Name %s", *Bone.ToString());
 	}
-	inSkeletalRef->SetVisibility(false);
+	
+	//inSkeletalRef->SetVisibility(false);
+}
+
+void ALeeXRHandBase::PoseableDestroyed()
+{
+	if (IsValid(PoseableMesh))
+	{
+		PoseableMesh->DestroyComponent();
+		PoseableMesh = nullptr;
+		XRCharacter->GetHandPhysics(IsHandLeft())->SetVisibility(true);
+	}
 }
 
 // Switch Hand Type
@@ -341,6 +356,10 @@ void ALeeXRHandBase::OnGrabObject()
 {
 
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
+	if (bIsHeld) return;
+
+
 	TArray<AActor*> OverlappingActors;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{};
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic));

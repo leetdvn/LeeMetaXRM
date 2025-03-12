@@ -76,6 +76,8 @@ public:
 
 	void InitPhysicsContraints();
 
+	void InitPhysicsAnimation();
+
 	UAnimInstance* GetPhysicsAnimInstance(bool isLeft);
 
 	void SetPhysicsAllBodyBlendWeight(float inWeight,bool isLeft);
@@ -122,6 +124,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<USkeletalMeshComponent> HandPhysicsRight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
+	TObjectPtr<UPhysicalAnimationComponent> AnimPhysicsRight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
+	TObjectPtr<UPhysicalAnimationComponent> AnimPhysicsLeft;
 
 	UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "LeeXR Settings|Data")
 	ULeeXRHandDataAsset* DataLeft;
