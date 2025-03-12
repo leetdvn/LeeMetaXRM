@@ -28,8 +28,9 @@ using namespace LeeXRUltils;
 
 DEFINE_STAT(STAT_ICTUCharacter);
 DEFINE_STAT(STAT_ICTUCharacterMemory);
+DEFINE_STAT(STAT_ICTUMV_TotalMemories);
 
-
+float MemoriesSize;
 // Sets default values
 ALeeXRCharacter::ALeeXRCharacter()
 {

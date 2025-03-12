@@ -69,16 +69,14 @@ FPlatformMemory::EMemoryCounterRegion::MCR_Invalid);
 #define PROPERTYCHANGED(Class,inProperty) PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(Class, inProperty)
 #endif
 
-//static float  MemoriesSize;
+extern float  MemoriesSize;
 
-//DECLARE_MEMORY_STAT_EXTERN(TEXT("ICTUMV_TotalMemories"), STAT_ICTUMV_TotalMemories, STATGROUP_ICTUMV, );
-//DEFINE_STAT(STAT_ICTUMV_TotalMemories);
+DECLARE_MEMORY_STAT_EXTERN(TEXT("ICTUMV_TotalMemories"), STAT_ICTUMV_TotalMemories, STATGROUP_ICTUMV, );
 
 
 #define ADDMEMORYSTAT(inObject,ClassStat)	\
 	float ResourceSize = inObject->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal);	\
 	INC_MEMORY_STAT_BY(ClassStat, ResourceSize);\
-	//MemoriesSize += ResourceSize;	\
-	INC_MEMORY_STAT_BY(ClassStat, ResourceSize);\
-	//INC_MEMORY_STAT_BY(STAT_ICTUMV_TotalMemories, MemoriesSize);
+	MemoriesSize += ResourceSize;	\
+	INC_MEMORY_STAT_BY(STAT_ICTUMV_TotalMemories, MemoriesSize);
 
