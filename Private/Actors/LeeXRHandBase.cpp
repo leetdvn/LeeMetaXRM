@@ -14,6 +14,7 @@
 #include "StaticMeshComponent.h"
 #include <PoseableMeshComponent.h>
 #include "Components/ArrowComponent.h"
+#include "Actors/LeeXRGrabbableActor.h"
 
 
 DEFINE_STAT(STAT_ICTUController);
@@ -350,18 +351,22 @@ void ALeeXRHandBase::OnGrabObject()
 
 	for (auto Actor : OverlappingActors)
 	{
-		//Tag Check
-		if (Actor->ActorHasTag("Grabbable"))
-		{
-			CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(Actor);
-			if (CurrentGrabObject) {
-				bIsHeld = true;
-				OnHandGrabledEvent.Broadcast();
-				CurrentGrabObject->OnGrabObjects(MotionController);
-				//LeeScreenLog("Grabbing 2 %s", FColor::Green, *Actor->GetName());
-				break;
-			}
+		if (auto* GrabActor = Cast<ALeeXRGrabbableActor>(Actor)) {
+			//Gragable Tag Name of Actor Grabable defined in the Editor
+			FGameplayTag TagGrabable = FGameplayTag::RequestGameplayTag(FName("Grabable"));
+			//Tag Check
+			if (TagGrabable.IsValid() && GrabActor->IsTag(TagGrabable))
+			{
+				CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(Actor);
+				if (CurrentGrabObject) {
+					bIsHeld = true;
+					OnHandGrabledEvent.Broadcast();
+					CurrentGrabObject->OnGrabObjects(MotionController);
+					//LeeScreenLog("Grabbing 2 %s", FColor::Green, *Actor->GetName());
+					break;
+				}
 
+			}
 		}
 	}
 	FString msg = __FUNCTION__;

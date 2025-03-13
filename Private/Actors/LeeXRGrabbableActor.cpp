@@ -22,6 +22,11 @@ ALeeXRGrabbableActor::ALeeXRGrabbableActor()
 
 }
 
+bool ALeeXRGrabbableActor::IsTag(const FGameplayTag inObjectTag, bool isObject) const
+{
+	return isObject ? TagObject == inObjectTag : TagElemental == inObjectTag;
+}
+
 void ALeeXRGrabbableActor::SetFreeze(bool bFreeze)
 {
 	FrezzeOnSnap = bFreeze;
@@ -134,6 +139,23 @@ void ALeeXRGrabbableActor::SetSmoothGrabableRelease(bool isGrabable, float inAng
 
 }
 
+UStaticMeshComponent* ALeeXRGrabbableActor::FindStaticMeshComponent(FString inName) const
+{
+	TArray<UStaticMeshComponent*> StaticMeshes;
+	GetComponents<UStaticMeshComponent>(StaticMeshes);
+	if (StaticMeshes.IsEmpty()) return nullptr;
+
+	for (auto StaticMesh : StaticMeshes)
+	{
+		LEE_LOG(LogLeeXRHandBase, Log, "Info :%s", *StaticMesh->GetName());
+		if (StaticMesh->GetName() == inName) {
+			return StaticMesh;
+		}
+	}
+
+	return nullptr;
+}
+
 void ALeeXRGrabbableActor::FreeGrababled(UMotionControllerComponent* inMotionController, bool isWeighted)
 {
 	if (inMotionController == nullptr || FrezzeOnSnap) return;
@@ -175,7 +197,9 @@ void ALeeXRGrabbableActor::PhysicsContraintImplementation(UMotionControllerCompo
 
 			FString HandSocket = HandBase->GetHandType() == EControllerHand::Left ? "hand_l" : "hand_r";
 			USkeletalMeshComponent* SkeletalComp = FindComponentByClass<USkeletalMeshComponent>();
-			UStaticMeshComponent* StaticMeshComp = FindComponentByClass<UStaticMeshComponent>();
+
+			UStaticMeshComponent* StaticMeshComp = FindComponentByClass<UStaticMeshComponent>(); //FindStaticMeshComponent("ActorMesh");
+			LEE_LOG(LeeXRMacro, Log, "HandSkeletalMeshRef %s", *StaticMeshComp->GetName());
 
 			ALeeXRCharacter* XRCharacter = LeeXRGetCustomCharacter<ALeeXRCharacter>(this);
 			bool isLeft = HandBase->GetHandType() == EControllerHand::Left;
@@ -184,7 +208,6 @@ void ALeeXRGrabbableActor::PhysicsContraintImplementation(UMotionControllerCompo
 				//HandSkeletalMeshRef = skeletal;
 				XRCharacter->OnPoseMesh.Broadcast(this);
 
-				LEE_LOG(LeeXRMacro, Log, "HandSkeletalMeshRef %s", *skeletal->GetName());
 				if (StaticMeshComp) {
 					HandBase->PoseableSpawned(RootComponent,XRCharacter->GetHandPhysics(isLeft)->GetSkeletalMeshAsset(), XRCharacter->GetHandPhysics(isLeft));
 					inPhysicsContraint->SetConstrainedComponents(skeletal, *HandSocket, StaticMeshComp, NAME_None);
@@ -289,27 +312,6 @@ void ALeeXRGrabbableActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	//MemoriesSize = 0;
 }
 
-void ALeeXRGrabbableActor::OnGrab(UObject* inComponent, const FVector& InGrabLocation)
-{
-}
-
-void ALeeXRGrabbableActor::OnRelease(UObject* inComponent)
-{
-
-	//if (inComponent == nullptr || FrezzeOnSnap) return;
-
-	//if (bIsheld)
-	//{
-	//	//LeeScreenLog("Releasing Object %s", FColor::Green, *GrabUObject->GetName());
-	//	if (inComponent == MainControllerRef) {
-
-	//		//Execute Release Delegate
-	//		ActorMesh->SetSimulatePhysics(true);
-	//		this->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	//		bIsheld = false;
-	//	}
-	//}
-}
 
 void ALeeXRGrabbableActor::OnGrabObjects(UMotionControllerComponent* inComponent)
 {

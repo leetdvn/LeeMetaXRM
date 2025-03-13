@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <GameplayTagContainer.h>
 #include "CoreMinimal.h"
 #include "Components/StaticMeshComponent.h"
 #include "LeeXRMeshSocket.generated.h"
@@ -38,7 +39,6 @@ public:
 
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	FGameplayTag SocketTag;
-
 
 	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	bool IsDone = false;

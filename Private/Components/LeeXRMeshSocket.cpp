@@ -74,7 +74,9 @@ void ULeeXRMeshSocket::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActo
 	{
 		if (auto* GrabActor = Cast<ALeeXRGrabActors>(OtherActor)) {
 			SetFlicker(true);
-			if (GrabActor && GrabActor->IsTag(SocketTag))
+			
+			///Check Tag Element for Snapable Object
+			if (GrabActor && GrabActor->IsTag(SocketTag,false))
 			{
 				SetCorrectShape(true);
 				//if (!GrabActor->IsSimulation()) return;
