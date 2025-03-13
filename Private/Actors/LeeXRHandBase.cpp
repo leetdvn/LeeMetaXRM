@@ -118,6 +118,10 @@ void ALeeXRHandBase::SetInputComponent()
 		EnhancedInputComponent->BindAction(IA_FingerPoint, ETriggerEvent::Completed, this, &ALeeXRHandBase::OnFingerAnimation);
 
 		EnhancedInputComponent->BindAction(IA_HandLog, ETriggerEvent::Started, this, &ALeeXRHandBase::LogReconize);
+
+		EnhancedInputComponent->BindAction(IA_MenuAction, ETriggerEvent::Started, this, &ALeeXRHandBase::OnMenuAction);
+		EnhancedInputComponent->BindAction(IA_MenuAction, ETriggerEvent::Completed, this, &ALeeXRHandBase::OnMenuAction);
+
 		//LeeScreenLog("Setting Input Component",FColor::Blue);
 		LEE_LOG(LogLeeXRHandBase, Log, "Setting Input Component");
 	}
@@ -384,10 +388,31 @@ void ALeeXRHandBase::OnReleaseObject()
 
 }
 
+void ALeeXRHandBase::ToogleWidgetInteraction(bool isEnable)
+{
+
+}
+
 // Called every frame
 void ALeeXRHandBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+}
+
+void ALeeXRHandBase::OnMenuAction(const FInputActionInstance& ActionInstance)
+{
+	if (WGActionMenu != nullptr)
+	{
+		WGActionMenu->Destroy();
+		WGActionMenu = nullptr;
+	}
+
+	if (WGActionMenu = LeeXRSPawnActorBP<AActor>(this, WGMenu))
+	{
+		LEE_LOG(LogLeeXRHandBase, Log, "Menu Action");
+
+	}
 
 }
 

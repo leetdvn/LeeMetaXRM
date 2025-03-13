@@ -165,9 +165,22 @@ public:
 	/// </summary>
 	virtual void OnReleaseObject();
 
+#pragma region WIDGETS
+	void ToogleWidgetInteraction(bool isEnable);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Widgets")
+	TSubclassOf<AActor> WGMenu;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Widgets")
+	TObjectPtr<AActor> WGActionMenu;
+		
+#pragma endregion
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -179,10 +192,15 @@ protected:
 
 	virtual void OnFingerAnimation(const FInputActionInstance& ActionInstance);
 
+	UFUNCTION()
+	void LogReconize() { OnLogRecognizer.Broadcast(); }
+
+	UPROPERTY(BlueprintAssignable, Category = "LeeXR|Delegate")
+	FOnLogRecognizer OnLogRecognizer;
+
 	AActor* HasOverlapActor(const USphereComponent* inSphere);
 
 	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance);
-
 
 	void SetHandSwitch(bool isLeft);
 	bool bIsCanGrasp;
@@ -341,16 +359,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputAction> IA_Move;
 
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "LeeXR Settings|Input")
+	TObjectPtr<class UInputAction> IA_MenuAction;
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void OnMenuAction(const FInputActionInstance& ActionInstance);
+
 #pragma endregion
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	UFUNCTION()
-	void LogReconize() { OnLogRecognizer.Broadcast(); }
-
-	UPROPERTY(BlueprintAssignable, Category = "LeeXR|Delegate")
-	FOnLogRecognizer OnLogRecognizer;
 
 private:
 

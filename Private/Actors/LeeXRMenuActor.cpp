@@ -32,13 +32,14 @@ void ALeeXRMenuActor::BeginPlay()
 void ALeeXRMenuActor::SetupActorInputComponent()
 {
 	UInputComponent* PlayerInputComponent = GetWorld()->GetFirstPlayerController()->InputComponent;
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
 		if (!IsValid(WGInteractionRefLeft) || !IsValid(WGInteractionRefRight))
 		{
-
+			EnhancedInputComponent->BindAction(IA_MenuAction_Left, ETriggerEvent::Started, this, &ALeeXRMenuActor::OnInputActiveMenu);
+			EnhancedInputComponent->BindAction(IA_MenuAction_Left, ETriggerEvent::Completed, this, &ALeeXRMenuActor::OnInputActiveMenu);
 			LEE_LOG(LogLeeXRMenuActor, Warning, "Widget Interaction Reference Not Set");
 		}
-
+	}
 }
 
 // Called every frame

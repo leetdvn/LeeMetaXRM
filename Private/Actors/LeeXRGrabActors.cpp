@@ -17,12 +17,7 @@ ALeeXRGrabActors::ALeeXRGrabActors()
 	ActorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ActorMesh"));
 	SetRootComponent(ActorMesh);
 
-	GrabRegion = CreateDefaultSubobject<UBoxComponent>(TEXT("GrabRegion"));
-
-	//GrabRegion->SetupAttachment(ActorMesh);
-	GrabRegion->SetupAttachment(ActorMesh);
-
-	GrabRegion->SetCollisionProfileName(TEXT("Grabbable"));
+	ActorMesh->SetCollisionProfileName(TEXT("Grabbable"));
 
 	AbilityComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }

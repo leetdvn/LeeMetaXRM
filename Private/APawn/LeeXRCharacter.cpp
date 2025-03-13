@@ -275,6 +275,10 @@ void ALeeXRCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	///Reset Profile Memories
 	SET_MEMORY_STAT(STAT_ICTUCharacter, 0);
+
+	MemoriesSize = 0;
+	SET_MEMORY_STAT(STAT_ICTUMV_TotalMemories, 0);
+
 }
 
 #if WITH_EDITOR

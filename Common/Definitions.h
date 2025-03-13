@@ -71,7 +71,7 @@ FPlatformMemory::EMemoryCounterRegion::MCR_Invalid);
 
 extern float  MemoriesSize;
 
-DECLARE_MEMORY_STAT_EXTERN(TEXT("ICTUMV_TotalMemories"), STAT_ICTUMV_TotalMemories, STATGROUP_ICTUMV, );
+DECLARE_MEMORY_STAT_POOL_EXTERN(TEXT("ICTUMV_TotalMemories"), STAT_ICTUMV_TotalMemories, STATGROUP_ICTUMV, FPlatformMemory::MCR_Physical, );
 
 
 #define ADDMEMORYSTAT(inObject,ClassStat)	\
