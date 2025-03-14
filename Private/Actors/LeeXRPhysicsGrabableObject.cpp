@@ -18,10 +18,10 @@ ALeeXRPhysicsGrabableObject::ALeeXRPhysicsGrabableObject()
 	PrimaryActorTick.bCanEverTick = true;
 
 	ShapePhysicsMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ActorMesh"));
-	SetRootComponent(ShapePhysicsMesh);
+	ShapePhysicsMesh->SetupAttachment(RootComponent);
 
-	ShapeCollisionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShapeCollisionMesh"));
-	ShapeCollisionMesh->SetupAttachment(ShapePhysicsMesh);
+	//ShapeCollisionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShapeCollisionMesh"));
+	//ShapeCollisionMesh->SetupAttachment(ShapePhysicsMesh);
 
 }
 
@@ -42,6 +42,7 @@ void ALeeXRPhysicsGrabableObject::BeginPlay()
 	
 
 	//MaterialIns = ShapePhysicsMesh->CreateAndSetMaterialInstanceDynamic(0);
+	ShapePhysicsMesh->BodyInstance.SetMassOverride(150.f);
 
 }
 

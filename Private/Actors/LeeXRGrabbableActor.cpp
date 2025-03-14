@@ -208,7 +208,7 @@ void ALeeXRGrabbableActor::PhysicsContraintImplementation(UMotionControllerCompo
 				//HandSkeletalMeshRef = skeletal;
 				XRCharacter->OnPoseMesh.Broadcast(this);
 
-				if (StaticMeshComp) {
+				if (IsValid(StaticMeshComp) && StaticMeshComp->IsSimulatingPhysics()) {
 					HandBase->PoseableSpawned(RootComponent,XRCharacter->GetHandPhysics(isLeft)->GetSkeletalMeshAsset(), XRCharacter->GetHandPhysics(isLeft));
 					inPhysicsContraint->SetConstrainedComponents(skeletal, *HandSocket, StaticMeshComp, NAME_None);
 					GetWorld()->GetTimerManager().SetTimer(TimerWeighted, [this, inMCComponent,StaticMeshComp]() {

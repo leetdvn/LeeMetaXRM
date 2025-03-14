@@ -334,7 +334,7 @@ void ALeeXRHandBase::OnGrabObject()
 
 	TArray<AActor*> OverlappingActors;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{};
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody));
 	TArray<AActor*> ActorToIgnore;
 	ActorToIgnore.Add(this);
 
