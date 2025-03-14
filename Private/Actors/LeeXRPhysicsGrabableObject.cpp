@@ -7,7 +7,6 @@
 #include "Components/PrimitiveComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include <Kismet/KismetMaterialLibrary.h>
-#include <MaterialEditingLibrary.h>
 #include "LeeXRUltils.h"
 #include <APawn/LeeXRCharacter.h>
 

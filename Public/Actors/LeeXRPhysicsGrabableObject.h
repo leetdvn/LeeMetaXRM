@@ -15,10 +15,10 @@ class LEEMETAXRM_API ALeeXRPhysicsGrabableObject : public ALeeXRGrabbableActor
 	GENERATED_BODY()
 	
 
-	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Components", meta = (AllowPrivateAccess="true"))
+	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Components", meta = (AllowPrivateAccess = "true", ExposeOnSpawn = "true"))
 	TObjectPtr<class UStaticMeshComponent> ShapePhysicsMesh;
 
-	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Components", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Components", meta = (AllowPrivateAccess = "true", ExposeOnSpawn = "true"))
 	TObjectPtr<class UStaticMeshComponent> ShapeCollisionMesh;
 
 public:	

@@ -420,7 +420,6 @@ void ALeeXRGrabbableActor::PostEditChangeProperty(FPropertyChangedEvent& Propert
 	
 	if (PROPERTYCHANGED(ALeeXRGrabbableActor,GrabableType))
 	{
-		InitSettings();
 	}
 
 }

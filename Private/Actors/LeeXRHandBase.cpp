@@ -413,12 +413,11 @@ void ALeeXRHandBase::OnMenuAction(const FInputActionInstance& ActionInstance)
 		WGActionMenu = nullptr;
 	}
 
-	if (WGActionMenu = LeeXRSPawnActorBP<AActor>(this, WGMenu))
+	WGActionMenu = LeeXRSPawnActorBP<AActor>(this, WGMenu);
+	if (WGActionMenu)
 	{
-		LEE_LOG(LogLeeXRHandBase, Log, "Menu Action");
 
 	}
-
 }
 
 // Find Actor to Grab
