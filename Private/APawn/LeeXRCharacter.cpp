@@ -30,6 +30,8 @@ DEFINE_STAT(STAT_ICTUCharacter);
 DEFINE_STAT(STAT_ICTUCharacterMemory);
 DEFINE_STAT(STAT_ICTUMV_TotalMemories);
 
+#define LOCTEXT_NAMESPACE "LeeMetaXRModules"
+
 float MemoriesSize;
 // Sets default values
 ALeeXRCharacter::ALeeXRCharacter()
@@ -439,4 +441,4 @@ ALeeXRHandBase* ALeeXRCharacter::HandInitialize(ELeeXRHandType inType,bool isLef
 }
 
 
-
+#undef LOCTEXT_NAMESPACE

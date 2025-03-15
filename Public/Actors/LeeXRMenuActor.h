@@ -26,6 +26,13 @@ class LEEMETAXRM_API ALeeXRMenuActor : public AActor
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Input", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> IA_MenuAction_Right;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> IA_MenuCursor_Right;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Input", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> IA_MenuCursor_Left;
+
 public:	
 	// Sets default values for this actor's properties
 	ALeeXRMenuActor();
@@ -39,11 +46,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	float CursorSpeed = -8.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	float MenuDistanceToWardsCamera =10.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	FVector  MenuOffset = FVector(0.f, 0.f, 0.f);
+
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void OnActionMenu(UWidgetInteractionComponent* inComponent, ETriggerEvent inEvent);
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void OnInputActiveMenu(const FInputActionInstance& ActionInstance);
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void OnMenuCursorActiveMenu(const FInputActionInstance& ActionInstance);
 
 	UWidgetInteractionComponent* FindWidgetInteractionReference(EControllerHand inType);
 
@@ -57,6 +73,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<USceneComponent> OriginComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
+	TObjectPtr<UStaticMeshComponent> Cursor;
 
 
 public:	
@@ -78,6 +96,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OnMoveComfortableLocation();
 
+	UFUNCTION(BlueprintCallable)
+	void UpdateWidgetLocation();
+
+	/// <summary>
+	/// Update Cursor Location
+	/// </summary>
+	/// <param name="input"></param>
+	UFUNCTION(BlueprintCallable)
+	void UpdateCursorLocation(FVector2D input);
 private:
 
 	TObjectPtr<class UWidgetInteractionComponent> WGInteractionRefLeft=nullptr;
@@ -86,4 +113,7 @@ private:
 
 	TObjectPtr<class UMotionControllerComponent> MotionControllerRef;
 
+	TObjectPtr<class ALeeXRCharacter> XRCharacter = nullptr;
+
+	bool ActiveMenuRight = false;
 };

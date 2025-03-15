@@ -8,6 +8,8 @@
 #include "AbilitySystemComponent.h"
 
 
+#define LOCATE_NAMESPACE "LeeMetaXRModules"
+
 // Sets default values
 ALeeXRGrabActors::ALeeXRGrabActors()
 {
@@ -88,3 +90,5 @@ void ALeeXRGrabActors::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 	}
 }
 
+
+#undef LOCATE_NAMESPACE

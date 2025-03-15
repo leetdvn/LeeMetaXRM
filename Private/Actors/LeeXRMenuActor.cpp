@@ -8,6 +8,8 @@
 #include <MotionControllerComponent.h>
 #include <Kismet/GameplayStatics.h>
 #include <EnhancedInputComponent.h>
+#include <SceneComponent.h>
+#include "Components/WidgetComponent.h"
 
 // Sets default values
 ALeeXRMenuActor::ALeeXRMenuActor()
@@ -21,6 +23,8 @@ ALeeXRMenuActor::ALeeXRMenuActor()
 	WGComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WGComponent"));
 	SetRootComponent(OriginComponent);
 
+	Cursor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Cursor"));
+	Cursor->SetupAttachment(WGComponent);
 }
 
 // Called when the game starts or when spawned
@@ -30,6 +34,8 @@ void ALeeXRMenuActor::BeginPlay()
 	
 	//Set Input Component
 	InitializationContext(GetWorld(), MenuActionContext, 0);
+
+	SetupActorInputComponent();
 
 	SetReference();
 
@@ -42,8 +48,10 @@ void ALeeXRMenuActor::SetupActorInputComponent()
 		if (!IsValid(WGInteractionRefLeft) || !IsValid(WGInteractionRefRight))
 		{
 			EnhancedInputComponent->BindAction(IA_MenuAction_Left, ETriggerEvent::Started, this, &ALeeXRMenuActor::OnInputActiveMenu);
-			EnhancedInputComponent->BindAction(IA_MenuAction_Left, ETriggerEvent::Completed, this, &ALeeXRMenuActor::OnInputActiveMenu);
-			LEE_LOG(LogLeeXRMenuActor, Warning, "Widget Interaction Reference Not Set");
+			EnhancedInputComponent->BindAction(IA_MenuAction_Right, ETriggerEvent::Completed, this, &ALeeXRMenuActor::OnInputActiveMenu);
+			EnhancedInputComponent->BindAction(IA_MenuCursor_Left, ETriggerEvent::Triggered, this, &ALeeXRMenuActor::OnMenuCursorActiveMenu);
+			EnhancedInputComponent->BindAction(IA_MenuCursor_Right, ETriggerEvent::Triggered, this, &ALeeXRMenuActor::OnMenuCursorActiveMenu);
+
 		}
 	}
 }
@@ -86,6 +94,16 @@ void ALeeXRMenuActor::OnInputActiveMenu(const FInputActionInstance& ActionInstan
 	OnActionMenu(MControl, TriggerEvent);
 }
 
+void ALeeXRMenuActor::OnMenuCursorActiveMenu(const FInputActionInstance& ActionInstance)
+{
+	FString ActName = ActionInstance.GetSourceAction()->GetName();
+	FVector2D ActValue = ActionInstance.GetValue().Get<FVector2D>();
+
+	//Update Cursor Location
+	UpdateCursorLocation(ActValue);
+
+}
+
 void ALeeXRMenuActor::OnActionMenu(UWidgetInteractionComponent* inComponent, ETriggerEvent inEvent)
 {
 	if (!IsValid(inComponent)) return;
@@ -107,11 +125,10 @@ UMotionControllerComponent* ALeeXRMenuActor::FindMotionControllerReference(bool 
 	{
 		if (APawn* Pawn = World->GetFirstPlayerController()->GetPawn())
 		{
-			if (ALeeXRCharacter* Character = Cast<ALeeXRCharacter>(Pawn))
+			if (IsValid(XRCharacter))
 			{
-				return Character->GetMotionController(isLeftHand);
+				return XRCharacter->GetMotionController(isLeftHand);
 			}
-			LEE_LOG(LogLeeXRMenuActor, Warning, "Widget Interaction Reference Set");
 
 		}
 	}
@@ -122,12 +139,15 @@ void ALeeXRMenuActor::SetReference()
 {
 	WGInteractionRefLeft = FindWidgetInteractionReference(EControllerHand::Left);
 	WGInteractionRefRight = FindWidgetInteractionReference(EControllerHand::Right);
+	XRCharacter = LeeXRGetCustomCharacter<ALeeXRCharacter>(this);
+	LEE_CHECK(XRCharacter)
 
-	if (auto* XRCharacter = LeeXRGetCustomCharacter<ALeeXRCharacter>(this))
+	if (IsValid(XRCharacter))
 	{
 		bool IsLeft = XRCharacter->GetTeleportHandAction() == ELeeXRTeleportHandAction::LeeXRLeft ? true : false;
 
-		MotionControllerRef = FindMotionControllerReference(IsLeft);
+		MotionControllerRef = FindMotionControllerReference(!IsLeft);
+		ActiveMenuRight = !IsLeft;
 
 		if (!IsValid(WGInteractionRefLeft) ||
 			!IsValid(WGInteractionRefRight) ||
@@ -146,7 +166,61 @@ void ALeeXRMenuActor::OnMoveComfortableLocation()
 
 	if (auto const WGComp = FindComponentByClass<UWidgetComponent>())
 	{
-		LookAtComponent<UWidgetComponent>(this,WGComp, true);
+		LookAtComponent<UWidgetComponent>(this,WGComp,false);
 	}
 
+	//Update Widget Location
+	UpdateWidgetLocation();
+
 }
+
+void ALeeXRMenuActor::UpdateWidgetLocation()
+{
+	if (MotionControllerRef ==nullptr || WGComponent  == nullptr|| !IsValid(MotionControllerRef)) return;
+
+	FVector MCAim = LeeXRGetWorldLocation(MotionControllerRef);
+
+	FVector CameraLoc = UGameplayStatics::GetPlayerCameraManager(this, 0)->GetCameraLocation();
+
+	FRotator LookAt = UKismetMathLibrary::FindLookAtRotation(MCAim, CameraLoc);
+
+	FVector FWDistVec = UKismetMathLibrary::GetForwardVector(LookAt) * MenuDistanceToWardsCamera;
+
+	FVector UpVec = UKismetMathLibrary::GetUpVector(LookAt) * MenuDistanceToWardsCamera;
+
+	FVector NewLocation = MCAim + FWDistVec + UpVec;
+	WGComponent->SetWorldLocation(FVector(NewLocation.X + 20,NewLocation.Y, NewLocation.Z));
+
+	//LeeScreenLog("Location : %s", FColor::Green,*NewLocation.ToString());
+}
+
+
+// Update Cursor Location
+void ALeeXRMenuActor::UpdateCursorLocation(FVector2D inputVec)
+{
+	if (Cursor == nullptr) return;
+
+	EControllerHand HandType = ActiveMenuRight ? EControllerHand::Right : EControllerHand::Left;
+
+	if (auto WidgetInteraction = FindWidgetInteractionReference(HandType)) {
+
+		if (IsValid(WidgetInteraction))
+		{
+			if (WidgetInteraction->IsOverHitTestVisibleWidget()) return;
+
+			float cursorSpd = CursorSpeed * inputVec.X;
+			FVector CursorLoc = Cursor->GetRelativeLocation();
+
+			float ClampValue = CursorLoc.Y + cursorSpd;
+
+			float ClampedY = FMath::Clamp(ClampValue, -1.f, CursorLocationLimitY);
+
+			float Speedabs = FMath::Abs(CursorSpeed) * inputVec.Y;
+
+			float ClampedZ = FMath::Clamp(CursorLoc.Z + Speedabs, -1.f, CursorLocationLimitZ);
+
+			Cursor->SetRelativeLocation(FVector(0, ClampedY, ClampedZ));
+		}
+	}
+}
+

@@ -29,7 +29,6 @@ void ALeeXRPhysicsGrabableObject::ConstructionEditor()
 	MaterialIns = UKismetMaterialLibrary::CreateDynamicMaterialInstance(0, ShapePhysicsMesh->GetMaterial(0), TEXT("LeeXRMaterialDynamic"));
 	if (MaterialIns) {
 		//UKismetMaterialLibrary::SetMaterialInstanceScalarParameterValue(MaterialIns, TEXT("OnOff"), 1.f);
-		//UMaterialEditingLibrary::SetMaterialInstanceStaticSwitchParameterValue(MaterialIns, TEXT("OnOff"), true);
 	}
 }
 
@@ -40,7 +39,6 @@ void ALeeXRPhysicsGrabableObject::BeginPlay()
 	
 
 	//MaterialIns = ShapePhysicsMesh->CreateAndSetMaterialInstanceDynamic(0);
-	ShapePhysicsMesh->BodyInstance.SetInstanceSimulatePhysics(true);
 
 }
 

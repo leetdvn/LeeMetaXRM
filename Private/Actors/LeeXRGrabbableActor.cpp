@@ -14,6 +14,8 @@
 DEFINE_STAT(STAT_LeeXRGrabable);
 DEFINE_STAT(STAT_LeeXRGrabableMemory);
 
+#define LOCATE_NAMESPACE "LeeMetaXRModules"
+
 // Sets default values
 ALeeXRGrabbableActor::ALeeXRGrabbableActor()
 {
@@ -425,3 +427,7 @@ void ALeeXRGrabbableActor::PostEditChangeProperty(FPropertyChangedEvent& Propert
 
 
 #endif
+
+
+
+#undef LOCATE_NAMESPACE

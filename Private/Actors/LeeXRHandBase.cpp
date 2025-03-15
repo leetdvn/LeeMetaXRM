@@ -19,6 +19,8 @@
 
 DEFINE_STAT(STAT_ICTUController);
 DEFINE_STAT(STAT_HandController)
+
+#define LOCATE_NAMESPACE "LeeMetaXRModules"
 // Sets default values
 ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -679,3 +681,7 @@ FVector ALeeXRHandBase::GetTeleportLocation(const ALeeXRCharacter* inXRCharacter
 }
 
 #pragma endregion Teleport
+
+
+
+#undef LOCATE_NAMESPACE
