@@ -5,6 +5,10 @@
 #include <Components/LeeXRMeshSocket.h>
 #include <Definitions.h>
 #include <Components/WidgetComponent.h>
+#include <LeeXRUltils.h>
+#include <APawn/LeeXRCharacter.h>
+
+using namespace LeeXRUltils;
 
 // Sets default values
 ALeeXRSocketActor::ALeeXRSocketActor()
@@ -14,6 +18,9 @@ ALeeXRSocketActor::ALeeXRSocketActor()
 
 	SkeletonBasic = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletonBasic"));
 	SetRootComponent(SkeletonBasic);
+
+	PhysicsCollisionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PhysicsCollisionMesh"));
+	PhysicsCollisionMesh->SetupAttachment(SkeletonBasic);
 
 	StatusAct = CreateDefaultSubobject<UWidgetComponent>(TEXT("StatusAct"));
 	StatusAct->SetupAttachment(SkeletonBasic);
@@ -25,6 +32,8 @@ void ALeeXRSocketActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	InitSetting();
+
 	//TArray< ULeeXRMeshSocket*> MeshSockets{};
 	//GetComponents<ULeeXRMeshSocket>(MeshSockets);
 	//if (MeshSockets.IsEmpty()) return;
@@ -45,10 +54,25 @@ void ALeeXRSocketActor::Tick(float DeltaTime)
 
 	if (StatusAct == nullptr) return;
 
-	LookAtComponent<UWidgetComponent>(StatusAct,true);
+	LookAtComponent<UWidgetComponent>(this,StatusAct,true);
 }
 
 void ALeeXRSocketActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
+}
+
+void ALeeXRSocketActor::InitSetting()
+{
+	///Hiden Socket Setting Up base to Snap 
+	SkeletonBasic->SetVisibility(false);
+	SkeletonBasic->SetHiddenInGame(true);
+
+	///Set the Collision Profile
+	PhysicsCollisionMesh->Mobility = EComponentMobility::Static;
+	//PhysicsCollisionMesh->SetCollisionProfileName(TEXT("Grabbable"));
+
+	//Get the Character
+	XRCharacter = LeeXRGetCustomCharacter<ALeeXRCharacter>(this);
+	LEE_CHECK(XRCharacter);
 }

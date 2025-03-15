@@ -369,11 +369,9 @@ protected:
 
 private:
 
-
 	AActor* FindActorToGrab(TArray<AActor*> &inActors, FString inTag);
 
 	void OnHandTypeChanged();
-
 
 	UFUNCTION()
 	void OnHandTrigger(const FInputActionInstance& ActionInstance);

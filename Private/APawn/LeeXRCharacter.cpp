@@ -57,6 +57,8 @@ ALeeXRCharacter::ALeeXRCharacter()
 	AnimPhysicsLeft = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("AnimPhysicsLeft"));
 	AnimPhysicsRight = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("AnimPhysicsRight"));
 
+	if (Self == nullptr)
+		Self = this;
 }
 
 // Get the hand animation instance
@@ -391,7 +393,10 @@ void ALeeXRCharacter::OnHandGrabing(const FInputActionInstance& ActionInstance)
 void ALeeXRCharacter::OnResetOrientation()
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
-	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
+	//UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
+	//Menu
+
+	LeeScreenLog("Reset Orientation", FColor::Green);
 }
 
 void ALeeXRCharacter::OnTurn(const FInputActionInstance& ActionInstance)

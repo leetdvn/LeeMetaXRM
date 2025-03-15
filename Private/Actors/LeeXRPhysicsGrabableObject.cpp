@@ -19,10 +19,8 @@ ALeeXRPhysicsGrabableObject::ALeeXRPhysicsGrabableObject()
 
 	ShapePhysicsMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ActorMesh"));
 	ShapePhysicsMesh->SetupAttachment(RootComponent);
-
 	//ShapeCollisionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShapeCollisionMesh"));
 	//ShapeCollisionMesh->SetupAttachment(ShapePhysicsMesh);
-
 }
 
 void ALeeXRPhysicsGrabableObject::ConstructionEditor()
@@ -42,7 +40,7 @@ void ALeeXRPhysicsGrabableObject::BeginPlay()
 	
 
 	//MaterialIns = ShapePhysicsMesh->CreateAndSetMaterialInstanceDynamic(0);
-	ShapePhysicsMesh->BodyInstance.SetMassOverride(150.f);
+	ShapePhysicsMesh->BodyInstance.SetInstanceSimulatePhysics(true);
 
 }
 

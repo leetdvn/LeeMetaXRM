@@ -282,9 +282,7 @@ void ALeeXRGrabbableActor::BeginPlay()
 	LEE_SCOPE_CYCLE_COUNTER(LeeXRGrabable);
 
 	ADDMEMORYSTAT(this, STAT_LeeXRGrabableMemory);
-	if (UStaticMeshComponent* StaticMeshComp = FindComponentByClass<UStaticMeshComponent>()) {
-		StaticMeshComp->SetMassOverrideInKg(NAME_None, LeeMassDefault);
-	}
+
 	//Settitng Init When Game Starts
 	InitSettings();
 }

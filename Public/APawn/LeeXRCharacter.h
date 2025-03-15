@@ -85,7 +85,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	ALeeXRHandBase* GetHand(bool isLeft) const { return isLeft ? XRHandLeft : XRHandRight; }
 
-
 	/// <summary>
 	/// Get Widget Interaction
 	/// </summary>
@@ -114,7 +113,6 @@ public:
 	/// </summary>
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void CalculateMotionControllerVelocities();
-
 
 	/// <summary>
 	/// Update Climbing
@@ -269,6 +267,8 @@ private:
 
 	template<typename T>
 	ALeeXRHandBase* InitializeHandActor(TSubclassOf<T> inClass);
+
+	TWeakObjectPtr<ALeeXRCharacter> Self = nullptr;
 
 };
 

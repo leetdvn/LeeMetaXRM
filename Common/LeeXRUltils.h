@@ -9,6 +9,8 @@
 #include "InputMappingContext.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "OculusUtilsLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
+#include <Kismet/GameplayStatics.h>
 
 
 UENUM(BlueprintType)
@@ -250,6 +252,34 @@ namespace LeeXRUltils
 		if (APlayerController* PlayerController = LeeXRGetPlayerController(inContextObject))
 		{
 			PlayerController->PlayHapticEffect(inEffect, inHand);
+		}
+	}
+
+
+	template<typename T>
+	FORCEINLINE void LookAtComponent(const UObject* inContextObject,T* TargetComponent, bool isYawOnly)
+	{
+		/// <summary>
+		/// Look at the target component
+		if (auto World = GEngine->GetWorldFromContextObject(inContextObject, EGetWorldErrorMode::LogAndReturnNull))
+		{
+			if (TargetComponent == nullptr) return;
+
+			//// Get the world location of the display component
+			FVector DisplayLocation = TargetComponent->GetComponentLocation();
+
+			// Get the world location of the player's camera
+			FVector CameraLocation = UGameplayStatics::GetPlayerCameraManager(World, 0)->GetCameraLocation();
+
+			// Calculate the rotation needed to look at the camera
+			FRotator FLookAtRot = UKismetMathLibrary::FindLookAtRotation(DisplayLocation, CameraLocation);
+
+			FRotator LookAtRotation = isYawOnly == false ?
+				FLookAtRot :
+				FRotator(0, FLookAtRot.Yaw, 0);
+
+			// Set the world rotation of the display component to the calculated rotation
+			TargetComponent->SetWorldRotation(FRotator(0, LookAtRotation.Yaw, 0));
 		}
 	}
 }

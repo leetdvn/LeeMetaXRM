@@ -51,6 +51,13 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
+	TObjectPtr<UWidgetComponent> WGComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
+	TObjectPtr<USceneComponent> OriginComponent;
+
+
 
 public:	
 	// Called every frame
@@ -67,6 +74,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void SetReference();
 
+
+	UFUNCTION(BlueprintCallable)
+	void OnMoveComfortableLocation();
+
 private:
 
 	TObjectPtr<class UWidgetInteractionComponent> WGInteractionRefLeft=nullptr;
@@ -74,4 +85,5 @@ private:
 	TObjectPtr<class UWidgetInteractionComponent> WGInteractionRefRight=nullptr;
 
 	TObjectPtr<class UMotionControllerComponent> MotionControllerRef;
+
 };

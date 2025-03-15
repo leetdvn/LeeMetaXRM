@@ -15,6 +15,12 @@ ALeeXRMenuActor::ALeeXRMenuActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	OriginComponent = CreateDefaultSubobject<USceneComponent>(TEXT("OriginComponent"));
+	SetRootComponent(OriginComponent);
+
+	WGComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WGComponent"));
+	SetRootComponent(OriginComponent);
+
 }
 
 // Called when the game starts or when spawned
@@ -47,6 +53,8 @@ void ALeeXRMenuActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	///Move Update Comfortable Location
+	OnMoveComfortableLocation();
 }
 
 UWidgetInteractionComponent* ALeeXRMenuActor::FindWidgetInteractionReference(EControllerHand inType)
@@ -128,6 +136,17 @@ void ALeeXRMenuActor::SetReference()
 			LEE_LOG(LogLeeXRMenuActor, Error, "Widget Interaction Reference Not Set");
 		}
 
+	}
+
+}
+
+void ALeeXRMenuActor::OnMoveComfortableLocation()
+{
+	if (!IsValid(MotionControllerRef)) return;
+
+	if (auto const WGComp = FindComponentByClass<UWidgetComponent>())
+	{
+		LookAtComponent<UWidgetComponent>(this,WGComp, true);
 	}
 
 }

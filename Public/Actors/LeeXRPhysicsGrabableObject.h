@@ -9,17 +9,12 @@
 #include "LeeXRGrabbableActor.h"
 #include "LeeXRPhysicsGrabableObject.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType,Blueprintable,meta=(BlueprintSpawnableComponent))
 class LEEMETAXRM_API ALeeXRPhysicsGrabableObject : public ALeeXRGrabbableActor
 {
 	GENERATED_BODY()
 	
 
-	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Components", meta = (AllowPrivateAccess = "true", ExposeOnSpawn = "true"))
-	TObjectPtr<class UStaticMeshComponent> ShapePhysicsMesh;
-
-	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Components", meta = (AllowPrivateAccess = "true", ExposeOnSpawn = "true"))
-	TObjectPtr<class UStaticMeshComponent> ShapeCollisionMesh;
 
 public:	
 	// Sets default values for this actor's properties
@@ -46,6 +41,9 @@ protected:
 	virtual void OnReleaseObjects(UMotionControllerComponent* inComponent) override;
 
 	virtual void InitSettings() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
+	TObjectPtr<class UStaticMeshComponent> ShapePhysicsMesh;
 
 
 public:	

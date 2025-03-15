@@ -416,7 +416,8 @@ void ALeeXRHandBase::OnMenuAction(const FInputActionInstance& ActionInstance)
 	WGActionMenu = LeeXRSPawnActorBP<AActor>(this, WGMenu);
 	if (WGActionMenu)
 	{
-
+		LeeScreenLog("Menu Action %s", FColor::Green, *WGActionMenu->GetName());
+		WGActionMenu->SetActorLocation(GetActorLocation());
 	}
 }
 
@@ -426,10 +427,13 @@ AActor* ALeeXRHandBase::FindActorToGrab(TArray<AActor*> &inActors, FString inTag
 
 	for (auto Actor : inActors)
 	{
-		if (Actor->ActorHasTag(*inTag))
+		if (auto* GrabActor = Cast<ALeeXRGrabbableActor>(Actor))
 		{
-			LeeScreenLog("Grabbing Object %s", FColor::Green, *Actor->GetName());
-			return Actor;
+			FGameplayTag TagGrabable = FGameplayTag::RequestGameplayTag(FName("Grabable"));
+			if (GrabActor->IsTag(TagGrabable)) {
+				LeeScreenLog("Grabbing Object %s", FColor::Green, *GrabActor->GetName());
+				return GrabActor;
+			}
 		}
 	}
 	return nullptr;

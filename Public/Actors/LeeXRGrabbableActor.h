@@ -195,10 +195,10 @@ protected:
 #endif
 
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	bool FrezzeOnSnap = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	bool SnapHandMesh = false;
 
 
