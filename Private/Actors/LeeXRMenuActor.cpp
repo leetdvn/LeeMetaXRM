@@ -200,14 +200,17 @@ void ALeeXRMenuActor::UpdateCursorLocation(FVector2D inputVec)
 {
 	if (Cursor == nullptr) return;
 
+	///Find Hand Active Menu	
 	EControllerHand HandType = ActiveMenuRight ? EControllerHand::Right : EControllerHand::Left;
 
+	//Verify Widget Interaction
 	if (auto WidgetInteraction = FindWidgetInteractionReference(HandType)) {
 
 		if (IsValid(WidgetInteraction))
 		{
 			if (WidgetInteraction->IsOverHitTestVisibleWidget()) return;
 
+			//Get Cursor Speed
 			float cursorSpd = CursorSpeed * inputVec.X;
 			FVector CursorLoc = Cursor->GetRelativeLocation();
 
@@ -219,6 +222,7 @@ void ALeeXRMenuActor::UpdateCursorLocation(FVector2D inputVec)
 
 			float ClampedZ = FMath::Clamp(CursorLoc.Z + Speedabs, -1.f, CursorLocationLimitZ);
 
+			//Set Cursor Location
 			Cursor->SetRelativeLocation(FVector(0, ClampedY, ClampedZ));
 		}
 	}

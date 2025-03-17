@@ -24,6 +24,7 @@
 #include <PoseableMeshComponent.h>
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 
+
 using namespace LeeXRUltils;
 
 DEFINE_STAT(STAT_ICTUCharacter);
@@ -269,6 +270,8 @@ void ALeeXRCharacter::BeginPlay()
 	HandPhysicsLeft->SetAllBodiesBelowSimulatePhysics(TEXT("hand_l"), true);
 
 	InitPhysicsAnimation();
+
+	LEE_LOG(LogLeeXRCharacter, Log, "Begin Play");
 	//HandPhysicsRight->SetAllBodiesBelowPhysicsBlendWeight(TEXT("hand_r"), .15f);
 }
 
