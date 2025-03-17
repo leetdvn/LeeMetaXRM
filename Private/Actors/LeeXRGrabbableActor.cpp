@@ -346,9 +346,8 @@ void ALeeXRGrabbableActor::OnReleaseObjects(UMotionControllerComponent* inCompon
 	///Release Object
 	if (inComponent == nullptr || FrezzeOnSnap) return;
 
-	if(bIsheld){
-
-		
+	if(bIsheld)
+	{
 		switch (GrabType)
 		{
 			case EGrabType::EGT_Free: {

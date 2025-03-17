@@ -3,6 +3,7 @@
 using EpicGames.Core;
 using System;
 using UnrealBuildTool;
+using System.IO;
 
 public class LeeMetaXRM : ModuleRules
 {
@@ -42,17 +43,12 @@ public class LeeMetaXRM : ModuleRules
             "OculusUtils",
         });
 
-        //PrivateIncludePaths.AddRange(new string[] {
-        //    "Slate",
-        //    "SlateCore",
-
-        //});
-
 
         PublicIncludePaths.AddRange(new string[] {
-            "LeeMetaXRM/Common",
-            "LeeMetaXRM/",
-            "LeeMetaXRM/Shaders",
+            Path.Combine(PluginDirectory,"Source/LeeMetaXRM/Common"),
+            Path.Combine(PluginDirectory,"Source/LeeMetaXRM/Shaders"),
+            Path.Combine(PluginDirectory,"Source/LeeMetaXRM"),
+            //"LeeMetaXRM/Shaders",
         });
 
         if (Target.bBuildEditor==true)

@@ -68,13 +68,13 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
-	TObjectPtr<UWidgetComponent> WGComponent;
+	TObjectPtr<class UWidgetComponent> WGComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
-	TObjectPtr<USceneComponent> OriginComponent;
+	TObjectPtr<class USceneComponent> OriginComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
-	TObjectPtr<UStaticMeshComponent> Cursor;
+	TObjectPtr<class UStaticMeshComponent> Cursor;
 
 
 public:	
