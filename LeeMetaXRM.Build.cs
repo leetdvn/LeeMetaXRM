@@ -45,9 +45,11 @@ public class LeeMetaXRM : ModuleRules
 
 
         PublicIncludePaths.AddRange(new string[] {
+            Path.Combine(PluginDirectory,"Source/LeeMetaXRM"),
             Path.Combine(PluginDirectory,"Source/LeeMetaXRM/Common"),
             Path.Combine(PluginDirectory,"Source/LeeMetaXRM/Shaders"),
-            Path.Combine(PluginDirectory,"Source/LeeMetaXRM"),
+            Path.Combine(PluginDirectory,"Source/LeeMetaXRM/Public")
+
             //"LeeMetaXRM/Shaders",
         });
 

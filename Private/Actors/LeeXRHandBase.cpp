@@ -154,15 +154,16 @@ void ALeeXRHandBase::InittializeSetup()
 		return;
 	}
 
-	if (TeleportRef == nullptr) {
-		//Define Teleport Hand Action Left or Right
-		if (TeleportValid()) {
-			TeleportRef = LeeXRSPawnActorBP<AActor>(this, TeleportVisualizer);
+	//Init Telport Reference
+	//if (TeleportRef == nullptr) {
+	//	//Define Teleport Hand Action Left or Right
+	//	if (TeleportValid()) {
+	//		TeleportRef = LeeXRSPawnActorBP<AActor>(this, TeleportVisualizer);
 
-			if (TeleportRef)
-				TeleportRef->GetRootComponent()->SetVisibility(false, true);;
-		}
-	}
+	//		if (TeleportRef)
+	//			TeleportRef->GetRootComponent()->SetVisibility(false, true);;
+	//	}
+	//}
 
 }
 
@@ -544,8 +545,13 @@ void ALeeXRHandBase::OnHandTrigger(const FInputActionInstance& ActionInstance)
 void ALeeXRHandBase::TeleportTrace(FVector StartPos, FVector ForwardVec)
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
-	if(TeleportRef)
+
+	//Check
+	if (TeleportRef) {
 		TeleportRef->SetActorHiddenInGame(false);
+		//TeleportRef->GetRootComponent()->SetVisibility(bValidTeleportLocation, true);
+
+	}
 	//Trace Teleport
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>();
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
@@ -590,7 +596,7 @@ void ALeeXRHandBase::TeleportTrace(FVector StartPos, FVector ForwardVec)
 
 
 	if (TeleportRef) {
-		TeleportRef->GetRootComponent()->SetVisibility(bValidTeleportLocation, true);
+		//TeleportRef->GetRootComponent()->SetVisibility(bValidTeleportLocation, true);
 		if(OutHit.bBlockingHit)
 			TeleportRef->SetActorLocation(ProjectedTeleportLocation);
 	}
@@ -642,13 +648,20 @@ void ALeeXRHandBase::TryTeleport()
 
 	if (XRCharacter) {
 		FVector TeleportLocation = GetTeleportLocation(XRCharacter);
-		if (TeleportLocation.IsNearlyZero(0.0001f)) {
+		if (TeleportLocation.IsNearlyZero(0.0001f) || TeleportLocation.IsZero()) {
 			LeeScreenLog("Teleport Location is Zero", FColor::Red);
+			return;
 		}
+
 		if (TeleportLocation.Z <= 0) TeleportLocation.Z = 10;
+		XRCharacter->GetHandPhysics(IsHandLeft())->SetSimulatePhysics(false);
 		XRCharacter->TeleportTo(TeleportLocation, FRotator(0.0f, XRCharacter->GetActorRotation().Yaw, 0.0f), false, true);
-		if(TeleportRef)
+
+		if (TeleportRef) {
 			TeleportRef->SetActorHiddenInGame(true);
+			XRCharacter->GetHandPhysics(IsHandLeft())->SetSimulatePhysics(true);
+
+		}
 	}
 }
 
@@ -661,6 +674,11 @@ bool ALeeXRHandBase::TeleportValid()
 	bool TpAction = TelportAct == ELeeXRTeleportHandAction::LeeXRRight ? true : false;
 
 	EControllerHand Direction = TpAction ? EControllerHand::Right : EControllerHand::Left;
+
+	if (HandType != Direction) return false;
+	if (TeleportRef == nullptr) {
+		StartTeleportTrace();
+	}
 
 	return HandType == Direction;
 }
