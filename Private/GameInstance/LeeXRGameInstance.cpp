@@ -39,8 +39,6 @@ void ULeeXRGameInstance::OnStart()
 
 	LEE_LOG(LogLeeICTUGameInstance, Log, "ICTU Game Start");
 
-	if (auto Character = LeeXRGetCustomCharacter<ALeeXRCharacter>(this)) {
-		
-	}
+	//ActionType = EICTUActionType::EICTU_ActionOne;
 
 }

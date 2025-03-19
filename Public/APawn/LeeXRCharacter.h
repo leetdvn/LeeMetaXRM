@@ -28,18 +28,6 @@ enum class ELeeXRTeleportHandAction : uint8
 };
 
 
-USTRUCT(BlueprintType)
-struct LEEMETAXRM_API FLevelSpawnLocation
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditAnywhere)
-	TArray<FVector> SpawnLevel;
-
-};
-
-
 /**
  * XR Character Class
  */
@@ -156,10 +144,6 @@ public:
 
 	void HandPhysicBlendToPoseable(class UPoseableMeshComponent* inPoseable,bool isLeft=true);
 
-	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
-	void SetStartSpawnLocation(FVector inLocation) { StartSpawnLocation = inLocation; }
-
-
 	enum class EICTUActionType GetCurrentActionType() const; 
 protected:
 	// Called when the game starts or when spawned
@@ -167,8 +151,8 @@ protected:
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties", meta = (DisplayName = "Start Spawn"))
-	FVector StartSpawnLocation;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
+	int32 NextLevel=0;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

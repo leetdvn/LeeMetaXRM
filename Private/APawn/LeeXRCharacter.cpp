@@ -256,7 +256,16 @@ void ALeeXRCharacter::BeginPlay()
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
 	//Int Player Spawn Location
-	SetActorLocation(StartSpawnLocation);
+	if (auto GameIns = GetGameInstance<ULeeXRGameInstance>())
+	{
+		auto NextLoc = GameIns->GetLevelSpawnLocation();
+
+		if (NextLoc.SpawnLevel.Num() > 0 && NextLevel >= 0)
+		{
+			FVector StartSpawnLocation = NextLoc.SpawnLevel[NextLevel];
+			SetActorLocation(StartSpawnLocation);
+		}
+	}
 
 	ADDMEMORYSTAT(this, STAT_ICTUCharacterMemory);
 	InitializationContext(GetWorld(), DefaultMappingContext);

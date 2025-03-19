@@ -26,6 +26,17 @@ enum class EICTUActionType : uint8
 };
 
 
+USTRUCT(BlueprintType)
+struct LEEMETAXRM_API FLevelSpawnLocation
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+	TArray<FVector> SpawnLevel;
+
+};
+
 DEFINE_LOG_CATEGORY_STATIC(LogLeeICTUGameInstance, Log, All);
 
 /**
@@ -45,6 +56,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void SetActionType(EICTUActionType inType) { ActionType = inType; };
 
+	FLevelSpawnLocation GetLevelSpawnLocation() const { return Location; }
+
 protected:
 
 	virtual void Init() override;
@@ -55,4 +68,8 @@ protected:
 
 
 	EICTUActionType ActionType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	FLevelSpawnLocation Location;
+
 };
