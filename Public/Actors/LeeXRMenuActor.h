@@ -61,6 +61,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void OnMenuCursorActiveMenu(const FInputActionInstance& ActionInstance);
 
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void SetActiveMenu(bool isActive) { isActiveMenu = isActive; }
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	bool IsActive() const { return isActiveMenu; }
+
 	UWidgetInteractionComponent* FindWidgetInteractionReference(EControllerHand inType);
 
 protected:
@@ -76,7 +82,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UStaticMeshComponent> Cursor;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
+	TObjectPtr<class UNiagaraComponent> MenuLaser;
 
+	bool isActiveMenu;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -105,6 +114,9 @@ public:
 	/// <param name="input"></param>
 	UFUNCTION(BlueprintCallable)
 	void UpdateCursorLocation(FVector2D input);
+
+	void LaserPointerInput(UWidgetInteractionComponent* inWidgetAction);
+
 private:
 
 	TObjectPtr<class UWidgetInteractionComponent> WGInteractionRefLeft=nullptr;

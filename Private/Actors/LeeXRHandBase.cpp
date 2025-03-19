@@ -15,6 +15,7 @@
 #include <PoseableMeshComponent.h>
 #include "Components/ArrowComponent.h"
 #include "Actors/LeeXRGrabbableActor.h"
+#include <Actors/LeeXRMenuActor.h>
 
 
 DEFINE_STAT(STAT_ICTUController);
@@ -123,7 +124,7 @@ void ALeeXRHandBase::SetInputComponent()
 		EnhancedInputComponent->BindAction(IA_HandLog, ETriggerEvent::Started, this, &ALeeXRHandBase::LogReconize);
 
 		EnhancedInputComponent->BindAction(IA_MenuAction, ETriggerEvent::Started, this, &ALeeXRHandBase::OnMenuAction);
-		EnhancedInputComponent->BindAction(IA_MenuAction, ETriggerEvent::Completed, this, &ALeeXRHandBase::OnMenuAction);
+		//EnhancedInputComponent->BindAction(IA_MenuAction, ETriggerEvent::Completed, this, &ALeeXRHandBase::OnMenuAction);
 
 		//LeeScreenLog("Setting Input Component",FColor::Blue);
 		LEE_LOG(LogLeeXRHandBase, Log, "Setting Input Component");
@@ -410,18 +411,27 @@ void ALeeXRHandBase::Tick(float DeltaTime)
 
 void ALeeXRHandBase::OnMenuAction(const FInputActionInstance& ActionInstance)
 {
-	if (WGActionMenu != nullptr)
-	{
-		WGActionMenu->Destroy();
-		WGActionMenu = nullptr;
-	}
+	bIsShow = !bIsShow;
 
-	WGActionMenu = LeeXRSPawnActorBP<AActor>(this, WGMenu);
-	if (WGActionMenu)
-	{
-		LeeScreenLog("Menu Action %s", FColor::Green, *WGActionMenu->GetName());
-		WGActionMenu->SetActorLocation(GetActorLocation());
+	if (WGActionMenu == nullptr && bIsShow)
+		WGActionMenu = LeeXRSPawnActorBP<AActor>(this, WGMenu);
+
+	WGActionMenu->SetActorHiddenInGame(!bIsShow);
+
+	if (auto MActor = Cast<ALeeXRMenuActor>(WGActionMenu)) {
+		MActor->SetActiveMenu(bIsShow);
 	}
+	//if (!bIsShow) {
+	//	bIsShow = true;
+	//	WGActionMenu->SetHidden(bIsShow);
+	//}
+	//else {
+	//	WGActionMenu->SetHidden(bIsShow);
+	//}
+	
+	LeeScreenLog("Menu Action %s", FColor::Green, *WGActionMenu->GetName());
+	WGActionMenu->SetActorLocation(GetActorLocation());
+
 }
 
 // Find Actor to Grab

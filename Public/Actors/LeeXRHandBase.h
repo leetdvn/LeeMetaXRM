@@ -205,6 +205,8 @@ protected:
 	void SetHandSwitch(bool isLeft);
 	bool bIsCanGrasp;
 
+	bool bIsShow = false;
+
 	TObjectPtr<ALeeXRCharacter> XRCharacter=nullptr;
 
 #if WITH_EDITOR

@@ -10,6 +10,8 @@
 #include <EnhancedInputComponent.h>
 #include <SceneComponent.h>
 #include "Components/WidgetComponent.h"
+#include <NiagaraComponent.h>
+#include "NiagaraDataInterfaceArrayFunctionLibrary.h"
 
 // Sets default values
 ALeeXRMenuActor::ALeeXRMenuActor()
@@ -19,6 +21,9 @@ ALeeXRMenuActor::ALeeXRMenuActor()
 
 	OriginComponent = CreateDefaultSubobject<USceneComponent>(TEXT("OriginComponent"));
 	SetRootComponent(OriginComponent);
+
+	MenuLaser = CreateDefaultSubobject<UNiagaraComponent>(TEXT("MenuLaser"));
+	MenuLaser->SetupAttachment(OriginComponent);
 
 	WGComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WGComponent"));
 	SetRootComponent(OriginComponent);
@@ -107,7 +112,8 @@ void ALeeXRMenuActor::OnMenuCursorActiveMenu(const FInputActionInstance& ActionI
 	CursorLocationLimitZ = GSize.Y * 0.5f;
 
 	//Update Cursor Location
-	UpdateCursorLocation(ActValue);
+	if(isActiveMenu)
+		UpdateCursorLocation(ActValue);
 
 
 }
@@ -156,7 +162,7 @@ void ALeeXRMenuActor::SetReference()
 
 		MotionControllerRef = FindMotionControllerReference(!IsLeft);
 		ActiveMenuRight = !IsLeft;
-
+		LEE_LOG(LogLeeXRMenuActor, Error, "MotionControllerRef : %s",*MotionControllerRef->GetName());
 		if (!IsValid(WGInteractionRefLeft) ||
 			!IsValid(WGInteractionRefRight) ||
 			!IsValid(MotionControllerRef))
@@ -215,29 +221,63 @@ void ALeeXRMenuActor::UpdateCursorLocation(FVector2D inputVec)
 	//Verify Widget Interaction
 	if (auto WidgetInteraction = FindWidgetInteractionReference(HandType)) {
 
+
 		if (IsValid(WidgetInteraction))
 		{
 			if (WidgetInteraction->IsOverHitTestVisibleWidget()) {
+
+				LaserPointerInput(WidgetInteraction);
+
+				FHitResult LastHit = WidgetInteraction->GetLastHitResult();
+				Cursor->SetWorldLocation(LastHit.Location);
+				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVectorValue(MenuLaser, TEXT("User.PointArray"),0,LastHit.Location,false);
+				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVectorValue(MenuLaser, TEXT("User.PointArray"), 1, LastHit.Location, false);
+
+				//MenuLaser->SetVectorParameter("EndPoint", LastHit.Location);
 				LeeScreenLog("Cursor Over Widget", FColor::Green);
-				return;
+				//return;
 			}
+			else {
+				//Get Cursor Speed
+				float cursorSpd = CursorSpeed * inputVec.X;
+				FVector CursorLoc = Cursor->GetRelativeLocation();
 
-			//Get Cursor Speed
-			float cursorSpd = CursorSpeed * inputVec.X;
-			FVector CursorLoc = Cursor->GetRelativeLocation();
+				float ClampValue = CursorLoc.Y + cursorSpd;
 
-			float ClampValue = CursorLoc.Y + cursorSpd;
+				float ClampedY = FMath::Clamp(ClampValue, CursorLocationLimitY * -1.f, CursorLocationLimitY);
 
-			float ClampedY = FMath::Clamp(ClampValue, CursorLocationLimitY*  -1.f, CursorLocationLimitY);
+				float Speedabs = CursorLoc.Z + (FMath::Abs(CursorSpeed) * inputVec.Y);
 
-			float Speedabs = CursorLoc.Z + (FMath::Abs(CursorSpeed) * inputVec.Y);
+				float ClampedZ = FMath::Clamp(Speedabs, CursorLocationLimitZ * -1.f, CursorLocationLimitZ);
 
-			float ClampedZ = FMath::Clamp(Speedabs, CursorLocationLimitZ * -1.f, CursorLocationLimitZ);
+				//Set Cursor Location
+				Cursor->SetRelativeLocation(FVector(0, ClampedY, ClampedZ));
 
-			//Set Cursor Location
-			Cursor->SetRelativeLocation(FVector(0, ClampedY, ClampedZ));
+				LaserPointerInput(WidgetInteraction);
+
+			}
 			
 		}
 	}
+}
+
+void ALeeXRMenuActor::LaserPointerInput(UWidgetInteractionComponent* inWidgetAction)
+{
+	if (inWidgetAction == nullptr ) return;
+
+	EControllerHand HandType = ActiveMenuRight ? EControllerHand::Right : EControllerHand::Left;
+
+	if (auto WidgetInteraction = FindWidgetInteractionReference(HandType)) {
+		FString msg = UEnum::GetValueAsString(HandType);
+		LEE_LOG(LogLeeXRMenuActor, Warning, "Hand Type %s", *msg);
+
+	}
+	//MenuLaser->SetVisibility(true);
+	if(isActiveMenu)
+		inWidgetAction->K2_AttachToComponent(Cursor, NAME_None, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
+	else
+		inWidgetAction->K2_AttachToComponent(MotionControllerRef, NAME_None, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
+
+	inWidgetAction->SetRelativeLocation(FVector(-10, 0, 0), false, nullptr, ETeleportType::TeleportPhysics);
 }
 
