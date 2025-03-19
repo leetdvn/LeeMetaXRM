@@ -99,8 +99,16 @@ void ALeeXRMenuActor::OnMenuCursorActiveMenu(const FInputActionInstance& ActionI
 	FString ActName = ActionInstance.GetSourceAction()->GetName();
 	FVector2D ActValue = ActionInstance.GetValue().Get<FVector2D>();
 
+	FGeometry SpaceGeo = WGComponent->GetWidget()->GetPaintSpaceGeometry();
+
+	FVector2D GSize = SpaceGeo.GetAbsoluteSize();
+
+	CursorLocationLimitY = GSize.X * 0.5f;
+	CursorLocationLimitZ = GSize.Y * 0.5f;
+
 	//Update Cursor Location
 	UpdateCursorLocation(ActValue);
+
 
 }
 
@@ -166,11 +174,12 @@ void ALeeXRMenuActor::OnMoveComfortableLocation()
 
 	if (auto const WGComp = FindComponentByClass<UWidgetComponent>())
 	{
+		UpdateWidgetLocation();
+
 		LookAtComponent<UWidgetComponent>(this,WGComp,false);
 	}
 
 	//Update Widget Location
-	UpdateWidgetLocation();
 
 }
 
@@ -189,7 +198,7 @@ void ALeeXRMenuActor::UpdateWidgetLocation()
 	FVector UpVec = UKismetMathLibrary::GetUpVector(LookAt) * MenuDistanceToWardsCamera;
 
 	FVector NewLocation = MCAim + FWDistVec + UpVec;
-	WGComponent->SetWorldLocation(FVector(NewLocation.X + 20,NewLocation.Y, NewLocation.Z));
+	WGComponent->SetWorldLocation(NewLocation + MenuOffset);
 
 	//LeeScreenLog("Location : %s", FColor::Green,*NewLocation.ToString());
 }
@@ -208,7 +217,10 @@ void ALeeXRMenuActor::UpdateCursorLocation(FVector2D inputVec)
 
 		if (IsValid(WidgetInteraction))
 		{
-			if (WidgetInteraction->IsOverHitTestVisibleWidget()) return;
+			if (WidgetInteraction->IsOverHitTestVisibleWidget()) {
+				LeeScreenLog("Cursor Over Widget", FColor::Green);
+				return;
+			}
 
 			//Get Cursor Speed
 			float cursorSpd = CursorSpeed * inputVec.X;
@@ -216,14 +228,15 @@ void ALeeXRMenuActor::UpdateCursorLocation(FVector2D inputVec)
 
 			float ClampValue = CursorLoc.Y + cursorSpd;
 
-			float ClampedY = FMath::Clamp(ClampValue, -1.f, CursorLocationLimitY);
+			float ClampedY = FMath::Clamp(ClampValue, CursorLocationLimitY*  -1.f, CursorLocationLimitY);
 
-			float Speedabs = FMath::Abs(CursorSpeed) * inputVec.Y;
+			float Speedabs = CursorLoc.Z + (FMath::Abs(CursorSpeed) * inputVec.Y);
 
-			float ClampedZ = FMath::Clamp(CursorLoc.Z + Speedabs, -1.f, CursorLocationLimitZ);
+			float ClampedZ = FMath::Clamp(Speedabs, CursorLocationLimitZ * -1.f, CursorLocationLimitZ);
 
 			//Set Cursor Location
 			Cursor->SetRelativeLocation(FVector(0, ClampedY, ClampedZ));
+			
 		}
 	}
 }

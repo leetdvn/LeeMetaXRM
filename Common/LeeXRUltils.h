@@ -279,7 +279,7 @@ namespace LeeXRUltils
 				FRotator(0, FLookAtRot.Yaw, 0);
 
 			// Set the world rotation of the display component to the calculated rotation
-			TargetComponent->SetWorldRotation(FRotator(0, LookAtRotation.Yaw, 0));
+			TargetComponent->SetWorldRotation(LookAtRotation);
 		}
 	}
 }
