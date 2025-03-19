@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "APawn/LeeXRCharacter.h"
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "LeeXRGameInstance.generated.h"
@@ -16,10 +15,14 @@ enum class EICTUGameModeType : uint8
 };
 
 UENUM(BlueprintType)
-enum class EICTUTourState : uint8
+enum class EICTUActionType : uint8
 {
-	EICTU_TourStart UMETA(DisplayName = "Tour Start"),
-	EICTU_TourEnd UMETA(DisplayName = "Tour End")
+	EICTU_ActionOne UMETA(DisplayName = "Level One"),
+	EICTU_ActionTwo UMETA(DisplayName = "Level Two"),
+	EICTU_ActionThree UMETA(DisplayName = "Level Three"),
+	EICTU_ActionFour UMETA(DisplayName = "Level Four"),
+	EICTU_ActionFive UMETA(DisplayName = "Level Five"),
+
 };
 
 
@@ -36,6 +39,11 @@ class LEEMETAXRM_API ULeeXRGameInstance : public UGameInstance
 public:
 	ULeeXRGameInstance();
 
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	EICTUActionType GetActionType() const { return ActionType; };
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void SetActionType(EICTUActionType inType) { ActionType = inType; };
 
 protected:
 
@@ -44,4 +52,7 @@ protected:
 	virtual void Shutdown() override;
 
 	virtual void OnStart() override;
+
+
+	EICTUActionType ActionType;
 };

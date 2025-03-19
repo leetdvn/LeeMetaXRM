@@ -265,7 +265,7 @@ void ALeeXRMenuActor::LaserPointerInput(UWidgetInteractionComponent* inWidgetAct
 {
 	if (inWidgetAction == nullptr ) return;
 
-	EControllerHand HandType = ActiveMenuRight ? EControllerHand::Right : EControllerHand::Left;
+	EControllerHand HandType = ActiveMenuRight ? EControllerHand::Left : EControllerHand::Right;
 
 	if (auto WidgetInteraction = FindWidgetInteractionReference(HandType)) {
 		FString msg = UEnum::GetValueAsString(HandType);

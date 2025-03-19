@@ -5,6 +5,7 @@
 
 #include "Definitions.h"
 #include "LeeXRUltils.h"
+#include "APawn/LeeXRCharacter.h"
 
 
 using namespace LeeXRUltils;
@@ -37,5 +38,9 @@ void ULeeXRGameInstance::OnStart()
 	Super::OnStart();
 
 	LEE_LOG(LogLeeICTUGameInstance, Log, "ICTU Game Start");
+
+	if (auto Character = LeeXRGetCustomCharacter<ALeeXRCharacter>(this)) {
+		
+	}
 
 }

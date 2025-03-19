@@ -125,7 +125,12 @@ namespace LeeXRUltils
 		return nullptr;
 	}
 
-
+	/// <summary>
+	/// Initializer mapping context
+	/// </summary>
+	/// <param name="inWorld"></param>
+	/// <param name="inContext"></param>
+	/// <param name="Priority"></param>
 	FORCEINLINE void InitializationContext(UWorld* inWorld,UInputMappingContext* inContext,int32 Priority=0) {
 
 		if (!inWorld) return;

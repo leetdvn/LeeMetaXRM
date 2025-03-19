@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <GameInstance/LeeXRGameInstance.h>
 #include "Definitions.h"
 #include "DataAssets/LeeXRHandDataAsset.h"
 #include "Actors/LeeXRHandBase.h"
@@ -26,6 +27,17 @@ enum class ELeeXRTeleportHandAction : uint8
 	LeeXRRight UMETA(DisplayName = "Right Action")
 };
 
+
+USTRUCT(BlueprintType)
+struct LEEMETAXRM_API FLevelSpawnLocation
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+	TArray<FVector> SpawnLevel;
+
+};
 
 
 /**
@@ -144,12 +156,19 @@ public:
 
 	void HandPhysicBlendToPoseable(class UPoseableMeshComponent* inPoseable,bool isLeft=true);
 
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void SetStartSpawnLocation(FVector inLocation) { StartSpawnLocation = inLocation; }
 
+
+	enum class EICTUActionType GetCurrentActionType() const; 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties", meta = (DisplayName = "Start Spawn"))
+	FVector StartSpawnLocation;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -269,6 +288,11 @@ private:
 	ALeeXRHandBase* InitializeHandActor(TSubclassOf<T> inClass);
 
 	TWeakObjectPtr<ALeeXRCharacter> Self = nullptr;
+
+
+	//Init SpawnLoaction
+	void InitSpawnLocation();
+
 
 };
 

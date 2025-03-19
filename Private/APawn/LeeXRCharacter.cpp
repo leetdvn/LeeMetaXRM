@@ -23,7 +23,7 @@
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 #include <PoseableMeshComponent.h>
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
-
+#include <GameInstance/LeeXRGameInstance.h>
 
 using namespace LeeXRUltils;
 
@@ -236,6 +236,16 @@ void ALeeXRCharacter::HandPhysicBlendToPoseable(UPoseableMeshComponent* inPoseab
 
 }
 
+EICTUActionType ALeeXRCharacter::GetCurrentActionType() const
+{
+	if (auto GameIns = GetGameInstance<ULeeXRGameInstance>())
+	{
+		return GameIns->GetActionType();
+	}
+		
+	return EICTUActionType();
+}
+
 // Called when the game starts or when spawned
 void ALeeXRCharacter::BeginPlay()
 {
@@ -244,6 +254,9 @@ void ALeeXRCharacter::BeginPlay()
 
 	Super::BeginPlay();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	//Int Player Spawn Location
+	SetActorLocation(StartSpawnLocation);
 
 	ADDMEMORYSTAT(this, STAT_ICTUCharacterMemory);
 	InitializationContext(GetWorld(), DefaultMappingContext);
@@ -440,6 +453,11 @@ ALeeXRHandBase* ALeeXRCharacter::HandInitialize(ELeeXRHandType inType,bool isLef
 		}
 	}
 	return nullptr;
+
+}
+
+void ALeeXRCharacter::InitSpawnLocation()
+{
 
 }
 
