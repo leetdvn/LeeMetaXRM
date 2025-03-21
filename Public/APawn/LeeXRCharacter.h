@@ -99,7 +99,8 @@ public:
 	/// <param name="isLeft"></param>
 	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
-	UMotionControllerComponent* GetMotionController(bool isLeft) const { return isLeft ? XRHandLeft->GetMotionController() : XRHandRight->GetMotionController(); }
+	UMotionControllerComponent* GetMotionController(bool isLeft) const;
+
 
 	/// <summary>
 	/// Set Hand Type

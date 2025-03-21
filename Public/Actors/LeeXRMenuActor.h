@@ -37,6 +37,7 @@ public:
 	// Sets default values for this actor's properties
 	ALeeXRMenuActor();
 
+#pragma region Properties
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	float CursorLocationLimitY = 1.f;
 
@@ -48,6 +49,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	float MenuDistanceToWardsCamera =10.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	bool isHomeMenu;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties", meta = (ClampMin = "10.0", ClampMax = "100.0"))
+	float RadiusDistance=10.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	FVector  MenuOffset = FVector(0.f, 0.f, 0.f);
@@ -69,9 +76,9 @@ public:
 
 	UWidgetInteractionComponent* FindWidgetInteractionReference(EControllerHand inType);
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+#pragma endregion
+
+#pragma region Components
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UWidgetComponent> WGComponent;
@@ -84,8 +91,20 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UNiagaraComponent> MenuLaser;
+#pragma endregion
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
 
 	bool isActiveMenu;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties", meta = (DisplayAfter = "Moveable"))
+	bool bMoveable;
+
+	float bRadius;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -107,6 +126,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateWidgetLocation();
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateWidgetMenuLocation();
 
 	/// <summary>
 	/// Update Cursor Location

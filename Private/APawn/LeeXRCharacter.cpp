@@ -79,6 +79,19 @@ UAnimInstance* ALeeXRCharacter::GetHandAnimInstance(bool isLeft)
 	return nullptr;
 }
 
+UMotionControllerComponent* ALeeXRCharacter::GetMotionController(bool isLeft) const
+{
+
+	auto Hand = isLeft ? XRHandLeft : XRHandRight;
+	if (IsValid(Hand))
+	{
+		if (auto Control = Hand->GetMotionController())
+			return Control;
+	}
+
+	return nullptr;
+}
+
 void ALeeXRCharacter::CalculateMotionControllerVelocities()
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
@@ -242,7 +255,6 @@ EICTUActionType ALeeXRCharacter::GetCurrentActionType() const
 	{
 		return GameIns->GetActionType();
 	}
-		
 	return EICTUActionType();
 }
 
@@ -255,15 +267,21 @@ void ALeeXRCharacter::BeginPlay()
 	Super::BeginPlay();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
+	FString CurrentLevel = GetWorld()->GetMapName();
+
 	//Int Player Spawn Location
 	if (auto GameIns = GetGameInstance<ULeeXRGameInstance>())
 	{
 		auto NextLoc = GameIns->GetLevelSpawnLocation();
 
+		NextLevel = CurrentLevel.EndsWith("HomeMenu") ? NextLoc.SpawnLevel.Num() - 1 : NextLevel;
+
 		if (NextLoc.SpawnLevel.Num() > 0 && NextLevel >= 0)
 		{
 			FVector StartSpawnLocation = NextLoc.SpawnLevel[NextLevel];
 			SetActorLocation(StartSpawnLocation);
+
+	
 		}
 	}
 
@@ -282,6 +300,11 @@ void ALeeXRCharacter::BeginPlay()
 		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::LocalFloor);
 
 		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
+		if (CurrentLevel.EndsWith("HomeMenu"))
+		{
+	
+			//UHeadMountedDisplayFunctionLibrary::
+		}
 	}
 
 

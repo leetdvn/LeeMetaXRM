@@ -26,10 +26,11 @@ ALeeXRMenuActor::ALeeXRMenuActor()
 	MenuLaser->SetupAttachment(OriginComponent);
 
 	WGComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WGComponent"));
-	SetRootComponent(OriginComponent);
+	WGComponent->SetupAttachment(OriginComponent);
 
 	Cursor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Cursor"));
 	Cursor->SetupAttachment(WGComponent);
+
 }
 
 // Called when the game starts or when spawned
@@ -42,7 +43,10 @@ void ALeeXRMenuActor::BeginPlay()
 
 	SetupActorInputComponent();
 
-	SetReference();
+	if (XRCharacter = LeeXRGetCustomCharacter<ALeeXRCharacter>(this)) {
+		SetReference();
+	}
+
 
 }
 
@@ -76,11 +80,12 @@ UWidgetInteractionComponent* ALeeXRMenuActor::FindWidgetInteractionReference(ECo
 	{
 		if (APawn* Pawn = World->GetFirstPlayerController()->GetPawn())
 		{
-			if (ALeeXRCharacter* Character = Cast<ALeeXRCharacter>(Pawn))
+			if (IsValid(XRCharacter))
 			{
-				return inType == EControllerHand::Left ?
-					Character->GetHand(true)->GetWidgetInteraction():
-					Character->GetHand(false)->GetWidgetInteraction();
+				if (auto Hand = XRCharacter->GetHand(inType == EControllerHand::Left))
+				{
+					return Hand->GetWidgetInteraction();
+				}
 			}
 			LEE_LOG(LogLeeXRMenuActor,Warning,"Widget Interaction Reference Set");
 			
@@ -141,7 +146,7 @@ UMotionControllerComponent* ALeeXRMenuActor::FindMotionControllerReference(bool 
 		{
 			if (IsValid(XRCharacter))
 			{
-				return XRCharacter->GetMotionController(isLeftHand);
+				if (auto MControl = XRCharacter->GetMotionController(isLeftHand)) return MControl;
 			}
 
 		}
@@ -151,8 +156,12 @@ UMotionControllerComponent* ALeeXRMenuActor::FindMotionControllerReference(bool 
 
 void ALeeXRMenuActor::SetReference()
 {
+
+	bRadius = RadiusDistance * 15.f;
+
 	WGInteractionRefLeft = FindWidgetInteractionReference(EControllerHand::Left);
 	WGInteractionRefRight = FindWidgetInteractionReference(EControllerHand::Right);
+
 	XRCharacter = LeeXRGetCustomCharacter<ALeeXRCharacter>(this);
 	LEE_CHECK(XRCharacter)
 
@@ -162,7 +171,7 @@ void ALeeXRMenuActor::SetReference()
 
 		MotionControllerRef = FindMotionControllerReference(!IsLeft);
 		ActiveMenuRight = !IsLeft;
-		LEE_LOG(LogLeeXRMenuActor, Error, "MotionControllerRef : %s",*MotionControllerRef->GetName());
+
 		if (!IsValid(WGInteractionRefLeft) ||
 			!IsValid(WGInteractionRefRight) ||
 			!IsValid(MotionControllerRef))
@@ -176,14 +185,15 @@ void ALeeXRMenuActor::SetReference()
 
 void ALeeXRMenuActor::OnMoveComfortableLocation()
 {
-	if (!IsValid(MotionControllerRef)) return;
+	if (!IsValid(WGComponent)) return;
 
-	if (auto const WGComp = FindComponentByClass<UWidgetComponent>())
-	{
-		UpdateWidgetLocation();
-
-		LookAtComponent<UWidgetComponent>(this,WGComp,false);
+	if (bMoveable) {
+		//Get the World Location of the Motion Controller
+		isHomeMenu ? UpdateWidgetMenuLocation() :
+			UpdateWidgetLocation();
 	}
+
+	LookAtComponent<UWidgetComponent>(this, WGComponent,false);
 
 	//Update Widget Location
 
@@ -191,22 +201,48 @@ void ALeeXRMenuActor::OnMoveComfortableLocation()
 
 void ALeeXRMenuActor::UpdateWidgetLocation()
 {
-	if (MotionControllerRef ==nullptr || WGComponent  == nullptr|| !IsValid(MotionControllerRef)) return;
+	if (WGComponent  == nullptr) return;
 
-	FVector MCAim = LeeXRGetWorldLocation(MotionControllerRef);
+	//LeeScreenLog("Update Widget Location", FColor::Green);
 
-	FVector CameraLoc = UGameplayStatics::GetPlayerCameraManager(this, 0)->GetCameraLocation();
+	FVector MCAim = !isHomeMenu ?
+		LeeXRGetWorldLocation(MotionControllerRef) : 
+		XRCharacter->GetCameraLocation();
 
-	FRotator LookAt = UKismetMathLibrary::FindLookAtRotation(MCAim, CameraLoc);
+	if (auto CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0)) {
 
-	FVector FWDistVec = UKismetMathLibrary::GetForwardVector(LookAt) * MenuDistanceToWardsCamera;
+		FVector CameraLoc = CameraManager->GetCameraLocation();
 
-	FVector UpVec = UKismetMathLibrary::GetUpVector(LookAt) * MenuDistanceToWardsCamera;
+		FRotator LookAt = UKismetMathLibrary::FindLookAtRotation(MCAim, CameraLoc);
 
-	FVector NewLocation = MCAim + FWDistVec + UpVec;
-	WGComponent->SetWorldLocation(NewLocation + MenuOffset);
+		FVector FWDistVec = UKismetMathLibrary::GetForwardVector(LookAt) * MenuDistanceToWardsCamera;
 
+		FVector UpVec = UKismetMathLibrary::GetUpVector(LookAt) * MenuDistanceToWardsCamera;
+
+		FVector NewLocation = MCAim + FWDistVec + UpVec;
+		WGComponent->SetWorldLocation(NewLocation + MenuOffset);
+	}
 	//LeeScreenLog("Location : %s", FColor::Green,*NewLocation.ToString());
+}
+
+void ALeeXRMenuActor::UpdateWidgetMenuLocation()
+{
+	if (!IsValid(XRCharacter)) return;
+
+	FVector Center = LeeXRGetWorldLocation(XRCharacter->GetRootComponent());
+	FVector ToWorldVec = LeeXRGetWorldLocation(RootComponent);
+
+
+	if (auto Camera = UGameplayStatics::GetPlayerCameraManager(this, 0)) {
+
+		float YawInRadians = FMath::DegreesToRadians(Camera->GetCameraRotation().Yaw);
+
+		float x = Center.X + bRadius * FMath::Cos(YawInRadians);
+		float y = Center.Y + bRadius * FMath::Sin(YawInRadians);
+
+		SetActorLocation(FVector(x, y, GetActorLocation().Z));
+	}
+
 }
 
 
