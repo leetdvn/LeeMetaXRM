@@ -2,10 +2,12 @@
 
 #pragma once
 
+
 #include <PhysicsEngine/PhysicsAsset.h>
 #include <NiagaraComponent.h>
 #include <LeeXRUltils.h>
 #include <Interfaces/LeeXRInteraction.h>
+#include <Interfaces/LeeXRInterfaceHMD.h>
 #include "MotionControllerComponent.h"
 #include <Components/WidgetInteractionComponent.h>
 #include "Animations/LeeXRAnimInstance.h"

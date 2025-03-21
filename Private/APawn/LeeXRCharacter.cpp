@@ -261,13 +261,21 @@ EICTUActionType ALeeXRCharacter::GetCurrentActionType() const
 // Called when the game starts or when spawned
 void ALeeXRCharacter::BeginPlay()
 {
+	FString CurrentLevel = GetWorld()->GetMapName();
+
 	XRHandLeft =  HandInitialize(HandType, true);
 	XRHandRight =  HandInitialize(HandType, false);
 
 	Super::BeginPlay();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
-	FString CurrentLevel = GetWorld()->GetMapName();
+	if (CurrentLevel.EndsWith("HomeMenu")) {
+		Camera->bLockToHmd = false;
+
+		HandPhysicsLeft->SetHiddenInGame(true);
+		HandPhysicsRight->SetHiddenInGame(true);
+		return;
+	}
 
 	//Int Player Spawn Location
 	if (auto GameIns = GetGameInstance<ULeeXRGameInstance>())
@@ -280,8 +288,6 @@ void ALeeXRCharacter::BeginPlay()
 		{
 			FVector StartSpawnLocation = NextLoc.SpawnLevel[NextLevel];
 			SetActorLocation(StartSpawnLocation);
-
-	
 		}
 	}
 
@@ -289,8 +295,9 @@ void ALeeXRCharacter::BeginPlay()
 	InitializationContext(GetWorld(), DefaultMappingContext);
 	InitializationContext(GetWorld(), HandMappingContext, 1);
 
-	//LeeXRInitMappingContext(this,DefaultMappingContext);
-	//LeeXRInitMappingContext(this, HandMappingContext);
+
+
+
 
 	//Set Tracking Origin to FLoor
 	bool isEnable = UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled();
@@ -298,13 +305,8 @@ void ALeeXRCharacter::BeginPlay()
 	if (isEnable)
 	{
 		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::LocalFloor);
-
 		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
-		if (CurrentLevel.EndsWith("HomeMenu"))
-		{
 	
-			//UHeadMountedDisplayFunctionLibrary::
-		}
 	}
 
 

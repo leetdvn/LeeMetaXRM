@@ -12,6 +12,8 @@
 #include "Components/WidgetComponent.h"
 #include <NiagaraComponent.h>
 #include "NiagaraDataInterfaceArrayFunctionLibrary.h"
+#include "Widgets/LeeXRHomeMenuWG.h"
+#include "Widgets/LeeXRButtonWG.h"
 
 // Sets default values
 ALeeXRMenuActor::ALeeXRMenuActor()
@@ -47,7 +49,7 @@ void ALeeXRMenuActor::BeginPlay()
 		SetReference();
 	}
 
-
+	InitWidgetMenu();
 }
 
 void ALeeXRMenuActor::SetupActorInputComponent()
@@ -63,6 +65,20 @@ void ALeeXRMenuActor::SetupActorInputComponent()
 
 		}
 	}
+}
+
+#if WITH_EDITOR
+void ALeeXRMenuActor::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	InitWidgetMenu();
+}
+#endif
+
+void ALeeXRMenuActor::OnHMDOrientReset()
+{
+	LeeScreenLog("HMD Orient Reset", FColor::Green);
 }
 
 // Called every frame
@@ -315,5 +331,19 @@ void ALeeXRMenuActor::LaserPointerInput(UWidgetInteractionComponent* inWidgetAct
 		inWidgetAction->K2_AttachToComponent(MotionControllerRef, NAME_None, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, true);
 
 	inWidgetAction->SetRelativeLocation(FVector(-10, 0, 0), false, nullptr, ETeleportType::TeleportPhysics);
+}
+
+void ALeeXRMenuActor::InitWidgetMenu()
+{
+	if (IsValid(WGComponent) && isHomeMenu)
+	{
+		if (auto WG = WGComponent->GetWidget())
+		{
+			if (auto HomeMenu = Cast<ULeeXRHomeMenuWG>(WG))
+			{
+				HomeMenu->LoadDisplayNames(TableStr);
+			}
+		}
+	}
 }
 

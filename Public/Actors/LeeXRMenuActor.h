@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <interfaces/LeeXRInterfaceHMD.h>
 #include <GameplayTagContainer.h>
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -14,7 +15,7 @@ class UWidgetInteractionComponent;
 class UMotionControllerComponent;
 
 UCLASS()
-class LEEMETAXRM_API ALeeXRMenuActor : public AActor
+class LEEMETAXRM_API ALeeXRMenuActor : public AActor, public ILeeXRInterfaceHMD
 {
 	GENERATED_BODY()
 	
@@ -91,6 +92,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UNiagaraComponent> MenuLaser;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
+	UStringTable* TableStr;
+
 #pragma endregion
 
 protected:
@@ -110,6 +115,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupActorInputComponent();
+
+#if WITH_EDITOR
+	virtual void OnConstruction(const FTransform& Transform) override;
+#endif
+	virtual void OnHMDOrientReset() override;
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	UWidgetInteractionComponent* GetWidgetRef(bool isLeft) const { return isLeft ? WGInteractionRefLeft : WGInteractionRefRight; }
@@ -139,6 +149,7 @@ public:
 
 	void LaserPointerInput(UWidgetInteractionComponent* inWidgetAction);
 
+	void InitWidgetMenu();
 private:
 
 	TObjectPtr<class UWidgetInteractionComponent> WGInteractionRefLeft=nullptr;
