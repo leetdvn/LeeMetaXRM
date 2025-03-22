@@ -42,7 +42,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogLeeICTUGameInstance, Log, All);
 /**
  * 
  */
-UCLASS()
+UCLASS(Config=Game)
 class LEEMETAXRM_API ULeeXRGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
@@ -58,10 +58,10 @@ public:
 
 	FLevelSpawnLocation GetLevelSpawnLocation() const { return Location; }
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	UPROPERTY(Config,EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	int32 CurrentLevel = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	UPROPERTY(Config,EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	bool bIsLockHMD = false;
 
 protected:
@@ -72,7 +72,7 @@ protected:
 
 	virtual void OnStart() override;
 
-
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	EICTUActionType ActionType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")

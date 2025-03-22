@@ -105,8 +105,7 @@ void ULeeXRHomeMenuWG::ChangeMap(ULeeXRButtonWG* inButton)
 		{
 			if (auto GamsIns = GetGameInstance<ULeeXRGameInstance>())
 			{
-				//XRCharacter->SetLockHMD(GamsIns->bIsLockHMD);
-				XRCharacter->NextLevel = 3;
+				GamsIns->CurrentLevel = 3;
 			}
 
 			HMD->Execute_OnHMDLevelChanged(XRCharacter, NewMap);

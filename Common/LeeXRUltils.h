@@ -287,4 +287,96 @@ namespace LeeXRUltils
 			TargetComponent->SetWorldRotation(LookAtRotation);
 		}
 	}
+
+	FORCEINLINE void LeeXRSetGameConfigStr(const FString ConfigName,const FString ClassName,const FString inValue) {
+		if (GConfig)
+		{
+			FString Section = FString::Printf(TEXT("/Script/LeeMetaXRM.%s"), *ClassName);
+
+			LEE_LOG(LeeXRMacro, Log, "Set Config %s", *Section);
+
+			GConfig->SetString(
+				*Section,
+				*ConfigName,
+				*inValue,
+				GGameIni
+			);
+		}
+	}
+
+	FORCEINLINE void LeeXRSetGameConfigInt(const FString ConfigName, const FString ClassName, int32 inValue) {
+		if (GConfig)
+		{
+			FString Section = FString::Printf(TEXT("/Script/LeeMetaXRM.%s"), *ClassName);
+			LEE_LOG(LeeXRMacro, Log, "Set Config %s", *Section);
+			GConfig->SetInt(
+				*Section,
+				*ConfigName,
+				inValue,
+				GGameIni
+			);
+		}
+	}
+	
+	FORCEINLINE void LeeXRSetGameConfigBool(const FString ConfigName, const FString ClassName, bool inValue) {
+		if (GConfig)
+		{
+			FString Section = FString::Printf(TEXT("/Script/LeeMetaXRM.%s"), *ClassName);
+			LEE_LOG(LeeXRMacro, Log, "Set Config %s", *Section);
+			GConfig->SetBool(
+				*Section,
+				*ConfigName,
+				inValue,
+				GGameIni
+			);
+		}
+	}
+
+	FORCEINLINE int LeeXRGetGameConfigInt(const FString ConfigName, const FString ClassName) {
+		int32 Value = 0;
+		if (GConfig)
+		{
+			FString Section = FString::Printf(TEXT("/Script/LeeMetaXRM.%s"), *ClassName);
+			LEE_LOG(LeeXRMacro, Log, "Get Config %s", *Section);
+			GConfig->GetInt(
+				*Section,
+				*ConfigName,
+				Value,
+				GGameIni
+			);
+		}
+		return Value;
+	}
+
+	FORCEINLINE bool LeeXRGetGameConfigBool(const FString ConfigName, const FString ClassName) {
+		bool Value = false;
+		if (GConfig)
+		{
+			FString Section = FString::Printf(TEXT("/Script/LeeMetaXRM.%s"), *ClassName);
+			LEE_LOG(LeeXRMacro, Log, "Get Config %s", *Section);
+			GConfig->GetBool(
+				*Section,
+				*ConfigName,
+				Value,
+				GGameIni
+			);
+		}
+		return Value;
+	}
+
+	FORCEINLINE FString LeeXRGetGameConfigStr(const FString ConfigName, const FString ClassName) {
+		FString Value = "";
+		if (GConfig)
+		{
+			FString Section = FString::Printf(TEXT("/Script/LeeMetaXRM.%s"), *ClassName);
+			LEE_LOG(LeeXRMacro, Log, "Get Config %s", *Section);
+			GConfig->GetString(
+				*Section,
+				*ConfigName,
+				Value,
+				GGameIni
+			);
+		}
+		return Value;
+	}
 }

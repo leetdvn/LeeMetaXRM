@@ -261,8 +261,6 @@ EICTUActionType ALeeXRCharacter::GetCurrentActionType() const
 // Called when the game starts or when spawned
 void ALeeXRCharacter::BeginPlay()
 {
-
-
 	Super::BeginPlay();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
@@ -275,8 +273,8 @@ void ALeeXRCharacter::BeginPlay()
 
 	Camera->bLockToHmd = !IsHome;
 
-	HandPhysicsLeft->SetHiddenInGame(!IsHome);
-	HandPhysicsRight->SetHiddenInGame(!IsHome);
+	//HandPhysicsLeft->SetHiddenInGame(!IsHome);
+	//HandPhysicsRight->SetHiddenInGame(!IsHome);
 
 
 	//Int Player Spawn Location
@@ -284,7 +282,7 @@ void ALeeXRCharacter::BeginPlay()
 	{
 		auto NextLoc = GameIns->GetLevelSpawnLocation();
 
-		NextLevel = CurrentLevel.EndsWith("HomeMenu") ? NextLoc.SpawnLevel.Num() - 1 : NextLevel;
+		NextLevel = CurrentLevel.EndsWith("HomeMenu") ? NextLoc.SpawnLevel.Num() - 1 : GameIns->CurrentLevel;
 
 		if (NextLoc.SpawnLevel.Num() > 0 && NextLevel >= 0)
 		{

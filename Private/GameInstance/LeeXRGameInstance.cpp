@@ -21,7 +21,16 @@ void ULeeXRGameInstance::Init()
 {
 	Super::Init();
 
-	LEE_LOG(LogLeeICTUGameInstance, Log, "ICTU Game Instance Init");
+	if (GConfig)
+	{
+		CurrentLevel = LeeXRGetGameConfigInt(TEXT("CurrentLevel"), TEXT("ULeeXRGameInstance"));
+
+		int32 Demo = LeeXRGetGameConfigInt(TEXT("ActionType"), TEXT("ULeeXRGameInstance"));
+		LEE_LOG(LogLeeICTUGameInstance, Log, "Current Level %d", CurrentLevel);
+		LEE_LOG(LogLeeICTUGameInstance, Log, "Current Level %d", Demo);
+
+	}
+
 	
 }
 
