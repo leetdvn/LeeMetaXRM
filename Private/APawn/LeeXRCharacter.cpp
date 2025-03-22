@@ -261,13 +261,15 @@ EICTUActionType ALeeXRCharacter::GetCurrentActionType() const
 // Called when the game starts or when spawned
 void ALeeXRCharacter::BeginPlay()
 {
-	FString CurrentLevel = GetWorld()->GetMapName();
 
-	XRHandLeft =  HandInitialize(HandType, true);
-	XRHandRight =  HandInitialize(HandType, false);
 
 	Super::BeginPlay();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	FString CurrentLevel = GetWorld()->GetMapName();
+
+	XRHandLeft = HandInitialize(HandType, true);
+	XRHandRight = HandInitialize(HandType, false);
 
 	bool IsHome = CurrentLevel.EndsWith("HomeMenu");
 
@@ -335,11 +337,8 @@ void ALeeXRCharacter::OnHMDOrientReset()
 void ALeeXRCharacter::OnHMDLevelChanged_Implementation(const FString& NewLevelName)
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
-
-
 	//Set Tracking Origin to FLoor
 	InitVRTrackingOrigin();
-	//Camera->bLockToHmd = true;
 
 }
 

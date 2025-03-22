@@ -152,6 +152,9 @@ public:
 
 	void SetLockHMD(bool isLock) { Camera->bLockToHmd = isLock; }
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
+	int32 NextLevel = 0;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -161,8 +164,6 @@ protected:
 	virtual void OnHMDOrientReset() override;
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
-	int32 NextLevel=0;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
