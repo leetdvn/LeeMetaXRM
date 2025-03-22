@@ -58,6 +58,12 @@ public:
 
 	FLevelSpawnLocation GetLevelSpawnLocation() const { return Location; }
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	int32 CurrentLevel = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	bool bIsLockHMD = false;
+
 protected:
 
 	virtual void Init() override;

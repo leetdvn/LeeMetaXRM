@@ -2,6 +2,7 @@
 
 
 #include "Actors/LeeXRMenuActor.h"
+
 #include <APawn/LeeXRCharacter.h>
 #include <Actors/LeeXRHandBase.h>
 #include <Components/WidgetInteractionComponent.h>
@@ -9,7 +10,6 @@
 #include <Kismet/GameplayStatics.h>
 #include <EnhancedInputComponent.h>
 #include <SceneComponent.h>
-#include "Components/WidgetComponent.h"
 #include <NiagaraComponent.h>
 #include "NiagaraDataInterfaceArrayFunctionLibrary.h"
 #include "Widgets/LeeXRHomeMenuWG.h"
@@ -76,17 +76,13 @@ void ALeeXRMenuActor::OnConstruction(const FTransform& Transform)
 }
 #endif
 
-void ALeeXRMenuActor::OnHMDOrientReset()
-{
-	LeeScreenLog("HMD Orient Reset", FColor::Green);
-}
-
 // Called every frame
 void ALeeXRMenuActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	///Move Update Comfortable Location
+	if (isHomeMenu) return;
 	OnMoveComfortableLocation();
 }
 
@@ -260,7 +256,6 @@ void ALeeXRMenuActor::UpdateWidgetMenuLocation()
 	}
 
 }
-
 
 // Update Cursor Location
 void ALeeXRMenuActor::UpdateCursorLocation(FVector2D inputVec)

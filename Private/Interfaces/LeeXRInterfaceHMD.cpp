@@ -4,3 +4,4 @@
 #include "interfaces/LeeXRInterfaceHMD.h"
 
 // Add default functionality here for any ILeeXRInterfaceHMD functions that are not pure virtual.
+

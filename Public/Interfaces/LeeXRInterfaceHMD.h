@@ -24,4 +24,11 @@ class LEEMETAXRM_API ILeeXRInterfaceHMD
 public:
 
 	virtual void OnHMDOrientReset() = 0;
+
+	/// <summary>
+	/// Native Event Blueprint Implement
+	/// </summary>
+	/// <param name="NewLevelName"></param>
+	UFUNCTION(BlueprintCallable,BlueprintNativeEvent, Category = "LeeXR|Func")
+	void OnHMDLevelChanged(const FString& NewLevelName);
 };

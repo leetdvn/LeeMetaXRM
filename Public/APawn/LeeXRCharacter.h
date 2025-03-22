@@ -7,6 +7,7 @@
 #include "DataAssets/LeeXRHandDataAsset.h"
 #include "Actors/LeeXRHandBase.h"
 #include "CoreMinimal.h"
+#include "interfaces/LeeXRInterfaceHMD.h"
 #include "GameFramework/Character.h"
 #include "LeeXRCharacter.generated.h"
 
@@ -32,7 +33,7 @@ enum class ELeeXRTeleportHandAction : uint8
  * XR Character Class
  */
 UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
-class LEEMETAXRM_API ALeeXRCharacter : public ACharacter
+class LEEMETAXRM_API ALeeXRCharacter : public ACharacter, public ILeeXRInterfaceHMD
 {
 	GENERATED_BODY()
 
@@ -146,11 +147,19 @@ public:
 	void HandPhysicBlendToPoseable(class UPoseableMeshComponent* inPoseable,bool isLeft=true);
 
 	enum class EICTUActionType GetCurrentActionType() const; 
+
+	void OnHMDLevelChanged_Implementation(const FString& NewLevelName);
+
+	void SetLockHMD(bool isLock) { Camera->bLockToHmd = isLock; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	virtual void OnHMDOrientReset() override;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	int32 NextLevel=0;
@@ -278,7 +287,8 @@ private:
 	//Init SpawnLoaction
 	void InitSpawnLocation();
 
-
+	//Init VR Tracking
+	void InitVRTrackingOrigin();
 };
 
 template<typename T>

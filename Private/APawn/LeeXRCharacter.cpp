@@ -269,13 +269,13 @@ void ALeeXRCharacter::BeginPlay()
 	Super::BeginPlay();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
-	if (CurrentLevel.EndsWith("HomeMenu")) {
-		Camera->bLockToHmd = false;
+	bool IsHome = CurrentLevel.EndsWith("HomeMenu");
 
-		HandPhysicsLeft->SetHiddenInGame(true);
-		HandPhysicsRight->SetHiddenInGame(true);
-		return;
-	}
+	Camera->bLockToHmd = !IsHome;
+
+	HandPhysicsLeft->SetHiddenInGame(!IsHome);
+	HandPhysicsRight->SetHiddenInGame(!IsHome);
+
 
 	//Int Player Spawn Location
 	if (auto GameIns = GetGameInstance<ULeeXRGameInstance>())
@@ -297,17 +297,8 @@ void ALeeXRCharacter::BeginPlay()
 
 
 
-
-
-	//Set Tracking Origin to FLoor
-	bool isEnable = UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled();
-
-	if (isEnable)
-	{
-		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::LocalFloor);
-		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
-	
-	}
+	//Init VR Origin
+	InitVRTrackingOrigin();
 
 
 	//init COntraints
@@ -332,6 +323,23 @@ void ALeeXRCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	MemoriesSize = 0;
 	SET_MEMORY_STAT(STAT_ICTUMV_TotalMemories, 0);
+
+}
+
+void ALeeXRCharacter::OnHMDOrientReset()
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+	//UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
+}
+
+void ALeeXRCharacter::OnHMDLevelChanged_Implementation(const FString& NewLevelName)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+
+	//Set Tracking Origin to FLoor
+	InitVRTrackingOrigin();
+	//Camera->bLockToHmd = true;
 
 }
 
@@ -492,6 +500,20 @@ ALeeXRHandBase* ALeeXRCharacter::HandInitialize(ELeeXRHandType inType,bool isLef
 
 void ALeeXRCharacter::InitSpawnLocation()
 {
+
+}
+
+void ALeeXRCharacter::InitVRTrackingOrigin()
+{
+	//Set Tracking Origin to FLoor
+	bool isEnable = UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled();
+
+	if (isEnable)
+	{
+		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::LocalFloor);
+		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
+
+	}
 
 }
 

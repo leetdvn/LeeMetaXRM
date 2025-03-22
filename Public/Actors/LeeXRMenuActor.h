@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "Components/WidgetComponent.h"
+#include "Widgets/LeeXRHomeMenuWG.h"
 #include <interfaces/LeeXRInterfaceHMD.h>
 #include <GameplayTagContainer.h>
 #include "CoreMinimal.h"
@@ -15,7 +17,7 @@ class UWidgetInteractionComponent;
 class UMotionControllerComponent;
 
 UCLASS()
-class LEEMETAXRM_API ALeeXRMenuActor : public AActor, public ILeeXRInterfaceHMD
+class LEEMETAXRM_API ALeeXRMenuActor : public AActor
 {
 	GENERATED_BODY()
 	
@@ -119,7 +121,10 @@ public:
 #if WITH_EDITOR
 	virtual void OnConstruction(const FTransform& Transform) override;
 #endif
-	virtual void OnHMDOrientReset() override;
+
+
+	UFUNCTION(BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	ULeeXRHomeMenuWG* GetHomeMenu() const { return Cast<ULeeXRHomeMenuWG>(WGComponent->GetUserWidgetObject()); }
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	UWidgetInteractionComponent* GetWidgetRef(bool isLeft) const { return isLeft ? WGInteractionRefLeft : WGInteractionRefRight; }
@@ -129,7 +134,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void SetReference();
-
 
 	UFUNCTION(BlueprintCallable)
 	void OnMoveComfortableLocation();
@@ -147,9 +151,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateCursorLocation(FVector2D input);
 
+
 	void LaserPointerInput(UWidgetInteractionComponent* inWidgetAction);
 
 	void InitWidgetMenu();
+
+
+
 private:
 
 	TObjectPtr<class UWidgetInteractionComponent> WGInteractionRefLeft=nullptr;

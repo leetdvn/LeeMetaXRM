@@ -66,6 +66,7 @@ void ALeeXRHandBase::BeginPlay()
 		InitializationContext(GetWorld(),DefaultContext ,0);
 		InitializationContext(GetWorld(), MenuContext, 0);
 		InitializationContext(GetWorld(), HandContext, 1);
+		InitializationContext(GetWorld(), IMCFireContext, 1);
 
 	}
 	///Set Up input Component
@@ -124,6 +125,8 @@ void ALeeXRHandBase::SetInputComponent()
 		EnhancedInputComponent->BindAction(IA_HandLog, ETriggerEvent::Started, this, &ALeeXRHandBase::LogReconize);
 
 		EnhancedInputComponent->BindAction(IA_MenuAction, ETriggerEvent::Started, this, &ALeeXRHandBase::OnMenuAction);
+
+		EnhancedInputComponent->BindAction(IA_Fire, ETriggerEvent::Started, this, &ALeeXRHandBase::OnFireAction);
 		//EnhancedInputComponent->BindAction(IA_MenuAction, ETriggerEvent::Completed, this, &ALeeXRHandBase::OnMenuAction);
 
 		//LeeScreenLog("Setting Input Component",FColor::Blue);
@@ -172,13 +175,29 @@ void ALeeXRHandBase::InittializeSetup()
 void ALeeXRHandBase::OnFingerAnimation(const FInputActionInstance& ActionInstance)
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
-	SetFingerAnimationPose(HandSkeletal, ActionInstance);
+	if (!IsValid(XRCharacter)) return;
 
-	if (IsValid(XRCharacter)) {
-		SetFingerAnimationPose(XRCharacter->GetHandPhysics(IsHandLeft()), ActionInstance);
+	bool isController = XRCharacter->GetHandType() == ELeeXRHandType::LeeXRController ?
+		true : false;
+
+	SetFingerAnimationPose(HandSkeletal, ActionInstance);
+	if (auto HandPhysics = XRCharacter->GetHandPhysics(IsHandLeft())) {
+		SetFingerAnimationPose(HandPhysics, ActionInstance);
 	}
 
-	//SetFingerAnimationPose(HandDebug, ActionInstance);
+
+}
+
+void ALeeXRHandBase::OnFireAction(const FInputActionInstance& ActionInstance)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
+
+	if (IsValid(WidgetInteraction)) {
+		WidgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
+		LeeScreenLog("Press Fire", FColor::Green);
+
+	}
 }
 
 //Has Overlap Actor Func
@@ -213,7 +232,7 @@ void ALeeXRHandBase::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, 
 
 	FString ActName = ActionInstance.GetSourceAction()->GetName();
 
-	if (ULeeXRAnimInstance* AnimIns = Cast<ULeeXRAnimInstance>(inComponet->GetAnimInstance())) {
+	if (auto* AnimIns = Cast<ULeeXRAnimInstance>(inComponet->GetAnimInstance())) {
 
 		if (IsHandLeft()) AnimIns->bMirror = true;
 
@@ -227,7 +246,7 @@ void ALeeXRHandBase::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, 
 		}
 		else if (ActName == this->IA_HandThumpUp->GetName())
 		{
-			AnimIns->PoseAlphaThumbUp = PoseValueStartCancel;
+			AnimIns->CurrentPoseAlphaThumbUp = PoseValueStartCancel;
 		}
 		else if (ActName == this->IA_Grasp->GetName())
 		{

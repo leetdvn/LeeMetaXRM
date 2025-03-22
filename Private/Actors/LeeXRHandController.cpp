@@ -117,7 +117,9 @@ void ALeeXRHandController::OnInputActionMove(const FInputActionInstance& ActionI
 
 void ALeeXRHandController::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance)
 {
+	Super::SetFingerAnimationPose(inComponet, ActionInstance);
 
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 }
 
 /// <summary>

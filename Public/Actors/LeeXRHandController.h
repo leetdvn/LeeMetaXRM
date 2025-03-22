@@ -59,7 +59,7 @@ protected:
 
 	virtual void SetInputComponent();
 
-
+	virtual	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance) override;
 	UFUNCTION()
 	void OnInputActionMove(const FInputActionInstance& ActionInstance);
 private:
@@ -70,7 +70,6 @@ private:
 	/// </summary>
 	/// <param name="inComponet"></param>
 	/// <param name="ActionInstance"></param>
-	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance);
 
 };
 

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Widgets/LeeXRButtonWG.h"
 #include "Blueprint/WidgetTree.h"
 #include "Internationalization/StringTable.h"
 #include "CoreMinimal.h"
@@ -13,6 +14,7 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogLeeXRHomeMenuWG, Log, All);
 
+
 class UButton;
 
 
@@ -22,6 +24,37 @@ class LEEMETAXRM_API ULeeXRHomeMenuWG : public UUserWidget
 	GENERATED_BODY()
 public:
 	ULeeXRHomeMenuWG(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void SetFreeLabel(FText inText);
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void SetTourLabel(FText inText);
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void SetTrainLabel(FText inText);
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void LoadDisplayNames(UStringTable* inTable);
+
+	UFUNCTION(BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UButton* GetFreeButton() const { return Free->LeeBtn.Get(); }
+
+	UFUNCTION(BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UButton* GetTouristButton() const { return Tourist->LeeBtn.Get(); }
+
+	UFUNCTION(BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UButton* GetTrainButton() const { return Train->LeeBtn.Get(); }
+
+	UFUNCTION(BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UButton* GetExitButton() const { return Exit->LeeBtn.Get(); }
+
+protected:
+
+	virtual void NativeConstruct() override;
+
+	virtual void NativePreConstruct() override;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties", meta = (BindWidget, DisplayName = "Free To Play"))
 	TObjectPtr<class ULeeXRButtonWG> Free;
@@ -36,72 +69,24 @@ public:
 	TObjectPtr<class ULeeXRButtonWG> Exit;
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
-	void SetFreeLabel(FText inText);
+	void OnHovered();
 
-	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
-	void SetTourLabel(FText inText);
+	UFUNCTION()
+	void OnFreeClicked();
 
-	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
-	void SetTrainLabel(FText inText);
+	UFUNCTION()
+	void OnTouristClicked();
 
-	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
-	void LoadDisplayNames(UStringTable* inTable);
+	UFUNCTION()
+	void OnTrainClicked();
 
-
-	//template<typename T>
-	//T* LeeXRFindWidget(const FName& Name) const;
-
-
-	//template<typename T>
-	//TArray<T*> LeeXRFindWidgetsOfClass() const;
-
-protected:
-
-	virtual void NativeConstruct() override;
-
-	virtual void NativePreConstruct() override;
-
+	UFUNCTION()
+	void OnExitClicked();
 
 private:
 
-};
+	void ChangeMap(ULeeXRButtonWG* inButton);
 
-//template<typename T>
-//inline T* ULeeXRHomeMenuWG::LeeXRFindWidget(const FName& Name) const
-//{
-//	UWidget* LocalParent = GetRootWidget()->GetOuter();
-//
-//	if (auto TreeWG = Cast<UWidgetTree>(LocalParent))
-//	{
-//		if (auto Widget = TreeWG->FindWidget<T>(Name))
-//		{
-//			return Widget;
-//		}
-//	}
-//	return nullptr;
-//}
-//
-//template<typename T>
-//inline TArray<T*> ULeeXRHomeMenuWG::LeeXRFindWidgetsOfClass() const
-//{
-//
-//	TArray<UWidget*> Widgets{};
-//	TArray<T*> FoundWidgets{};
-//
-//	UObject* LocalParent = GetRootWidget()->GetOuter();
-//
-//	if (auto RootWg = Cast<UWidgetTree>(LocalParent))
-//	{
-//		RootWg->GetAllWidgets(Widgets);
-//
-//		for (auto Widget : Widgets)
-//		{
-//			if (auto FoundWidget = Cast<T>(Widget))
-//			{
-//				FoundWidgets.AddUnique(FoundWidget);
-//			}
-//		}
-//	}
-//	return FoundWidgets;
-//
-//}
+	void InitBindMenu();
+
+};

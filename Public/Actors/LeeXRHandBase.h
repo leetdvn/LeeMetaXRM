@@ -197,12 +197,15 @@ protected:
 	UFUNCTION()
 	void LogReconize() { OnLogRecognizer.Broadcast(); }
 
+	UFUNCTION()
+	void OnFireAction(const FInputActionInstance& ActionInstance);
+
 	UPROPERTY(BlueprintAssignable, Category = "LeeXR|Delegate")
 	FOnLogRecognizer OnLogRecognizer;
 
 	AActor* HasOverlapActor(const USphereComponent* inSphere);
 
-	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance);
+	virtual	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance);
 
 	void SetHandSwitch(bool isLeft);
 	bool bIsCanGrasp;
@@ -343,6 +346,9 @@ protected:
 	TObjectPtr<class UInputMappingContext> DefaultContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
+	TObjectPtr<class UInputMappingContext> IMCFireContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputAction> IA_Grasp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
@@ -365,6 +371,9 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputAction> IA_MenuAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
+	TObjectPtr<class UInputAction> IA_Fire;
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void OnMenuAction(const FInputActionInstance& ActionInstance);

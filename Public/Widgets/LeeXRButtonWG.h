@@ -7,6 +7,7 @@
 #include "Blueprint/UserWidget.h"
 #include "LeeXRButtonWG.generated.h"
 
+
 /**
  * 
  */
@@ -29,6 +30,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties", meta = (ExposeOnSpawn = "true"))
 	FText DisplayName;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties", meta = (ExposeOnSpawn = "true"))
+	FString MapName;
+
+	UFUNCTION(BlueprintPure, Category = "LeeXR|Func",meta=(BlueprintThreadSafe))
+	UButton* GetButton() const { return LeeBtn.Get(); }
 
 protected:
 	virtual void NativeConstruct() override;

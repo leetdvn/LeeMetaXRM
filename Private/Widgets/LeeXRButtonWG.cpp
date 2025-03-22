@@ -4,8 +4,9 @@
 #include "Widgets/LeeXRButtonWG.h"
 
 #include "Components/SizeBox.h"
-
 #include "LeeXRUltils.h"
+#include "Engine/Level.h"
+
 
 using namespace LeeXRUltils;
 
@@ -21,14 +22,6 @@ void ULeeXRButtonWG::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-    if (Label && LeeSizeBox)
-    {
-        FVector2D DesiredSize = Label->GetDesiredSize();
-        LeeSizeBox->SetWidthOverride(DesiredSize.X);
-        LeeSizeBox->SetHeightOverride(DesiredSize.Y);
-
-		LEE_LOG(LogTemp, Log, "Desired Size %s", *DesiredSize.ToString());
-    }
 }
 
 
