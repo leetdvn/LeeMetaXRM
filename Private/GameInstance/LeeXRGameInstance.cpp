@@ -23,6 +23,14 @@ void ULeeXRGameInstance::Init()
 
 	if (GConfig)
 	{
+#if UE_BUILD_SHIPPING || UE_BUILD_DEVELOPMENT || UE_BUILD_TEST || UE_BUILD_DEBUG
+		GConfig->SetBool(
+			TEXT("/Script/EngineSettings.GeneralProjectSettings"),
+			TEXT("bStartInVR"),
+			true,
+			GGameIni
+		);
+#endif
 		CurrentLevel = LeeXRGetGameConfigInt(TEXT("CurrentLevel"), TEXT("ULeeXRGameInstance"));
 
 		int32 Demo = LeeXRGetGameConfigInt(TEXT("ActionType"), TEXT("ULeeXRGameInstance"));
