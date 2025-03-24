@@ -271,7 +271,7 @@ void ALeeXRCharacter::BeginPlay()
 
 	bool IsHome = CurrentLevel.EndsWith("HomeMenu");
 
-	Camera->bLockToHmd = !IsHome;
+	//Camera->bLockToHmd = !IsHome;
 
 	//HandPhysicsLeft->SetHiddenInGame(!IsHome);
 	//HandPhysicsRight->SetHiddenInGame(!IsHome);
