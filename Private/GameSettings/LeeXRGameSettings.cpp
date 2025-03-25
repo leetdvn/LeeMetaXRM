@@ -8,7 +8,7 @@ ULeeXRGameSettings::ULeeXRGameSettings(const FObjectInitializer& ObjectInitializ
 	:Super(ObjectInitializer)
 {
 	//Super::SetToDefaults();	
-	SetAACommand((uint8)AntiAliasingMethod);
+	//SetAACommand((uint8)AntiAliasingMethod);
 }
 
 void ULeeXRGameSettings::SetAntiAliasingMethod(EAntiAliasingMethod Value)
@@ -86,7 +86,7 @@ void ULeeXRGameSettings::LoadSettings(bool bForceReload)
 
 	Super::LoadSettings(bForceReload);
 
-	SetAACommand((uint8)AntiAliasingMethod);
+	//SetAACommand((uint8)AntiAliasingMethod);
 
 
 

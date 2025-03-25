@@ -35,6 +35,20 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray<FVector> SpawnLevel;
 
+	FVector GetSpawnLevelAt(int32 index) const
+	{
+		if (SpawnLevel.IsValidIndex(index))
+		{
+			return SpawnLevel[index];
+		}
+		return FVector::ZeroVector;
+	}
+
+
+	FLevelSpawnLocation() :SpawnLevel(TArray<FVector>())
+	{
+	}
+
 };
 
 DEFINE_LOG_CATEGORY_STATIC(LogLeeICTUGameInstance, Log, All);
@@ -57,6 +71,9 @@ public:
 	void SetActionType(EICTUActionType inType) { ActionType = inType; };
 
 	FLevelSpawnLocation GetLevelSpawnLocation() const { return Location; }
+
+	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	FVector GetSpawnLocationAt(int32 index) const { return Location.GetSpawnLevelAt(index); }
 
 	UPROPERTY(Config,EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	int32 CurrentLevel = 0;
