@@ -80,3 +80,8 @@ DECLARE_MEMORY_STAT_POOL_EXTERN(TEXT("ICTUMV_TotalMemories"), STAT_ICTUMV_TotalM
 	MemoriesSize += ResourceSize;	\
 	INC_MEMORY_STAT_BY(STAT_ICTUMV_TotalMemories, MemoriesSize);
 
+#define REMOVEMEMORYSTAT(inObject,ClassStat)	\
+	float ResourceSize = inObject->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal);	\
+	DEC_MEMORY_STAT_BY(ClassStat, ResourceSize);\
+	MemoriesSize -= ResourceSize;	\
+	DEC_MEMORY_STAT_BY(STAT_ICTUMV_TotalMemories, ResourceSize);

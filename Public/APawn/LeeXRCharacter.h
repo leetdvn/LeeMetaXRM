@@ -133,9 +133,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FLeeXROnPoseMesh OnPoseMesh;
 
-	void InitPhysicsContraints();
+	void InitPhysicsContraints(bool isLeft=true);
 
-	void InitPhysicsAnimation();
+	void InitPhysicsAnimation(bool isLeft = true);
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	UAnimInstance* GetPhysicsAnimInstance(bool isLeft);

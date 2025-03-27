@@ -146,12 +146,11 @@ void ALeeXRCharacter::UpdateClimbing()
 
 }
 
-void ALeeXRCharacter::InitPhysicsContraints()
+void ALeeXRCharacter::InitPhysicsContraints(bool isLeft)
 {
 	if (!IsValid(XRHandLeft) || !IsValid(XRHandRight)) return;
 
-	TArray<ALeeXRHandBase*> Hands = { XRHandLeft,XRHandRight };
-	for (auto Hand : Hands)
+	if (auto Hand = isLeft ? XRHandLeft : XRHandRight)
 	{
 		if (IsValid(Hand)) {
 			if (UPhysicsConstraintComponent* PhysicContraint = Hand->GetPhysicsContraint()) {
@@ -161,35 +160,28 @@ void ALeeXRCharacter::InitPhysicsContraints()
 			}
 		}
 	}
-
 }
 
-void ALeeXRCharacter::InitPhysicsAnimation()
+void ALeeXRCharacter::InitPhysicsAnimation(bool isLeft)
 {
 	if (!IsValid(AnimPhysicsLeft) || !IsValid(AnimPhysicsRight)) return;
 
-	TArray<UPhysicalAnimationComponent*> AnimPhysics = { AnimPhysicsLeft,AnimPhysicsRight };
-	TArray<FName> SideName = { TEXT("hand_l"),TEXT("hand_r")};
+	UPhysicalAnimationComponent* Anim = isLeft ? AnimPhysicsLeft : AnimPhysicsRight;
+	FName SideName = isLeft ? TEXT("hand_l") : TEXT("hand_r");
 
+	if (IsValid(Anim)) {
 
-	int32 count = 0;
-	for (auto Anim : AnimPhysics)
-	{
-		if (IsValid(Anim)) {
+		FPhysicalAnimationData* AnimData = new FPhysicalAnimationData();
+		AnimData->OrientationStrength = 10000.f;
+		AnimData->PositionStrength = 1000.f;
+		AnimData->VelocityStrength = 150.f;
+		AnimData->AngularVelocityStrength = 150.f;
 
-			FPhysicalAnimationData* AnimData = new FPhysicalAnimationData();
-			AnimData->OrientationStrength = 10000.f;
-			AnimData->PositionStrength = 1000.f;
-			AnimData->VelocityStrength = 150.f;
-			AnimData->AngularVelocityStrength = 150.f;
-
-			USkeletalMeshComponent* Hand = count == 0 ? HandPhysicsLeft : HandPhysicsRight;
-			Anim->SetSkeletalMeshComponent(Hand);
-			Anim->SetStrengthMultiplyer(1.0f);
-			//LEE_LOG()
-			Anim->ApplyPhysicalAnimationSettingsBelow(SideName[count], *AnimData);
-		}
-		count++;
+		USkeletalMeshComponent* Hand = isLeft ? HandPhysicsLeft : HandPhysicsRight;
+		Anim->SetSkeletalMeshComponent(Hand);
+		Anim->SetStrengthMultiplyer(1.0f);
+		//LEE_LOG()
+		Anim->ApplyPhysicalAnimationSettingsBelow(SideName, *AnimData);
 	}
 }
 
@@ -302,12 +294,12 @@ void ALeeXRCharacter::BeginPlay()
 
 
 	//init COntraints
-	InitPhysicsContraints();
+	//InitPhysicsContraints();
 
-	HandPhysicsRight->SetAllBodiesBelowSimulatePhysics(TEXT("hand_r"), true);
-	HandPhysicsLeft->SetAllBodiesBelowSimulatePhysics(TEXT("hand_l"), true);
+	//HandPhysicsRight->SetAllBodiesBelowSimulatePhysics(TEXT("hand_r"), true);
+	//HandPhysicsLeft->SetAllBodiesBelowSimulatePhysics(TEXT("hand_l"), true);
 
-	InitPhysicsAnimation();
+	//InitPhysicsAnimation();
 
 	LEE_LOG(LogLeeXRCharacter, Log, "Begin Play");
 	//HandPhysicsRight->SetAllBodiesBelowPhysicsBlendWeight(TEXT("hand_r"), .15f);
@@ -477,7 +469,8 @@ ALeeXRHandBase* ALeeXRCharacter::HandInitialize(ELeeXRHandType inType,bool isLef
 	}
 	
 	ULeeXRHandDataAsset* Data = isLeft ? DataLeft : DataRight;
-
+	USkeletalMeshComponent* HandPhysics = isLeft ? HandPhysicsLeft : HandPhysicsRight;
+	FName HandName = isLeft ? "hand_l" : "hand_r";
 	// Initialize the hand actor
 	switch (inType)
 	{
@@ -491,6 +484,14 @@ ALeeXRHandBase* ALeeXRCharacter::HandInitialize(ELeeXRHandType inType,bool isLef
 			return InitializeHandActor<ALeeXRHandPhysics>(Data->Assets.Physics);
 		}
 	}
+
+
+	InitPhysicsContraints(isLeft);
+
+	HandPhysics->SetAllBodiesBelowSimulatePhysics(HandName, true);
+
+	InitPhysicsAnimation(isLeft);
+
 	return nullptr;
 
 }
