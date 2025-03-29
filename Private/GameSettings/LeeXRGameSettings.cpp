@@ -31,6 +31,26 @@ void ULeeXRGameSettings::SetAntiAliasingMethod(EAntiAliasingMethod Value)
 
 
 
+void ULeeXRGameSettings::EditGameSettings(const FString inCommand, float inValue)
+{
+	uint8 val = (uint8)inValue;
+	static IConsoleVariable* SetAA = IConsoleManager::Get().FindConsoleVariable(*inCommand);
+	if (ensure(SetAA))
+	{
+		// ECVF_SetByGameSetting , ECVF_SetByCode, ECVF_SetByProjectSetting
+#if WITH_EDITOR
+		SetAA->Set(val, ECVF_SetByProjectSetting);
+#elif UE_BUILD_SHIPPING || UE_BUILD_DEVELOPMENT || UE_BUILD_TEST || UE_BUILD_DEBUG
+		SetAA->Set(val, ECVF_SetByGameSetting);
+#endif
+	}
+
+	FString msg = FString::Printf(TEXT("%s : %f"), *inCommand, inValue);
+
+	UE_LOG(LogLeeXRGameSettings, Log, TEXT("EditGameSettings %s"), *msg);
+
+}
+
 void ULeeXRGameSettings::SetAACommand(uint8 val) {
 
 	if (GEngine != nullptr) {
@@ -59,15 +79,11 @@ void ULeeXRGameSettings::SetAACommand(uint8 val) {
 
 }
 
-
-
 uint8 ULeeXRGameSettings::GetAntiAliasingMethod() const
 {
 
 	return AntiAliasingMethod;
 }
-
-
 
 bool ULeeXRGameSettings::IsAntiAliasingMethodDirty() const
 {
@@ -88,7 +104,12 @@ void ULeeXRGameSettings::LoadSettings(bool bForceReload)
 
 	//SetAACommand((uint8)AntiAliasingMethod);
 
+	///Set the 
+	EditGameSettings(TEXT("r.Streaming.PoolSize"), PoolSize);
+	EditGameSettings(TEXT("r.ScreenPercentage"), ScreenPercentage);
+	EditGameSettings(TEXT("FullscreenMode"), 2.0f);
+	EditGameSettings(TEXT("t.MaxFPS"), 999);
 
-
-
+	FString ShowFps = FString::Printf(TEXT("stat FPS"));
+	GetWorld()->Exec(GetWorld(), *ShowFps);
 }

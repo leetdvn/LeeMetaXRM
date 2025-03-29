@@ -6,6 +6,17 @@
 #include "GameFramework/GameUserSettings.h"
 #include "LeeXRGameSettings.generated.h"
 
+
+UENUM(BlueprintType)
+enum class ELeeXRPlatformBuild : uint8
+{
+	LEEXR_WindowsVR UMETA(DisplayName = "PC Virtual Reality"),
+	LEEXR_Windows UMETA(DisplayName = "Windows"),
+	LEEXR_Android UMETA(DisplayName = "VR"),
+};
+
+
+DEFINE_LOG_CATEGORY_STATIC(LogLeeXRGameSettings, Log, All);
 /**
  * 
  */
@@ -25,15 +36,23 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Settings)
 	uint8 GetAntiAliasingMethod() const;
 
-
-
-
 	UFUNCTION(BlueprintPure, Category = Settings)
 	bool IsAntiAliasingMethodDirty() const;
 
 	//UFUNCTION(BlueprintCallable, Category = Settings)
 	virtual void LoadSettings(bool bForceReload = false) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (DisplayName = "Platform Build"))
+	ELeeXRPlatformBuild PlatformBuild;
+
+	UPROPERTY(config)
+	float PoolSize = 2000.0f;
+
+	UPROPERTY(config, meta = (ClampMin = "0.0", ClampMax = "100.0"))
+	float ScreenPercentage = 67.0f;
+
+	UFUNCTION()
+	void EditGameSettings(const FString inCommand, float inValue);
 
 protected:
 	UPROPERTY(config)
@@ -42,4 +61,5 @@ protected:
 private:
 	UFUNCTION()
 	void SetAACommand(uint8 val);
+
 };

@@ -682,7 +682,7 @@ void ALeeXRHandBase::TryTeleport()
 			return;
 		}
 
-		if (TeleportLocation.Z <= 0) TeleportLocation.Z = 10;
+		if (TeleportLocation.Z <= 0) TeleportLocation.Z = 20;
 		XRCharacter->GetHandPhysics(IsHandLeft())->SetSimulatePhysics(false);
 		XRCharacter->TeleportTo(TeleportLocation, FRotator(0.0f, XRCharacter->GetActorRotation().Yaw, 0.0f), false, true);
 
