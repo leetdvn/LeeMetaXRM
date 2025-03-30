@@ -58,8 +58,5 @@ protected:
 	UPROPERTY(config)
 	uint8 AntiAliasingMethod;
 
-private:
-	UFUNCTION()
-	void SetAACommand(uint8 val);
 
 };

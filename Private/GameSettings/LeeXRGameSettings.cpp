@@ -24,7 +24,6 @@ void ULeeXRGameSettings::SetAntiAliasingMethod(EAntiAliasingMethod Value)
 #endif
 
 	}
-	SetAACommand(val);
 	AntiAliasingMethod = val;
 }
 
@@ -48,34 +47,6 @@ void ULeeXRGameSettings::EditGameSettings(const FString inCommand, float inValue
 	FString msg = FString::Printf(TEXT("%s : %f"), *inCommand, inValue);
 
 	UE_LOG(LogLeeXRGameSettings, Log, TEXT("EditGameSettings %s"), *msg);
-
-}
-
-void ULeeXRGameSettings::SetAACommand(uint8 val) {
-
-	if (GEngine != nullptr) {
-
-		GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Red, FString::Printf(TEXT("SetAACommand %d"), val));
-
-		if (GEngine->GameViewport != nullptr) {
-			UWorld* world = GEngine->GameViewport->GetWorld();
-			if (world != nullptr) {
-				GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Red, FString::Printf(TEXT("SET AA Index %d"), val));
-				if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0)) {
-					PC->ConsoleCommand("r.AntiAliasingMethod " + val);
-				}
-				else {
-					GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Red, TEXT("PLAYER CONTROLLER IS NULL"));
-				}
-			}
-			else {
-				GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Red, TEXT("WORLD IS NULL"));
-			}
-		}
-		else {
-			GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Red, TEXT("GEngine->GameViewport is null"));
-		}
-	}
 
 }
 
@@ -112,4 +83,7 @@ void ULeeXRGameSettings::LoadSettings(bool bForceReload)
 
 	FString ShowFps = FString::Printf(TEXT("stat FPS"));
 	GetWorld()->Exec(GetWorld(), *ShowFps);
+
+	UE_LOG(LogLeeXRGameSettings, Warning, TEXT("Settings Initialize"));
+
 }

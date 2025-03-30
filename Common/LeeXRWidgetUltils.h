@@ -13,26 +13,7 @@
 
 namespace LeeXRWidgetUltils
 {
-	/// <summary>
-	/// Find a widget by name 
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	/// <param name="UUserWidget"></param>
-	/// <param name="FName"></param>
-	/// <returns></returns>
-	template<class T>
-	FORCEINLINE T* LeeXRFindWidget(UUserWidget* inBaseWG,const FName& Name) {
-		UWidget* LocalParent = inBaseWG->GetRootWidget()->GetOuter();
 
-		if (auto TreeWG = Cast<UWidgetTree>(LocalParent))
-		{
-			if (auto Widget = TreeWG->FindWidget<T>(Name))
-			{
-				return Widget;
-			}
-		}
-		return nullptr;
-	}
 
 	/// <summary>
 	/// Get all buttons

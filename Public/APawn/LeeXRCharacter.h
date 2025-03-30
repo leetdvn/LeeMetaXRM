@@ -146,7 +146,7 @@ public:
 
 	void HandPhysicBlendToPoseable(class UPoseableMeshComponent* inPoseable,bool isLeft=true);
 
-	enum class EICTUActionType GetCurrentActionType() const; 
+	EICTUActionType GetCurrentActionType() const; 
 
 	void OnHMDLevelChanged_Implementation(const FString& NewLevelName);
 

@@ -45,7 +45,8 @@ void ALeeXRMenuActor::BeginPlay()
 
 	SetupActorInputComponent();
 
-	if (XRCharacter = LeeXRGetCustomCharacter<ALeeXRCharacter>(this)) {
+	XRCharacter = LeeXRGetCustomCharacter<ALeeXRCharacter>(this);
+	if (XRCharacter) {
 		SetReference();
 	}
 

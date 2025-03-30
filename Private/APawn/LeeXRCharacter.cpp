@@ -253,13 +253,14 @@ EICTUActionType ALeeXRCharacter::GetCurrentActionType() const
 // Called when the game starts or when spawned
 void ALeeXRCharacter::BeginPlay()
 {
+	XRHandLeft = HandInitialize(HandType, true);
+	XRHandRight = HandInitialize(HandType, false);
+
 	Super::BeginPlay();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
 	FString CurrentLevel = GetWorld()->GetMapName();
 
-	XRHandLeft = HandInitialize(HandType, true);
-	XRHandRight = HandInitialize(HandType, false);
 
 	bool IsHome = CurrentLevel.EndsWith("HomeMenu");
 
@@ -485,12 +486,18 @@ ALeeXRHandBase* ALeeXRCharacter::HandInitialize(ELeeXRHandType inType,bool isLef
 		}
 	}
 
+	FTimerHandle StackTimeHander;
+	GetWorld()->GetTimerManager().SetTimer(StackTimeHander, 
+		[this,isLeft,HandPhysics,HandName]() {
+			InitPhysicsContraints(isLeft);
 
-	InitPhysicsContraints(isLeft);
+			//HandPhysics->SetAllBodiesBelowSimulatePhysics(HandName, true);
 
-	HandPhysics->SetAllBodiesBelowSimulatePhysics(HandName, true);
+			//InitPhysicsAnimation(isLeft);
 
-	InitPhysicsAnimation(isLeft);
+			GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
+		},
+		1.0f, false,1.f);
 
 	return nullptr;
 
