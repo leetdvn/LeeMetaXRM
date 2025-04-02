@@ -21,6 +21,11 @@ DECLARE_MEMORY_STAT_POOL_EXTERN(TEXT("ICTUCharacterMemory"), STAT_ICTUCharacterM
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLeeXROnPoseMesh,AActor*,GrabableActor);
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLeeXRTest,float,inValue);
+
+
+
 UENUM(BlueprintType)
 enum class ELeeXRTeleportHandAction : uint8
 {
@@ -235,6 +240,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputAction> IA_Grasp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
+	TObjectPtr<class UInputAction> IA_TestAct;
+
+	UPROPERTY(BlueprintAssignable)
+	FLeeXRTest OnLeeXRTest;
 
 #pragma endregion Input
 
@@ -259,6 +269,13 @@ public:
 
 	UFUNCTION()
 	void OnTurn(const FInputActionInstance& ActionInstance);
+
+	UFUNCTION()
+	void OnSnapTurn(float inValue);
+
+	UFUNCTION()
+	void TestCmd(const FInputActionInstance& ActionInstance);
+
 private:
 
 	TObjectPtr<class ALeeXRGrabbableActor> HeldLeftObject;

@@ -253,8 +253,6 @@ EICTUActionType ALeeXRCharacter::GetCurrentActionType() const
 // Called when the game starts or when spawned
 void ALeeXRCharacter::BeginPlay()
 {
-	XRHandLeft = HandInitialize(HandType, true);
-	XRHandRight = HandInitialize(HandType, false);
 
 	Super::BeginPlay();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
@@ -263,6 +261,10 @@ void ALeeXRCharacter::BeginPlay()
 
 
 	bool IsHome = CurrentLevel.EndsWith("HomeMenu");
+
+
+	XRHandLeft = HandInitialize(HandType, true);
+	XRHandRight = HandInitialize(HandType, false);
 
 	//Camera->bLockToHmd = !IsHome;
 
@@ -381,6 +383,9 @@ void ALeeXRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 		EnhancedInputComponent->BindAction(IA_RMenuToogle, ETriggerEvent::Started, this, &ALeeXRCharacter::OnResetOrientation);
 		EnhancedInputComponent->BindAction(IA_Turn, ETriggerEvent::Started, this, &ALeeXRCharacter::OnTurn);
 
+		EnhancedInputComponent->BindAction(IA_TestAct, ETriggerEvent::Started, this, &ALeeXRCharacter::TestCmd);
+		EnhancedInputComponent->BindAction(IA_TestAct, ETriggerEvent::Completed, this, &ALeeXRCharacter::TestCmd);
+
 		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Started, this, &ALeeXRCharacter::OnHandGrabing);
 		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Completed, this, &ALeeXRCharacter::OnHandRelease);
 		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Canceled, this, &ALeeXRCharacter::OnHandRelease);
@@ -453,10 +458,45 @@ void ALeeXRCharacter::OnTurn(const FInputActionInstance& ActionInstance)
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
-	LeeScreenLog("Turn", FColor::Green);
-	//FRotator CurrentRotation = GetActorRotation();
-	//FRotator NewRotation = CurrentRotation + FRotator(0.0f, 90.0f, 0.0f);
-	//SetActorRotation(NewRotation);
+	float ActValue = ActionInstance.GetValue().Get<float>();
+
+	LeeScreenLog("Turn : %f", FColor::Green,ActValue);
+
+
+	OnSnapTurn(ActValue);
+
+}
+
+void ALeeXRCharacter::OnSnapTurn(float inValue)
+{
+	float Yaw = inValue > 0 ? 45.0f : -45.0f;
+	//FRotator NewRotation = CurrentRotation + FRotator(0.0f, Yaw, 0.0f);
+
+	FVector ActorLoc = GetActorLocation();
+	FRotator ActorRot = GetActorRotation();
+
+	FRotator Combine = UKismetMathLibrary::ComposeRotators(ActorRot, FRotator(0.0f, Yaw, 0.0f));
+
+	FVector CamLoc = LeeXRGetWorldLocation(Camera);
+	FTransform RelativeTransform = Camera->GetRelativeTransform();
+
+	FTransform NewTransform = UKismetMathLibrary::MakeTransform(ActorLoc, Combine, FVector::OneVector);
+
+	AddActorWorldRotation(FRotator(0.0f, Yaw, 0.0f));
+
+	FTransform NewTrans = UKismetMathLibrary::ComposeTransforms(RelativeTransform, NewTransform);
+	FVector Minus = CamLoc - NewTrans.GetLocation();
+
+	SetActorLocation(Minus + ActorLoc);
+}
+
+void ALeeXRCharacter::TestCmd(const FInputActionInstance& ActionInstance)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	float gValue = ActionInstance.GetValue().Get<float>();
+	OnLeeXRTest.Broadcast(gValue);
+
 }
 
 // Initialize the hands
