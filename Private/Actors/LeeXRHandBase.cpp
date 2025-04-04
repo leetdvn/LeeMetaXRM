@@ -430,12 +430,15 @@ void ALeeXRHandBase::Tick(float DeltaTime)
 
 void ALeeXRHandBase::OnMenuAction(const FInputActionInstance& ActionInstance)
 {
+	if (TeleportValid()) return;
 	bIsShow = !bIsShow;
+
 
 	if (WGActionMenu == nullptr && bIsShow)
 		WGActionMenu = LeeXRSPawnActorBP<AActor>(this, WGMenu);
 
-	WGActionMenu->SetActorHiddenInGame(!bIsShow);
+	if(IsValid(WGActionMenu) && WGActionMenu != nullptr)
+		WGActionMenu->SetActorHiddenInGame(!bIsShow);
 
 	if (auto MActor = Cast<ALeeXRMenuActor>(WGActionMenu)) {
 		MActor->SetActiveMenu(bIsShow);
@@ -449,7 +452,8 @@ void ALeeXRHandBase::OnMenuAction(const FInputActionInstance& ActionInstance)
 	//}
 	
 	LeeScreenLog("Menu Action %s", FColor::Green, *WGActionMenu->GetName());
-	WGActionMenu->SetActorLocation(GetActorLocation());
+	if (IsValid(WGActionMenu) && WGActionMenu != nullptr)
+		WGActionMenu->SetActorLocation(GetActorLocation());
 
 }
 
