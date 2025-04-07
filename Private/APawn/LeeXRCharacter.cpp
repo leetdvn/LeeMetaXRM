@@ -275,14 +275,17 @@ void ALeeXRCharacter::BeginPlay()
 	//Int Player Spawn Location
 	if (auto GameIns = GetGameInstance<ULeeXRGameInstance>())
 	{
+
 		auto NextLoc = GameIns->GetLevelSpawnLocation();
 
-		NextLevel = CurrentLevel.EndsWith("HomeMenu") ? NextLoc.SpawnLevel.Num() - 1 : GameIns->CurrentLevel;
+		int32 LevelIdx = (int32)GameIns->GetActionType();
+		//NextLevel = CurrentLevel.EndsWith("HomeMenu") ? NextLoc.SpawnLevel.Num() - 1 : GameIns->CurrentLevel;
 
-		if (NextLoc.SpawnLevel.Num() > 0 && NextLevel >= 0)
+		if (NextLoc.SpawnLevel.IsValidIndex(LevelIdx))
 		{
-			FVector StartSpawnLocation = NextLoc.SpawnLevel[NextLevel];
+			FVector StartSpawnLocation = NextLoc.SpawnLevel[LevelIdx];
 			SetActorLocation(StartSpawnLocation);
+
 		}
 	}
 

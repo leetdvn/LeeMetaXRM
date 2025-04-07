@@ -671,17 +671,21 @@ void ALeeXRHandBase::StartTeleportTrace()
 	//NiagaraComponent->SetVisibility(true);
 	if (TeleportRef == nullptr) {
 		TeleportRef = LeeXRSPawnActorBP<AActor>(this, TeleportVisualizer);
+		if (TeleportRef)
+			TeleportStartPos = TeleportRef->GetActorLocation();
 	}
 }
 
 void ALeeXRHandBase::TryTeleport()
 {
-	UWorld* World = GetWorld();
-	if (World == nullptr) return;
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
 	if (XRCharacter) {
 		FVector TeleportLocation = GetTeleportLocation(XRCharacter);
-		if (TeleportLocation.IsNearlyZero(0.0001f) || TeleportLocation.IsZero()) {
+		if (TeleportLocation.IsNearlyZero(0.0001f) ||
+			TeleportLocation.IsZero()||
+			TeleportLocation == TeleportStartPos
+			) {
 			LeeScreenLog("Teleport Location is Zero", FColor::Red);
 			return;
 		}

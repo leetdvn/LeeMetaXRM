@@ -41,6 +41,8 @@ void ULeeXRGameSettings::EditGameSettings(const FString inCommand, float inValue
 		SetAA->Set(val, ECVF_SetByProjectSetting);
 #elif UE_BUILD_SHIPPING || UE_BUILD_DEVELOPMENT || UE_BUILD_TEST || UE_BUILD_DEBUG
 		SetAA->Set(val, ECVF_SetByGameSetting);
+		UE_LOG(LogLeeXRGameSettings, Log, TEXT("Cmd : %s"), *inCommand);
+
 #endif
 	}
 

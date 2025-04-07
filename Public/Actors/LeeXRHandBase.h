@@ -378,14 +378,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void OnMenuAction(const FInputActionInstance& ActionInstance);
 
-#pragma endregion
-
-private:
-
-	AActor* FindActorToGrab(TArray<AActor*> &inActors, FString inTag);
-
-	void OnHandTypeChanged();
-
 	UFUNCTION()
 	void OnHandTrigger(const FInputActionInstance& ActionInstance);
 	/// <summary>
@@ -405,4 +397,14 @@ private:
 	UFUNCTION()
 	void OnHandInteract(const FInputActionInstance& ActionInstance);
 
+
+#pragma endregion
+
+private:
+
+	AActor* FindActorToGrab(TArray<AActor*> &inActors, FString inTag);
+
+	void OnHandTypeChanged();
+
+	FVector TeleportStartPos;
 };
