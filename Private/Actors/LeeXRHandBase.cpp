@@ -683,8 +683,7 @@ void ALeeXRHandBase::TryTeleport()
 	if (XRCharacter) {
 		FVector TeleportLocation = GetTeleportLocation(XRCharacter);
 		if (TeleportLocation.IsNearlyZero(0.0001f) ||
-			TeleportLocation.IsZero()||
-			TeleportLocation == TeleportStartPos
+			TeleportLocation.IsZero()
 			) {
 			LeeScreenLog("Teleport Location is Zero", FColor::Red);
 			return;
