@@ -254,6 +254,23 @@ EICTUActionType ALeeXRCharacter::GetCurrentActionType() const
 void ALeeXRCharacter::BeginPlay()
 {
 
+	//Int Player Spawn Location
+	if (auto GameIns = GetGameInstance<ULeeXRGameInstance>())
+	{
+
+		auto NextLoc = GameIns->GetLevelSpawnLocation();
+
+		int32 LevelIdx = (int32)GameIns->GetActionType();
+		//NextLevel = CurrentLevel.EndsWith("HomeMenu") ? NextLoc.SpawnLevel.Num() - 1 : GameIns->CurrentLevel;
+
+		if (NextLoc.SpawnLevel.IsValidIndex(LevelIdx))
+		{
+			FVector StartSpawnLocation = NextLoc.SpawnLevel[LevelIdx];
+			SetActorLocation(StartSpawnLocation);
+
+		}
+	}
+
 	Super::BeginPlay();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
@@ -272,22 +289,7 @@ void ALeeXRCharacter::BeginPlay()
 	//HandPhysicsRight->SetHiddenInGame(!IsHome);
 
 
-	//Int Player Spawn Location
-	if (auto GameIns = GetGameInstance<ULeeXRGameInstance>())
-	{
 
-		auto NextLoc = GameIns->GetLevelSpawnLocation();
-
-		int32 LevelIdx = (int32)GameIns->GetActionType();
-		//NextLevel = CurrentLevel.EndsWith("HomeMenu") ? NextLoc.SpawnLevel.Num() - 1 : GameIns->CurrentLevel;
-
-		if (NextLoc.SpawnLevel.IsValidIndex(LevelIdx))
-		{
-			FVector StartSpawnLocation = NextLoc.SpawnLevel[LevelIdx];
-			SetActorLocation(StartSpawnLocation);
-
-		}
-	}
 
 	ADDMEMORYSTAT(this, STAT_ICTUCharacterMemory);
 	InitializationContext(GetWorld(), DefaultMappingContext);
