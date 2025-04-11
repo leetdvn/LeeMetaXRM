@@ -35,6 +35,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray<FVector> SpawnLevel;
 
+	UPROPERTY(EditAnywhere)
+	TArray<FRotator> ZRotations;
 
 	FVector GetSpawnLevelAt(int32 index) const
 	{
@@ -50,7 +52,18 @@ public:
 		return SpawnLevel.Num();
 	}
 
+	TArray<FVector> GetSpawnLevel() const
+	{
+		return SpawnLevel;
+	}
+
+	TArray<FRotator> GetZRotations() const
+	{
+		return ZRotations;
+	}
+
 	FLevelSpawnLocation() :SpawnLevel(TArray<FVector>())
+		, ZRotations(TArray<float>())
 	{
 	}
 
@@ -80,6 +93,19 @@ public:
 
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	FVector GetSpawnLocationAt(int32 index) const { return Location.GetSpawnLevelAt(index); }
+
+	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	TArray<FVector> GetSpawnLocations() const { return Location.GetSpawnLevel(); }
+
+	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	TArray<FRotator> GetSpawnRotations() const { return Location.GetZRotations(); }
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void SetNextLevel();
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void ResetLevel() { ActionType = EICTUActionType::EICTU_ActionOne; }
+
 
 	UPROPERTY(Config,EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	int32 CurrentLevel = 0;

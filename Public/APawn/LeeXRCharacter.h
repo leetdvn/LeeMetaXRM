@@ -320,7 +320,7 @@ inline ALeeXRHandBase* ALeeXRCharacter::InitializeHandActor(const FString inHand
 	if (HandBase == nullptr) return nullptr;
 	HandBase->AttachToComponent(LeeXROrigin, AttachRules);
 
-	return nullptr;
+	return HandBase;
 }
 
 template<typename T>

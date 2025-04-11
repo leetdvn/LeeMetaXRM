@@ -17,6 +17,29 @@ ULeeXRGameInstance::ULeeXRGameInstance()
 {
 }
 
+void ULeeXRGameInstance::SetNextLevel()
+{
+
+	LEE_SCOPE_CYCLE_COUNTER(LeeXRGrabable);
+
+	switch (ActionType)
+	{
+	case EICTUActionType::EICTU_ActionOne:
+		ActionType = EICTUActionType::EICTU_ActionTwo;
+		break;
+	case EICTUActionType::EICTU_ActionTwo:
+		ActionType = EICTUActionType::EICTU_ActionThree;
+		break;
+	case EICTUActionType::EICTU_ActionThree:
+		ActionType = EICTUActionType::EICTU_ActionFour;
+		break;
+	case EICTUActionType::EICTU_ActionFour:
+		ActionType = EICTUActionType::EICTU_ActionFive;
+		break;
+	}
+
+}
+
 void ULeeXRGameInstance::Init()
 {
 	Super::Init();

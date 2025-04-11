@@ -265,9 +265,9 @@ void ALeeXRCharacter::BeginPlay()
 
 		if (NextLoc.SpawnLevel.IsValidIndex(LevelIdx))
 		{
-			FVector StartSpawnLocation = NextLoc.SpawnLevel[LevelIdx];
+			FVector StartSpawnLocation = NextLoc.SpawnLevel[LevelIdx-1];
 			SetActorLocation(StartSpawnLocation);
-
+			LeeXROrigin->SetRelativeRotation(NextLoc.ZRotations[LevelIdx-1]);
 		}
 	}
 
@@ -521,28 +521,31 @@ ALeeXRHandBase* ALeeXRCharacter::HandInitialize(ELeeXRHandType inType,bool isLef
 	switch (inType)
 	{
 		case ELeeXRHandType::LeeXRController: {
-			return InitializeHandActor<ALeeXRHandController>(Data->Assets.Controller);
+			InitializeHandActor<ALeeXRHandController>(Data->Assets.Controller);
+			break;
 		}
 		case ELeeXRHandType::LeeXRHandTracking: {
-			return InitializeHandActor<ALeeXRHandTracking>(Data->Assets.Tracking);
+			InitializeHandActor<ALeeXRHandTracking>(Data->Assets.Tracking);
+			break;
 		}
 		case ELeeXRHandType::LeeXRHandPhysics: {
-			return InitializeHandActor<ALeeXRHandPhysics>(Data->Assets.Physics);
+			InitializeHandActor<ALeeXRHandPhysics>(Data->Assets.Physics);
+			break;
 		}
 	}
 
-	FTimerHandle StackTimeHander;
-	GetWorld()->GetTimerManager().SetTimer(StackTimeHander, 
-		[this,isLeft,HandPhysics,HandName]() {
-			InitPhysicsContraints(isLeft);
+	//FTimerHandle StackTimeHander;
+	//GetWorld()->GetTimerManager().SetTimer(StackTimeHander, 
+	//	[this,isLeft,HandPhysics,HandName]() {
+	//		InitPhysicsContraints(isLeft);
 
-			//HandPhysics->SetAllBodiesBelowSimulatePhysics(HandName, true);
+	//		HandPhysics->SetAllBodiesBelowSimulatePhysics(HandName, true);
 
-			//InitPhysicsAnimation(isLeft);
+	//		InitPhysicsAnimation(isLeft);
 
-			GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
-		},
-		1.0f, false,1.f);
+	//		GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
+	//	},
+	//	1.0f, false,1.f);
 
 	return nullptr;
 

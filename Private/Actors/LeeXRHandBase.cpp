@@ -195,7 +195,7 @@ void ALeeXRHandBase::OnFireAction(const FInputActionInstance& ActionInstance)
 
 	if (IsValid(WidgetInteraction)) {
 		WidgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
-		LeeScreenLog("Press Fire", FColor::Green);
+		//LeeScreenLog("Press Fire", FColor::Green);
 
 	}
 }
@@ -682,8 +682,10 @@ void ALeeXRHandBase::TryTeleport()
 
 	if (XRCharacter) {
 		FVector TeleportLocation = GetTeleportLocation(XRCharacter);
+		FVector2D TeleportLocation2D = FVector2D(TeleportLocation.X, TeleportLocation.Y);
 		if (TeleportLocation.IsNearlyZero(0.0001f) ||
-			TeleportLocation.IsZero()
+			TeleportLocation.IsZero() ||
+			TeleportLocation2D.IsZero()
 			) {
 			LeeScreenLog("Teleport Location is Zero", FColor::Red);
 			return;
