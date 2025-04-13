@@ -451,7 +451,7 @@ void ALeeXRHandBase::OnMenuAction(const FInputActionInstance& ActionInstance)
 	//	WGActionMenu->SetHidden(bIsShow);
 	//}
 	
-	LeeScreenLog("Menu Action %s", FColor::Green, *WGActionMenu->GetName());
+	//LeeScreenLog("Menu Action %s", FColor::Green, *WGActionMenu->GetName());
 	if (IsValid(WGActionMenu) && WGActionMenu != nullptr)
 		WGActionMenu->SetActorLocation(GetActorLocation());
 

@@ -160,6 +160,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	int32 NextLevel = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
+	float RotateSpd = 30.f;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

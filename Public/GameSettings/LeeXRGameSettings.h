@@ -46,7 +46,7 @@ public:
 	ELeeXRPlatformBuild PlatformBuild;
 
 	UPROPERTY(config)
-	float PoolSize = 2000.0f;
+	float PoolSize = 2800.0f;
 
 	UPROPERTY(config, meta = (ClampMin = "0.0", ClampMax = "100.0"))
 	float ScreenPercentage = 67.0f;

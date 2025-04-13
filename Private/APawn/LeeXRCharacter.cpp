@@ -465,7 +465,7 @@ void ALeeXRCharacter::OnTurn(const FInputActionInstance& ActionInstance)
 
 	float ActValue = ActionInstance.GetValue().Get<float>();
 
-	LeeScreenLog("Turn : %f", FColor::Green,ActValue);
+	//LeeScreenLog("Turn : %f", FColor::Green,ActValue);
 
 
 	OnSnapTurn(ActValue);
@@ -474,11 +474,11 @@ void ALeeXRCharacter::OnTurn(const FInputActionInstance& ActionInstance)
 
 void ALeeXRCharacter::OnSnapTurn(float inValue)
 {
-	float Yaw = inValue > 0 ? 45.0f : -45.0f;
+	float Yaw = inValue > 0 ? RotateSpd : -RotateSpd;
 	//FRotator NewRotation = CurrentRotation + FRotator(0.0f, Yaw, 0.0f);
 
 	FVector ActorLoc = GetActorLocation();
-	FRotator ActorRot = GetActorRotation();
+	FRotator ActorRot = LeeXROrigin->GetRelativeRotation();// GetActorRotation();
 
 	FRotator Combine = UKismetMathLibrary::ComposeRotators(ActorRot, FRotator(0.0f, Yaw, 0.0f));
 
@@ -491,8 +491,10 @@ void ALeeXRCharacter::OnSnapTurn(float inValue)
 
 	FTransform NewTrans = UKismetMathLibrary::ComposeTransforms(RelativeTransform, NewTransform);
 	FVector Minus = CamLoc - NewTrans.GetLocation();
-
-	SetActorLocation(Minus + ActorLoc);
+	FRotator Result = FRotator(ActorRot) + FRotator(0,Yaw,0);
+	//SetActorLocation(Minus + ActorLoc);
+	//FRotator Result= UKismetMathLibrary::MakeRotFromZ(Minus - ActorLoc);
+	LeeXROrigin->SetRelativeRotation(Result);
 }
 
 void ALeeXRCharacter::TestCmd(const FInputActionInstance& ActionInstance)
