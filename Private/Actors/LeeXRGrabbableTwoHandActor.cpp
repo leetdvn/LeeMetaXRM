@@ -79,13 +79,6 @@ void ALeeXRGrabbableTwoHandActor::PostEditChangeProperty(FPropertyChangedEvent& 
 	}
 }
 #endif
-void ALeeXRGrabbableTwoHandActor::OnGrab(UObject* inComponent, const FVector& InGrabLocation)
-{
-}
-
-void ALeeXRGrabbableTwoHandActor::OnRelease(UObject* inComponent)
-{
-}
 
 void ALeeXRGrabbableTwoHandActor::OnGrabObjects(UMotionControllerComponent* inComponent)
 {

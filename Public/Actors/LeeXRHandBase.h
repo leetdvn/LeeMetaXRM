@@ -2,10 +2,12 @@
 
 #pragma once
 
+
 #include <PhysicsEngine/PhysicsAsset.h>
 #include <NiagaraComponent.h>
 #include <LeeXRUltils.h>
 #include <Interfaces/LeeXRInteraction.h>
+#include <Interfaces/LeeXRInterfaceHMD.h>
 #include "MotionControllerComponent.h"
 #include <Components/WidgetInteractionComponent.h>
 #include "Animations/LeeXRAnimInstance.h"
@@ -48,7 +50,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLogRecognizer);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLeeXROnHandGrabled);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLeeXROnHandRelease);
 
-float MemoriesSize;
 
 
 UCLASS(Abstract)
@@ -112,6 +113,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UWidgetInteractionComponent* GetWidgetInteraction() { return WidgetInteraction; }
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UMotionControllerComponent* GetMotionController() { return MotionController; }
 	/// <summary>
 	/// Get Skeletal Mesh Component
 	/// </summary>
@@ -140,10 +143,19 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UWidgetInteractionComponent* GetWidgetInteractionComponent() const { return WidgetInteraction.Get(); }
-	/// <summary>
-	/// Grab One Hand
-	/// </summary>
-	virtual void OnGrabOneHand();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	bool IsHandLeft() const { return HandType == EControllerHand::Left; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UPhysicsConstraintComponent* GetPhysicsContraints() const { return PhysicContraint.Get(); }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UPoseableMeshComponent* GetPoseableMesh() const { return PoseableMesh.Get(); }
+
+	void PoseableSpawned(USceneComponent* inParent,USkeletalMesh* inAsset,USkeletalMeshComponent* inSkeletalRef);
+
+	void PoseableDestroyed();
 
 	/// <summary>
 	/// Grab Two Hand
@@ -151,18 +163,26 @@ public:
 	virtual void OnGrabObject();
 
 	/// <summary>
-	/// Grab One Hand Release
-	/// </summary>
-	virtual void OnGrabOneHandRelease();
-
-	/// <summary>
 	/// Grab Two Hand Release
 	/// </summary>
 	virtual void OnReleaseObject();
 
+#pragma region WIDGETS
+	void ToogleWidgetInteraction(bool isEnable);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Widgets")
+	TSubclassOf<AActor> WGMenu;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Widgets")
+	TObjectPtr<AActor> WGActionMenu;
+		
+#pragma endregion
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -174,12 +194,23 @@ protected:
 
 	virtual void OnFingerAnimation(const FInputActionInstance& ActionInstance);
 
+	UFUNCTION()
+	void LogReconize() { OnLogRecognizer.Broadcast(); }
+
+	UFUNCTION()
+	void OnFireAction(const FInputActionInstance& ActionInstance);
+
+	UPROPERTY(BlueprintAssignable, Category = "LeeXR|Delegate")
+	FOnLogRecognizer OnLogRecognizer;
+
 	AActor* HasOverlapActor(const USphereComponent* inSphere);
 
-	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance);
+	virtual	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance);
 
 	void SetHandSwitch(bool isLeft);
 	bool bIsCanGrasp;
+
+	bool bIsShow = false;
 
 	TObjectPtr<ALeeXRCharacter> XRCharacter=nullptr;
 
@@ -209,6 +240,7 @@ protected:
 	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	FVector GetTeleportLocation(const class ALeeXRCharacter* inXRCharacter);
+
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Varibles")
 	TArray<FVector> TeleportTracePathPositions;
@@ -260,9 +292,6 @@ protected:
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class USkeletalMeshComponent> HandSkeletal=nullptr;
 
-	UPROPERTY(EditAnyWhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
-	TObjectPtr<class USkeletalMeshComponent> HandDebug=nullptr;
-
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UHandPoseRecognizer> HandPoseRecognizer = nullptr;
 
@@ -271,6 +300,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UPhysicsConstraintComponent> GrabsContraint = nullptr;
+
+	UPROPERTY(Transient, EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
+	TObjectPtr<class UPoseableMeshComponent> PoseableMesh=nullptr;
 
 
 #pragma endregion
@@ -314,6 +346,9 @@ protected:
 	TObjectPtr<class UInputMappingContext> DefaultContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
+	TObjectPtr<class UInputMappingContext> IMCFireContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputAction> IA_Grasp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
@@ -334,24 +369,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputAction> IA_Move;
 
-#pragma endregion
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "LeeXR Settings|Input")
+	TObjectPtr<class UInputAction> IA_MenuAction;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	UFUNCTION()
-	void LogReconize() { OnLogRecognizer.Broadcast(); }
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
+	TObjectPtr<class UInputAction> IA_Fire;
 
-	UPROPERTY(BlueprintAssignable, Category = "LeeXR|Delegate")
-	FOnLogRecognizer OnLogRecognizer;
-
-private:
-
-
-	AActor* FindActorToGrab(TArray<AActor*> &inActors, FString inTag);
-
-	void OnHandTypeChanged();
-
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void OnMenuAction(const FInputActionInstance& ActionInstance);
 
 	UFUNCTION()
 	void OnHandTrigger(const FInputActionInstance& ActionInstance);
@@ -372,4 +397,14 @@ private:
 	UFUNCTION()
 	void OnHandInteract(const FInputActionInstance& ActionInstance);
 
+
+#pragma endregion
+
+private:
+
+	AActor* FindActorToGrab(TArray<AActor*> &inActors, FString inTag);
+
+	void OnHandTypeChanged();
+
+	FVector TeleportStartPos;
 };

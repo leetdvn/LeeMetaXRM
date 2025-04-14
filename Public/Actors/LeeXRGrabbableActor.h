@@ -8,6 +8,7 @@
 #include "Interfaces/LeeXRInteraction.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include <GameplayTagContainer.h>
 #include "LeeXRGrabbableActor.generated.h"
 
 
@@ -66,6 +67,24 @@ public:
 	ALeeXRGrabbableActor();
 
 #pragma region Properties
+
+	/// <summary>
+	/// Check Tag Grabable and Tag Snapable
+	/// </summary>
+	/// <param name="inObjectTag"></param>
+	/// <param name="isObject"></param>
+	/// <returns></returns>
+	UFUNCTION(BlueprintCallable)
+	bool IsTag(const FGameplayTag inObjectTag, bool isObject = true) const;
+
+	/// <summary>
+	/// Get Tag
+	/// </summary>
+	/// <param name="isObject"></param>
+	/// <returns></returns>
+	UFUNCTION(BlueprintCallable)
+	FGameplayTag Tag(bool isObject=true) const { return isObject ? TagObject : TagElemental; }
+
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	ELeeXRGrabableType GrabableType;
 
@@ -109,12 +128,24 @@ public:
 	void ReleaseHandMesh(UMotionControllerComponent*& inController, bool isLeft = true);
 
 	void SetHandSkeletalMesh(USkeletalMeshComponent* inSkeletal) { HandSkeletalMeshRef = inSkeletal; };
+
+	void SetSmoothGrabableRelease(bool isGrabable = true, float inAngleDamping = 0.0, float inLinearDamping = .1f);
+
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	UStaticMeshComponent* FindStaticMeshComponent(FString inName) const;
 #pragma endregion Functions
 	
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	EGrabType GrabType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	FGameplayTag TagElemental;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	FGameplayTag TagObject;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	bool bIsheld;
@@ -125,10 +156,6 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
-	virtual void OnGrab(UObject* inComponent, const FVector& InGrabLocation) override;
-
-	virtual void OnRelease(UObject* inComponent) override;
 
 	//Base Grab Object
 	virtual void OnGrabObjects(UMotionControllerComponent* inComponent) override;
@@ -168,10 +195,10 @@ protected:
 #endif
 
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	bool FrezzeOnSnap = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeVR Settings|Properties")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	bool SnapHandMesh = false;
 
 
@@ -196,7 +223,7 @@ private:
 	
 	TArray<class UPhysicsConstraintComponent*> GrabledConstraintsRefs;
 
-	FTimerHandle TimerWeighted;
+	FTimerHandle TimerWeighted, TimerGrabable;
 
 	///Grab One Hand
 	

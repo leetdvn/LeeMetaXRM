@@ -32,8 +32,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UAnimInstance* GetABPInstance() const { return HandSkeletal->GetAnimInstance(); }
 
-	UPROPERTY(EditAnyWhere, BluePrintReadWrite, Category = "LeeXR Settings|Components")
-	TObjectPtr<UStaticMeshComponent> CubeConstraint;
 
 	UPROPERTY(EditAnyWhere, BluePrintReadWrite, Category = "LeeXR Settings|Properties", meta = (ClampMin = "0", ClampMax = "1"))
 	float BodyWeighted=.25f;
@@ -42,15 +40,8 @@ public:
 	void SetPhysicsAllBodyBlendWeight(float inWeight);
 
 	/// <summary>
-	///	Grap Object
+	/// On Grab Object
 	/// </summary>
-	virtual void OnGrabOneHand() override;
-
-	/// <summary>
-	/// Grasp Release
-	/// </summary>
-	virtual void OnGrabOneHandRelease() override;
-
 	virtual void OnGrabObject() override;
 
 	virtual void OnReleaseObject() override;
@@ -68,7 +59,7 @@ protected:
 
 	virtual void SetInputComponent();
 
-
+	virtual	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance) override;
 	UFUNCTION()
 	void OnInputActionMove(const FInputActionInstance& ActionInstance);
 private:
@@ -79,7 +70,6 @@ private:
 	/// </summary>
 	/// <param name="inComponet"></param>
 	/// <param name="ActionInstance"></param>
-	void SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance);
 
 };
 

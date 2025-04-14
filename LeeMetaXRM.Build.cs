@@ -3,6 +3,7 @@
 using EpicGames.Core;
 using System;
 using UnrealBuildTool;
+using System.IO;
 
 public class LeeMetaXRM : ModuleRules
 {
@@ -37,20 +38,19 @@ public class LeeMetaXRM : ModuleRules
             "Niagara",
             "OculusHandPoseRecognition",
             "GameplayAbilities",
+            "GameplayTasks",
+            "GameplayTags",
             "OculusUtils",
         });
 
-        //PrivateIncludePaths.AddRange(new string[] {
-        //    "Slate",
-        //    "SlateCore",
-
-        //});
-
 
         PublicIncludePaths.AddRange(new string[] {
-            "LeeMetaXRM/Common",
-            "LeeMetaXRM/",
-            "LeeMetaXRM/Shaders",
+            Path.Combine(PluginDirectory,"Source/LeeMetaXRM"),
+            Path.Combine(PluginDirectory,"Source/LeeMetaXRM/Common"),
+            Path.Combine(PluginDirectory,"Source/LeeMetaXRM/Shaders"),
+            Path.Combine(PluginDirectory,"Source/LeeMetaXRM/Public")
+
+            //"LeeMetaXRM/Shaders",
         });
 
         if (Target.bBuildEditor==true)

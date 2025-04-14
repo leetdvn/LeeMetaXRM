@@ -11,10 +11,17 @@
 #include "Actors/LeeXRTeleportActor.h"
 #include "APawn/LeeXRCharacter.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
+#include "StaticMeshComponent.h"
+#include <PoseableMeshComponent.h>
+#include "Components/ArrowComponent.h"
+#include "Actors/LeeXRGrabbableActor.h"
+#include <Actors/LeeXRMenuActor.h>
 
 
 DEFINE_STAT(STAT_ICTUController);
 DEFINE_STAT(STAT_HandController)
+
+#define LOCATE_NAMESPACE "LeeMetaXRModules"
 // Sets default values
 ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -35,6 +42,7 @@ ALeeXRHandBase::ALeeXRHandBase(const FObjectInitializer& ObjectInitializer)
 
 	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
 	NiagaraComponent->SetupAttachment(MotionController);
+
 }
 
 bool ALeeXRHandBase::IsValidControllerType(ELeeXRHandType inType)
@@ -58,6 +66,7 @@ void ALeeXRHandBase::BeginPlay()
 		InitializationContext(GetWorld(),DefaultContext ,0);
 		InitializationContext(GetWorld(), MenuContext, 0);
 		InitializationContext(GetWorld(), HandContext, 1);
+		InitializationContext(GetWorld(), IMCFireContext, 1);
 
 	}
 	///Set Up input Component
@@ -114,6 +123,12 @@ void ALeeXRHandBase::SetInputComponent()
 		EnhancedInputComponent->BindAction(IA_FingerPoint, ETriggerEvent::Completed, this, &ALeeXRHandBase::OnFingerAnimation);
 
 		EnhancedInputComponent->BindAction(IA_HandLog, ETriggerEvent::Started, this, &ALeeXRHandBase::LogReconize);
+
+		EnhancedInputComponent->BindAction(IA_MenuAction, ETriggerEvent::Started, this, &ALeeXRHandBase::OnMenuAction);
+
+		EnhancedInputComponent->BindAction(IA_Fire, ETriggerEvent::Started, this, &ALeeXRHandBase::OnFireAction);
+		//EnhancedInputComponent->BindAction(IA_MenuAction, ETriggerEvent::Completed, this, &ALeeXRHandBase::OnMenuAction);
+
 		//LeeScreenLog("Setting Input Component",FColor::Blue);
 		LEE_LOG(LogLeeXRHandBase, Log, "Setting Input Component");
 	}
@@ -143,30 +158,46 @@ void ALeeXRHandBase::InittializeSetup()
 		return;
 	}
 
-	if (TeleportRef == nullptr) {
-		//Define Teleport Hand Action Left or Right
-		if (TeleportValid()) {
-			TeleportRef = LeeXRSPawnActorBP<AActor>(this, TeleportVisualizer);
+	//Init Telport Reference
+	//if (TeleportRef == nullptr) {
+	//	//Define Teleport Hand Action Left or Right
+	//	if (TeleportValid()) {
+	//		TeleportRef = LeeXRSPawnActorBP<AActor>(this, TeleportVisualizer);
 
-			if (TeleportRef)
-				TeleportRef->GetRootComponent()->SetVisibility(false, true);;
-		}
-	}
+	//		if (TeleportRef)
+	//			TeleportRef->GetRootComponent()->SetVisibility(false, true);;
+	//	}
+	//}
 
-
-
-	//Set Show Debug
-	HandDebug->SetActive(bShowDebug);
-	HandDebug->SetVisibility(bShowDebug);
-	HandDebug->SetHiddenInGame(!bShowDebug);
 }
 
 // Finger Animation type Hand Controller Only
 void ALeeXRHandBase::OnFingerAnimation(const FInputActionInstance& ActionInstance)
 {
-	
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+	if (!IsValid(XRCharacter)) return;
+
+	bool isController = XRCharacter->GetHandType() == ELeeXRHandType::LeeXRController ?
+		true : false;
+
 	SetFingerAnimationPose(HandSkeletal, ActionInstance);
-	SetFingerAnimationPose(HandDebug, ActionInstance);
+	if (auto HandPhysics = XRCharacter->GetHandPhysics(IsHandLeft())) {
+		SetFingerAnimationPose(HandPhysics, ActionInstance);
+	}
+
+
+}
+
+void ALeeXRHandBase::OnFireAction(const FInputActionInstance& ActionInstance)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
+
+	if (IsValid(WidgetInteraction)) {
+		WidgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
+		//LeeScreenLog("Press Fire", FColor::Green);
+
+	}
 }
 
 //Has Overlap Actor Func
@@ -201,7 +232,10 @@ void ALeeXRHandBase::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, 
 
 	FString ActName = ActionInstance.GetSourceAction()->GetName();
 
-	if (ULeeXRAnimInstance* AnimIns = Cast<ULeeXRAnimInstance>(inComponet->GetAnimInstance())) {
+	if (auto* AnimIns = Cast<ULeeXRAnimInstance>(inComponet->GetAnimInstance())) {
+
+		if (IsHandLeft()) AnimIns->bMirror = true;
+
 		if (ActName == this->IA_FingerPoint->GetName())
 		{
 			AnimIns->PoseAlphaPoint = PoseValueStartCancel;
@@ -212,7 +246,7 @@ void ALeeXRHandBase::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, 
 		}
 		else if (ActName == this->IA_HandThumpUp->GetName())
 		{
-			AnimIns->PoseAlphaThumbUp = PoseValueStartCancel;
+			AnimIns->CurrentPoseAlphaThumbUp = PoseValueStartCancel;
 		}
 		else if (ActName == this->IA_Grasp->GetName())
 		{
@@ -221,6 +255,37 @@ void ALeeXRHandBase::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, 
 			PoseValueCancelCompleted == 1 ?
 				OnGrabObject() : OnReleaseObject();
 		}
+	}
+}
+
+void ALeeXRHandBase::PoseableSpawned(USceneComponent* inParent,USkeletalMesh* inAsset, USkeletalMeshComponent* inSkeletalRef)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+	if (PoseableMesh) return;
+
+	PoseableMesh = NewObject<UPoseableMeshComponent>(this);
+	PoseableMesh->SetSkinnedAssetAndUpdate(inAsset);
+	PoseableMesh->RegisterComponent();
+	PoseableMesh->AttachToComponent(inParent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+
+	TArray<FName> BoneNames = PoseableMesh->GetAllSocketNames();
+	for (auto Bone : BoneNames)
+	{
+		FTransform BoneTrans = inSkeletalRef->GetSocketTransform(Bone);
+		PoseableMesh->SetBoneTransformByName(Bone, BoneTrans, EBoneSpaces::WorldSpace);
+		LEE_LOG(LogLeeXRHandController, Log, "Bone Name %s", *Bone.ToString());
+	}
+	
+	inSkeletalRef->SetVisibility(false);
+}
+
+void ALeeXRHandBase::PoseableDestroyed()
+{
+	if (IsValid(PoseableMesh))
+	{
+		PoseableMesh->DestroyComponent();
+		PoseableMesh = nullptr;
+		XRCharacter->GetHandPhysics(IsHandLeft())->SetVisibility(true);
 	}
 }
 
@@ -281,47 +346,18 @@ UPrimitiveComponent* ALeeXRHandBase::GetPrimitiveComponent(bool isController) co
 	return FindComponentByClass<UPrimitiveComponent>();
 }
 
-/// Grab Object
-void ALeeXRHandBase::OnGrabOneHand()
-{
-
-	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
-
-	//Hand Controller Grabs Objects
-	//==============================================
-
-	if (HandSkeletal == nullptr || 
-		ControllerType == ELeeXRHandType::LeeXRHandTracking) return;
-
-	AActor* OverlappingActor = HasOverlapActor(GrabSphere);
-	if (OverlappingActor)
-	{
-		if (OverlappingActor)
-		{
-			CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(OverlappingActor);
-			if (CurrentGrabObject) {
-				bIsHeld = true;
-				FVector GrabLocation = HandSkeletal->GetComponentLocation();
-				OnHandGrabledEvent.Broadcast();
-				//Hand Controller Grabs Objects
-				//CurrentGrabObject->OnGrab(HandSkeletal, GrabLocation);
-
-				CurrentGrabObject->OnGrabObjects(MotionController);
-
-			}
-		}
-	}
-
-}
-
 /// Grab Object 2
 void ALeeXRHandBase::OnGrabObject()
 {
 
 	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
+
+	if (bIsHeld) return;
+
+
 	TArray<AActor*> OverlappingActors;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{};
-	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldDynamic));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody));
 	TArray<AActor*> ActorToIgnore;
 	ActorToIgnore.Add(this);
 
@@ -338,18 +374,22 @@ void ALeeXRHandBase::OnGrabObject()
 
 	for (auto Actor : OverlappingActors)
 	{
-		//Tag Check
-		if (Actor->ActorHasTag("Grabbable"))
-		{
-			CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(Actor);
-			if (CurrentGrabObject) {
-				bIsHeld = true;
-				OnHandGrabledEvent.Broadcast();
-				CurrentGrabObject->OnGrabObjects(MotionController);
-				//LeeScreenLog("Grabbing 2 %s", FColor::Green, *Actor->GetName());
-				break;
-			}
+		if (auto* GrabActor = Cast<ALeeXRGrabbableActor>(Actor)) {
+			//Gragable Tag Name of Actor Grabable defined in the Editor
+			FGameplayTag TagGrabable = FGameplayTag::RequestGameplayTag(FName("Grabable"));
+			//Tag Check
+			if (TagGrabable.IsValid() && GrabActor->IsTag(TagGrabable))
+			{
+				CurrentGrabObject = TScriptInterface<ILeeXRInteraction>(Actor);
+				if (CurrentGrabObject) {
+					bIsHeld = true;
+					OnHandGrabledEvent.Broadcast();
+					CurrentGrabObject->OnGrabObjects(MotionController);
+					//LeeScreenLog("Grabbing 2 %s", FColor::Green, *Actor->GetName());
+					break;
+				}
 
+			}
 		}
 	}
 	FString msg = __FUNCTION__;
@@ -368,31 +408,17 @@ void ALeeXRHandBase::OnReleaseObject()
 	
 	OnHandReleaseEvent.Broadcast();
 	CurrentGrabObject->OnReleaseObjects(MotionController);
+
+	PoseableDestroyed();
+
 	CurrentGrabObject = nullptr;
 	bIsHeld = false;
 
 }
 
-/// Grab Release
-void ALeeXRHandBase::OnGrabOneHandRelease()
+void ALeeXRHandBase::ToogleWidgetInteraction(bool isEnable)
 {
 
-	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
-
-	if (ControllerType == ELeeXRHandType::LeeXRHandTracking) return;
-
-	if (CurrentGrabObject == nullptr ||
-		HandSkeletal == nullptr) {
-		
-		return;
-	}
-
-	OnHandReleaseEvent.Broadcast();
-
-	//Controller Release
-	CurrentGrabObject->OnReleaseObjects(MotionController);
-	CurrentGrabObject = nullptr;
-	bIsHeld = false;
 }
 
 // Called every frame
@@ -402,16 +428,48 @@ void ALeeXRHandBase::Tick(float DeltaTime)
 
 }
 
+void ALeeXRHandBase::OnMenuAction(const FInputActionInstance& ActionInstance)
+{
+	if (TeleportValid()) return;
+	bIsShow = !bIsShow;
+
+
+	if (WGActionMenu == nullptr && bIsShow)
+		WGActionMenu = LeeXRSPawnActorBP<AActor>(this, WGMenu);
+
+	if(IsValid(WGActionMenu) && WGActionMenu != nullptr)
+		WGActionMenu->SetActorHiddenInGame(!bIsShow);
+
+	if (auto MActor = Cast<ALeeXRMenuActor>(WGActionMenu)) {
+		MActor->SetActiveMenu(bIsShow);
+	}
+	//if (!bIsShow) {
+	//	bIsShow = true;
+	//	WGActionMenu->SetHidden(bIsShow);
+	//}
+	//else {
+	//	WGActionMenu->SetHidden(bIsShow);
+	//}
+	
+	//LeeScreenLog("Menu Action %s", FColor::Green, *WGActionMenu->GetName());
+	if (IsValid(WGActionMenu) && WGActionMenu != nullptr)
+		WGActionMenu->SetActorLocation(GetActorLocation());
+
+}
+
 // Find Actor to Grab
 AActor* ALeeXRHandBase::FindActorToGrab(TArray<AActor*> &inActors, FString inTag)
 {
 
 	for (auto Actor : inActors)
 	{
-		if (Actor->ActorHasTag(*inTag))
+		if (auto* GrabActor = Cast<ALeeXRGrabbableActor>(Actor))
 		{
-			LeeScreenLog("Grabbing Object %s", FColor::Green, *Actor->GetName());
-			return Actor;
+			FGameplayTag TagGrabable = FGameplayTag::RequestGameplayTag(FName("Grabable"));
+			if (GrabActor->IsTag(TagGrabable)) {
+				LeeScreenLog("Grabbing Object %s", FColor::Green, *GrabActor->GetName());
+				return GrabActor;
+			}
 		}
 	}
 	return nullptr;
@@ -520,8 +578,13 @@ void ALeeXRHandBase::OnHandTrigger(const FInputActionInstance& ActionInstance)
 void ALeeXRHandBase::TeleportTrace(FVector StartPos, FVector ForwardVec)
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
-	if(TeleportRef)
+
+	//Check
+	if (TeleportRef) {
 		TeleportRef->SetActorHiddenInGame(false);
+		//TeleportRef->GetRootComponent()->SetVisibility(bValidTeleportLocation, true);
+
+	}
 	//Trace Teleport
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>();
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
@@ -566,7 +629,7 @@ void ALeeXRHandBase::TeleportTrace(FVector StartPos, FVector ForwardVec)
 
 
 	if (TeleportRef) {
-		TeleportRef->GetRootComponent()->SetVisibility(bValidTeleportLocation, true);
+		//TeleportRef->GetRootComponent()->SetVisibility(bValidTeleportLocation, true);
 		if(OutHit.bBlockingHit)
 			TeleportRef->SetActorLocation(ProjectedTeleportLocation);
 	}
@@ -608,23 +671,35 @@ void ALeeXRHandBase::StartTeleportTrace()
 	//NiagaraComponent->SetVisibility(true);
 	if (TeleportRef == nullptr) {
 		TeleportRef = LeeXRSPawnActorBP<AActor>(this, TeleportVisualizer);
+		if (TeleportRef)
+			TeleportStartPos = TeleportRef->GetActorLocation();
 	}
 }
 
 void ALeeXRHandBase::TryTeleport()
 {
-	UWorld* World = GetWorld();
-	if (World == nullptr) return;
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
 	if (XRCharacter) {
 		FVector TeleportLocation = GetTeleportLocation(XRCharacter);
-		if (TeleportLocation.IsNearlyZero(0.0001f)) {
+		FVector2D TeleportLocation2D = FVector2D(TeleportLocation.X, TeleportLocation.Y);
+		if (TeleportLocation.IsNearlyZero(0.0001f) ||
+			TeleportLocation.IsZero() ||
+			TeleportLocation2D.IsZero()
+			) {
 			LeeScreenLog("Teleport Location is Zero", FColor::Red);
+			return;
 		}
-		if (TeleportLocation.Z <= 0) TeleportLocation.Z = 10;
+
+		if (TeleportLocation.Z <= 15.f) TeleportLocation.Z = 15.f;
+		XRCharacter->GetHandPhysics(IsHandLeft())->SetSimulatePhysics(false);
 		XRCharacter->TeleportTo(TeleportLocation, FRotator(0.0f, XRCharacter->GetActorRotation().Yaw, 0.0f), false, true);
-		if(TeleportRef)
+
+		if (TeleportRef) {
 			TeleportRef->SetActorHiddenInGame(true);
+			XRCharacter->GetHandPhysics(IsHandLeft())->SetSimulatePhysics(true);
+
+		}
 	}
 }
 
@@ -637,6 +712,11 @@ bool ALeeXRHandBase::TeleportValid()
 	bool TpAction = TelportAct == ELeeXRTeleportHandAction::LeeXRRight ? true : false;
 
 	EControllerHand Direction = TpAction ? EControllerHand::Right : EControllerHand::Left;
+
+	if (HandType != Direction) return false;
+	if (TeleportRef == nullptr) {
+		StartTeleportTrace();
+	}
 
 	return HandType == Direction;
 }
@@ -655,4 +735,9 @@ FVector ALeeXRHandBase::GetTeleportLocation(const ALeeXRCharacter* inXRCharacter
 
 	return FVector::ZeroVector;
 }
+
 #pragma endregion Teleport
+
+
+
+#undef LOCATE_NAMESPACE

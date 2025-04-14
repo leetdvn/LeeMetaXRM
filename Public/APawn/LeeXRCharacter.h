@@ -2,10 +2,12 @@
 
 #pragma once
 
+#include <GameInstance/LeeXRGameInstance.h>
 #include "Definitions.h"
 #include "DataAssets/LeeXRHandDataAsset.h"
 #include "Actors/LeeXRHandBase.h"
 #include "CoreMinimal.h"
+#include "interfaces/LeeXRInterfaceHMD.h"
 #include "GameFramework/Character.h"
 #include "LeeXRCharacter.generated.h"
 
@@ -17,6 +19,12 @@ DECLARE_MEMORY_STAT_EXTERN(TEXT("ICTUCharacter"), STAT_ICTUCharacter, STATGROUP_
 DECLARE_MEMORY_STAT_POOL_EXTERN(TEXT("ICTUCharacterMemory"), STAT_ICTUCharacterMemory, STATGROUP_ICTUMV,FPlatformMemory::MCR_PhysicalLLM, );
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLeeXROnPoseMesh,AActor*,GrabableActor);
+
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLeeXRTest,float,inValue);
+
+
 
 UENUM(BlueprintType)
 enum class ELeeXRTeleportHandAction : uint8
@@ -26,12 +34,11 @@ enum class ELeeXRTeleportHandAction : uint8
 };
 
 
-
 /**
  * XR Character Class
  */
 UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
-class LEEMETAXRM_API ALeeXRCharacter : public ACharacter
+class LEEMETAXRM_API ALeeXRCharacter : public ACharacter, public ILeeXRInterfaceHMD
 {
 	GENERATED_BODY()
 
@@ -40,38 +47,131 @@ public:
 	// Sets default values for this character's properties
 	ALeeXRCharacter();
 
+	/// <summary>
+	/// Get the hand animation instance
+	/// </summary>
+	/// <param name="isLeft"></param>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	UAnimInstance* GetHandAnimInstance(bool isLeft);
 
+	/// <summary>
+	/// Get Camera Location
+	/// </summary>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	FVector GetCameraLocation() const { return Camera->GetRelativeLocation(); }
 
+	/// <summary>
+	/// Get Teleport Hand Action
+	/// </summary>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	ELeeXRTeleportHandAction GetTeleportHandAction() const { return TeleportHandAction; }
 
+	/// <summary>
+	/// Set Teleport Hand Action
+	/// </summary>
+	/// <param name="inAction"></param>
 	UFUNCTION(BlueprintCallable,  Category = "LeeXR|Func")
 	void SetTeleportHandAction(ELeeXRTeleportHandAction inAction) { TeleportHandAction = inAction; }
 
+	/// <summary>
+	/// Get Hand Type 
+	/// </summary>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	ELeeXRHandType GetHandType() const { return HandType; }
 
+	/// <summary>
+	/// Get Hand Refercene
+	/// </summary>
+	/// <param name="isLeft"></param>
+	/// <returns></returns>
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
 	ALeeXRHandBase* GetHand(bool isLeft) const { return isLeft ? XRHandLeft : XRHandRight; }
 
+	/// <summary>
+	/// Get Widget Interaction
+	/// </summary>
+	/// <param name="isLeft"></param>
+	/// <returns></returns>
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UWidgetInteractionComponent* GetWidgetInteraction(bool isLeft) const { return isLeft ? XRHandLeft->GetWidgetInteraction() : XRHandRight->GetWidgetInteraction(); }
+
+	/// <summary>
+	///  Get the hand animation instance
+	/// </summary>
+	/// <param name="isLeft"></param>
+	/// <returns></returns>
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	UMotionControllerComponent* GetMotionController(bool isLeft) const;
+
+
+	/// <summary>
+	/// Set Hand Type
+	/// </summary>
+	/// <param name="inType"></param>
 	UFUNCTION(BlueprintCallable,  Category = "LeeXR|Func")
 	void SetHandType(ELeeXRHandType inType) { HandType = inType; }
 
+	/// <summary>
+	/// Calculate Motion Controller Velocities
+	/// </summary>
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void CalculateMotionControllerVelocities();
 
+	/// <summary>
+	/// Update Climbing
+	/// </summary>
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void UpdateClimbing();
+
+	/// <summary>
+	/// Get Hand Physics
+	/// </summary>
+	/// <param name="isLeft"></param>
+	/// <returns></returns>
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	USkeletalMeshComponent* GetHandPhysics(bool isLeft) const { return isLeft ? HandPhysicsLeft : HandPhysicsRight; }
+
+	UPROPERTY(BlueprintAssignable)
+	FLeeXROnPoseMesh OnPoseMesh;
+
+	void InitPhysicsContraints(bool isLeft=true);
+
+	void InitPhysicsAnimation(bool isLeft = true);
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	UAnimInstance* GetPhysicsAnimInstance(bool isLeft);
+
+	void SetPhysicsAllBodyBlendWeight(float inWeight,bool isLeft);
+
+	void PauseHandPhysics(bool isEnable = true,bool isLeft = true);
+
+	void HandPhysicBlendToPoseable(class UPoseableMeshComponent* inPoseable,bool isLeft=true);
+
+	EICTUActionType GetCurrentActionType() const; 
+
+	void OnHMDLevelChanged_Implementation(const FString& NewLevelName);
+
+	void SetLockHMD(bool isLock) { Camera->bLockToHmd = isLock; }
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
+	int32 NextLevel = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
+	float RotateSpd = 30.f;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	virtual void OnHMDOrientReset() override;
+
+
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -100,11 +200,24 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
 	TObjectPtr<ALeeXRHandBase> XRHandRight;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
+	TObjectPtr<USkeletalMeshComponent> HandPhysicsLeft;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
+	TObjectPtr<USkeletalMeshComponent> HandPhysicsRight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
+	TObjectPtr<UPhysicalAnimationComponent> AnimPhysicsRight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components")
+	TObjectPtr<UPhysicalAnimationComponent> AnimPhysicsLeft;
+
 	UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "LeeXR Settings|Data")
 	ULeeXRHandDataAsset* DataLeft;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Data")
 	ULeeXRHandDataAsset* DataRight;
+
 
 #pragma endregion Components
 
@@ -130,6 +243,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
 	TObjectPtr<class UInputAction> IA_Grasp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Input")
+	TObjectPtr<class UInputAction> IA_TestAct;
+
+	UPROPERTY(BlueprintAssignable)
+	FLeeXRTest OnLeeXRTest;
 
 #pragma endregion Input
 
@@ -148,6 +266,19 @@ public:
 
 	UFUNCTION()
 	void OnHandGrabing(const FInputActionInstance& ActionInstance);
+
+	UFUNCTION()
+	void OnResetOrientation();
+
+	UFUNCTION()
+	void OnTurn(const FInputActionInstance& ActionInstance);
+
+	UFUNCTION()
+	void OnSnapTurn(float inValue);
+
+	UFUNCTION()
+	void TestCmd(const FInputActionInstance& ActionInstance);
+
 private:
 
 	TObjectPtr<class ALeeXRGrabbableActor> HeldLeftObject;
@@ -171,6 +302,14 @@ private:
 	template<typename T>
 	ALeeXRHandBase* InitializeHandActor(TSubclassOf<T> inClass);
 
+	TWeakObjectPtr<ALeeXRCharacter> Self = nullptr;
+
+
+	//Init SpawnLoaction
+	void InitSpawnLocation();
+
+	//Init VR Tracking
+	void InitVRTrackingOrigin();
 };
 
 template<typename T>
@@ -184,7 +323,7 @@ inline ALeeXRHandBase* ALeeXRCharacter::InitializeHandActor(const FString inHand
 	if (HandBase == nullptr) return nullptr;
 	HandBase->AttachToComponent(LeeXROrigin, AttachRules);
 
-	return nullptr;
+	return HandBase;
 }
 
 template<typename T>

@@ -42,8 +42,6 @@ protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
-	virtual void OnGrab(UObject* inComponent, const FVector& InGrabLocation) override;
-	virtual void OnRelease(UObject* inComponent) override;
 	virtual void OnGrabObjects(UMotionControllerComponent* inComponent) override;
 	virtual void OnReleaseObjects(UMotionControllerComponent* inComponent) override;
 

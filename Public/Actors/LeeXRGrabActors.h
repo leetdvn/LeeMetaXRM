@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <GameplayTagContainer.h>
 #include "LeeXRGrabbableActor.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -25,11 +24,9 @@ public:
 	// Sets default values for this actor's properties
 	ALeeXRGrabActors();
 
-	UFUNCTION(BlueprintCallable)
-	bool IsTag(const FGameplayTag inObjectTag) const { return ObjectTags == inObjectTag; }
 
 	UFUNCTION(BlueprintCallable)
-	FString ObjectTag() const { return ObjectTags.ToString(); }
+	FString ObjectTag() const { return TagObject.ToString(); }
 
 	UFUNCTION(BlueprintCallable)
 	bool IsSimulation() { return ActorMesh->IsSimulatingPhysics(); }
@@ -37,6 +34,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetSimulation(bool bSimulate) { ActorMesh->SetSimulatePhysics(bSimulate); }
 
+	UStaticMeshComponent* GetActorMesh() { return ActorMesh; }
 
 protected:
 	// Called when the game starts or when spawned
@@ -51,15 +49,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	TObjectPtr<class UBoxComponent> GrabRegion;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
-	FGameplayTag ObjectTags;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components", meta = (AllowPrivateAccess = "true", DisplayName = "AbilitySystem"))
 	UAbilitySystemComponent* AbilityComponent;
 
-	virtual void OnGrab(UObject* inComponent,const FVector& InGrabLocation) override;
-
-	virtual void OnRelease(UObject* inComponent) override;
+#pragma region Virtual Functions
 
 	virtual void OnGrabObjects(UMotionControllerComponent* inComponent) override;
 
@@ -71,6 +65,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+#pragma endregion
+
 
 private:
 

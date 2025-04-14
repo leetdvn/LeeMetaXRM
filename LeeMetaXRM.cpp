@@ -4,7 +4,7 @@
 
 void FLeeMetaXRMModule::StartupModule()
 {
-	FString ShaderDir = FPaths::ProjectDir() +  "/Source/LeeMetaXRM/Shaders";
+	FString ShaderDir = FPaths::ProjectPluginsDir() + "LeeXRContent/Source/LeeMetaXRM/Shaders";
 
 	FString abc = FPaths::ConvertRelativePathToFull(ShaderDir);
 	UE_LOG(LogTemp, Warning, TEXT("Shader Path : %s"), *abc);

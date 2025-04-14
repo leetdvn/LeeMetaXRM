@@ -1,0 +1,133 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Engine/GameInstance.h"
+#include "LeeXRGameInstance.generated.h"
+
+
+UENUM(BlueprintType)
+enum class EICTUGameModeType : uint8
+{
+	EICTU_FactoryFree UMETA(DisplayName = "Factory Free"),
+	EICTU_FactoryTour UMETA(DisplayName = "Factory Tour")
+};
+
+UENUM(BlueprintType)
+enum class EICTUActionType : uint8
+{
+	EICTU_ActionOne UMETA(DisplayName = "Level One"),
+	EICTU_ActionTwo UMETA(DisplayName = "Level Two"),
+	EICTU_ActionThree UMETA(DisplayName = "Level Three"),
+	EICTU_ActionFour UMETA(DisplayName = "Level Four"),
+	EICTU_ActionFive UMETA(DisplayName = "Level Five"),
+
+};
+
+
+USTRUCT(BlueprintType)
+struct LEEMETAXRM_API FLevelSpawnLocation
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+	TArray<FVector> SpawnLevel;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FRotator> ZRotations;
+
+	FVector GetSpawnLevelAt(int32 index) const
+	{
+		if (SpawnLevel.IsValidIndex(index))
+		{
+			return SpawnLevel[index];
+		}
+		return FVector::ZeroVector;
+	}
+
+	int32 SpawnLevelCount() const
+	{
+		return SpawnLevel.Num();
+	}
+
+	TArray<FVector> GetSpawnLevel() const
+	{
+		return SpawnLevel;
+	}
+
+	TArray<FRotator> GetZRotations() const
+	{
+		return ZRotations;
+	}
+
+	FLevelSpawnLocation() :SpawnLevel(TArray<FVector>())
+		, ZRotations(TArray<float>())
+	{
+	}
+
+};
+
+DEFINE_LOG_CATEGORY_STATIC(LogLeeICTUGameInstance, Log, All);
+
+/**
+ * 
+ */
+UCLASS(Config=Game)
+class LEEMETAXRM_API ULeeXRGameInstance : public UGameInstance
+{
+	GENERATED_BODY()
+	
+public:
+	ULeeXRGameInstance();
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	EICTUActionType GetActionType() const { return ActionType; };
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void SetActionType(EICTUActionType inType) { ActionType = inType; };
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	FLevelSpawnLocation GetLevelSpawnLocation() const { return Location; }
+
+	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	FVector GetSpawnLocationAt(int32 index) const { return Location.GetSpawnLevelAt(index); }
+
+	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	TArray<FVector> GetSpawnLocations() const { return Location.GetSpawnLevel(); }
+
+	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "LeeXR|Func", meta = (BlueprintThreadSafe))
+	TArray<FRotator> GetSpawnRotations() const { return Location.GetZRotations(); }
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void SetNextLevel();
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void ResetLevel() { ActionType = EICTUActionType::EICTU_ActionOne; }
+
+
+	UPROPERTY(Config,EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	int32 CurrentLevel = 0;
+
+	UPROPERTY(Config,EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	bool bIsLockHMD = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	bool bIsTutorial = false;
+
+protected:
+
+	virtual void Init() override;
+
+	virtual void Shutdown() override;
+
+	virtual void OnStart() override;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	EICTUActionType ActionType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	FLevelSpawnLocation Location;
+
+};

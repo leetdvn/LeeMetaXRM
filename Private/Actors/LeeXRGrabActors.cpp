@@ -8,6 +8,8 @@
 #include "AbilitySystemComponent.h"
 
 
+#define LOCATE_NAMESPACE "LeeMetaXRModules"
+
 // Sets default values
 ALeeXRGrabActors::ALeeXRGrabActors()
 {
@@ -17,12 +19,7 @@ ALeeXRGrabActors::ALeeXRGrabActors()
 	ActorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ActorMesh"));
 	SetRootComponent(ActorMesh);
 
-	GrabRegion = CreateDefaultSubobject<UBoxComponent>(TEXT("GrabRegion"));
-
-	//GrabRegion->SetupAttachment(ActorMesh);
-	GrabRegion->SetupAttachment(ActorMesh);
-
-	GrabRegion->SetCollisionProfileName(TEXT("Grabbable"));
+	ActorMesh->SetCollisionProfileName(TEXT("Grabbable"));
 
 	AbilityComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
@@ -51,60 +48,6 @@ void ALeeXRGrabActors::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	SET_MEMORY_STAT(STAT_LeeXRGrabable, 0);
 }
 
-void ALeeXRGrabActors::OnGrab(UObject* inComponent,const FVector& InGrabLocation)
-{
-	Super::OnGrab(inComponent, InGrabLocation);
-	/*
-	Need Setup Collision Profileing and Custom Edit Collision Presets
-	*/
-	if (inComponent == nullptr || FrezzeOnSnap) return;
-
-	FAttachmentTransformRules AttachRules = GrabType == EGrabType::EGT_Free ?
-		FAttachmentTransformRules::KeepWorldTransform : 
-		FAttachmentTransformRules::SnapToTargetNotIncludingScale;
-
-	if (ActorMesh->IsSimulatingPhysics()) {
-		ActorMesh->SetSimulatePhysics(false);
-	}
-
-	bIsheld = ActorMesh->AttachToComponent(Cast<USceneComponent>(inComponent), AttachRules, NAME_None);
-	if (bIsheld) {
-		//MainControllerRef = inComponent;
-	}
-}
-
-void ALeeXRGrabActors::OnRelease(UObject* inComponent)
-{
-	Super::OnRelease(inComponent);
-
-	if (inComponent == nullptr || FrezzeOnSnap) return;
-
-	if (bIsheld)
-	{
-		//LeeScreenLog("Releasing Object %s", FColor::Green, *GrabUObject->GetName());
-		if (inComponent == MainControllerRef) {
-			
-			//Execute Release Delegate
-			ActorMesh->SetSimulatePhysics(true);
-			this->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-			bIsheld = false;
-		}
-	}
-
-	//switch (GrabType)
-	//{
-	//case EGrabType::EGT_Free: {
-
-	//	break;
-	//}
-	//case EGrabType::EGT_Snap:
-	//	break;
-	//case EGrabType::EGT_None:
-	//	break;
-	//default:
-	//	break;
-	//}
-}
 
 void ALeeXRGrabActors::OnGrabObjects(UMotionControllerComponent* inComponent)
 {
@@ -147,3 +90,5 @@ void ALeeXRGrabActors::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, 
 	}
 }
 
+
+#undef LOCATE_NAMESPACE

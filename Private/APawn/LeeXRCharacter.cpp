@@ -20,14 +20,20 @@
 #include <NiagaraFunctionLibrary.h>
 #include "Actors/LeeXRGrabbableActor.h"
 #include "Actors/LeeXRHandPhysics.h"
-
+#include "PhysicsEngine/PhysicsConstraintComponent.h"
+#include <PoseableMeshComponent.h>
+#include "PhysicsEngine/PhysicalAnimationComponent.h"
+#include <GameInstance/LeeXRGameInstance.h>
 
 using namespace LeeXRUltils;
 
 DEFINE_STAT(STAT_ICTUCharacter);
 DEFINE_STAT(STAT_ICTUCharacterMemory);
+DEFINE_STAT(STAT_ICTUMV_TotalMemories);
 
+#define LOCTEXT_NAMESPACE "LeeMetaXRModules"
 
+float MemoriesSize;
 // Sets default values
 ALeeXRCharacter::ALeeXRCharacter()
 {
@@ -45,9 +51,18 @@ ALeeXRCharacter::ALeeXRCharacter()
 	DisplayMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DisplayMesh"));
 	DisplayMesh->SetupAttachment(Camera);
 
+	HandPhysicsLeft = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandPhysicsLeft"));
+	HandPhysicsRight = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandPhysicsRight"));
+
+	HandPhysicsLeft->SetupAttachment(LeeXROrigin);
+	HandPhysicsRight->SetupAttachment(LeeXROrigin);
+
+	AnimPhysicsLeft = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("AnimPhysicsLeft"));
+	AnimPhysicsRight = CreateDefaultSubobject<UPhysicalAnimationComponent>(TEXT("AnimPhysicsRight"));
+
+	if (Self == nullptr)
+		Self = this;
 }
-
-
 
 // Get the hand animation instance
 UAnimInstance* ALeeXRCharacter::GetHandAnimInstance(bool isLeft)
@@ -64,6 +79,18 @@ UAnimInstance* ALeeXRCharacter::GetHandAnimInstance(bool isLeft)
 	return nullptr;
 }
 
+UMotionControllerComponent* ALeeXRCharacter::GetMotionController(bool isLeft) const
+{
+
+	auto Hand = isLeft ? XRHandLeft : XRHandRight;
+	if (IsValid(Hand))
+	{
+		if (auto Control = Hand->GetMotionController())
+			return Control;
+	}
+
+	return nullptr;
+}
 
 void ALeeXRCharacter::CalculateMotionControllerVelocities()
 {
@@ -119,33 +146,171 @@ void ALeeXRCharacter::UpdateClimbing()
 
 }
 
+void ALeeXRCharacter::InitPhysicsContraints(bool isLeft)
+{
+	if (!IsValid(XRHandLeft) || !IsValid(XRHandRight)) return;
+
+	if (auto Hand = isLeft ? XRHandLeft : XRHandRight)
+	{
+		if (IsValid(Hand)) {
+			if (UPhysicsConstraintComponent* PhysicContraint = Hand->GetPhysicsContraint()) {
+				USkeletalMeshComponent* HandPhys = Hand->IsHandLeft() ? HandPhysicsLeft : HandPhysicsRight;
+				FString BoneName = Hand->IsHandLeft() ? "hand_l" : "hand_r";
+				PhysicContraint->SetConstrainedComponents(Hand->GetHandSkeletal(), *BoneName, HandPhys, *BoneName);
+			}
+		}
+	}
+}
+
+void ALeeXRCharacter::InitPhysicsAnimation(bool isLeft)
+{
+	if (!IsValid(AnimPhysicsLeft) || !IsValid(AnimPhysicsRight)) return;
+
+	UPhysicalAnimationComponent* Anim = isLeft ? AnimPhysicsLeft : AnimPhysicsRight;
+	FName SideName = isLeft ? TEXT("hand_l") : TEXT("hand_r");
+
+	if (IsValid(Anim)) {
+
+		FPhysicalAnimationData* AnimData = new FPhysicalAnimationData();
+		AnimData->OrientationStrength = 10000.f;
+		AnimData->PositionStrength = 1000.f;
+		AnimData->VelocityStrength = 150.f;
+		AnimData->AngularVelocityStrength = 150.f;
+
+		USkeletalMeshComponent* Hand = isLeft ? HandPhysicsLeft : HandPhysicsRight;
+		Anim->SetSkeletalMeshComponent(Hand);
+		Anim->SetStrengthMultiplyer(1.0f);
+		//LEE_LOG()
+		Anim->ApplyPhysicalAnimationSettingsBelow(SideName, *AnimData);
+	}
+}
+
+UAnimInstance* ALeeXRCharacter::GetPhysicsAnimInstance(bool isLeft)
+{
+	if (!IsValid(HandPhysicsLeft) || !IsValid(HandPhysicsRight)) return nullptr;
+
+	return isLeft ? HandPhysicsLeft->GetAnimInstance() : HandPhysicsRight->GetAnimInstance();
+}
+
+void ALeeXRCharacter::SetPhysicsAllBodyBlendWeight(float inWeight,bool isLeft)
+{
+	//Set Up Bone Physisc
+	FString BoneName = isLeft ? "hand_r" : "hand_l";
+	USkeletalMeshComponent* Hand = isLeft ? HandPhysicsLeft : HandPhysicsRight;
+	if (Hand) {
+		Hand->SetAllBodiesBelowSimulatePhysics(*BoneName, true);
+		Hand->SetAllBodiesBelowPhysicsBlendWeight(*BoneName, inWeight, false, true);
+		LEE_LOG(LogLeeXRHandController, Log, "Set Physics All Body Blend Weight %f", inWeight);
+	}
+}
+
+void ALeeXRCharacter::PauseHandPhysics(bool isEnable, bool isLeft)
+{
+	FString BoneName = isLeft ? "hand_r" : "hand_l";
+
+	float Weight = isEnable ? .2f : 0.f;
+	USkeletalMeshComponent* Hand = isLeft ? HandPhysicsLeft : HandPhysicsRight;
+	ALeeXRHandBase* HandBase = isLeft ? XRHandLeft : XRHandRight;
+	Hand->SetAllBodiesBelowSimulatePhysics(*BoneName, isEnable, true);
+	Hand->SetAllBodiesBelowPhysicsBlendWeight(*BoneName, Weight);
+
+	if (isEnable)
+		Hand->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	else
+		Hand->AttachToComponent(LeeXROrigin, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+}
+
+void ALeeXRCharacter::HandPhysicBlendToPoseable(UPoseableMeshComponent* inPoseable, bool isLeft)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+	if (inPoseable == nullptr) return;
+	
+	USkeletalMeshComponent* Hand = isLeft ? HandPhysicsLeft : HandPhysicsRight;
+
+	//Set Physics Blend Weight
+	TArray<FName> BoneNames = Hand->GetAllSocketNames();
+
+	for (auto Bone : BoneNames)
+	{
+		FTransform BoneTrans = inPoseable->GetSocketTransform(Bone);
+		auto BoneIdx = Hand->GetBoneIndex(Bone);
+		Hand->GetBodyInstance(Bone)->SetBodyTransform(BoneTrans,ETeleportType::ResetPhysics);
+		LEE_LOG(LogLeeXRHandController, Log, "Bone Name %s", *Bone.ToString());
+	}
+	Hand->SetVisibility(true);
+
+}
+
+EICTUActionType ALeeXRCharacter::GetCurrentActionType() const
+{
+	if (auto GameIns = GetGameInstance<ULeeXRGameInstance>())
+	{
+		return GameIns->GetActionType();
+	}
+	return EICTUActionType();
+}
+
 // Called when the game starts or when spawned
 void ALeeXRCharacter::BeginPlay()
 {
-	XRHandLeft =  HandInitialize(HandType, true);
-	XRHandRight =  HandInitialize(HandType, false);
+
+	//Int Player Spawn Location
+	if (auto GameIns = GetGameInstance<ULeeXRGameInstance>())
+	{
+
+		auto NextLoc = GameIns->GetLevelSpawnLocation();
+
+		int32 LevelIdx = (int32)GameIns->GetActionType();
+		//NextLevel = CurrentLevel.EndsWith("HomeMenu") ? NextLoc.SpawnLevel.Num() - 1 : GameIns->CurrentLevel;
+
+		if (NextLoc.SpawnLevel.IsValidIndex(LevelIdx))
+		{
+			FVector StartSpawnLocation = NextLoc.SpawnLevel[LevelIdx-1];
+			SetActorLocation(StartSpawnLocation);
+			LeeXROrigin->SetRelativeRotation(NextLoc.ZRotations[LevelIdx-1]);
+		}
+	}
 
 	Super::BeginPlay();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	FString CurrentLevel = GetWorld()->GetMapName();
+
+
+	bool IsHome = CurrentLevel.EndsWith("HomeMenu");
+
+
+	XRHandLeft = HandInitialize(HandType, true);
+	XRHandRight = HandInitialize(HandType, false);
+
+	//Camera->bLockToHmd = !IsHome;
+
+	//HandPhysicsLeft->SetHiddenInGame(!IsHome);
+	//HandPhysicsRight->SetHiddenInGame(!IsHome);
+
+
+
 
 	ADDMEMORYSTAT(this, STAT_ICTUCharacterMemory);
 	InitializationContext(GetWorld(), DefaultMappingContext);
 	InitializationContext(GetWorld(), HandMappingContext, 1);
 
-	//LeeXRInitMappingContext(this,DefaultMappingContext);
-	//LeeXRInitMappingContext(this, HandMappingContext);
-
-	//Set Tracking Origin to FLoor
-	bool isEnable = UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled();
-
-	if (isEnable)
-	{
-		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::LocalFloor);
-
-		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
-	}
 
 
+	//Init VR Origin
+	InitVRTrackingOrigin();
+
+
+	//init COntraints
+	//InitPhysicsContraints();
+
+	//HandPhysicsRight->SetAllBodiesBelowSimulatePhysics(TEXT("hand_r"), true);
+	//HandPhysicsLeft->SetAllBodiesBelowSimulatePhysics(TEXT("hand_l"), true);
+
+	//InitPhysicsAnimation();
+
+	LEE_LOG(LogLeeXRCharacter, Log, "Begin Play");
+	//HandPhysicsRight->SetAllBodiesBelowPhysicsBlendWeight(TEXT("hand_r"), .15f);
 }
 
 void ALeeXRCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -155,6 +320,24 @@ void ALeeXRCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	///Reset Profile Memories
 	SET_MEMORY_STAT(STAT_ICTUCharacter, 0);
+
+	MemoriesSize = 0;
+	SET_MEMORY_STAT(STAT_ICTUMV_TotalMemories, 0);
+
+}
+
+void ALeeXRCharacter::OnHMDOrientReset()
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+	//UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
+}
+
+void ALeeXRCharacter::OnHMDLevelChanged_Implementation(const FString& NewLevelName)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+	//Set Tracking Origin to FLoor
+	InitVRTrackingOrigin();
+
 }
 
 #if WITH_EDITOR
@@ -201,7 +384,12 @@ void ALeeXRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	{
 		// Bind the action to the delegate
 		EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Started, this, &ALeeXRCharacter::OnMoving);
-		//EnhancedInputComponent->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ALeeXRCharacter::OnMoving);
+
+		EnhancedInputComponent->BindAction(IA_RMenuToogle, ETriggerEvent::Started, this, &ALeeXRCharacter::OnResetOrientation);
+		EnhancedInputComponent->BindAction(IA_Turn, ETriggerEvent::Started, this, &ALeeXRCharacter::OnTurn);
+
+		EnhancedInputComponent->BindAction(IA_TestAct, ETriggerEvent::Started, this, &ALeeXRCharacter::TestCmd);
+		EnhancedInputComponent->BindAction(IA_TestAct, ETriggerEvent::Completed, this, &ALeeXRCharacter::TestCmd);
 
 		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Started, this, &ALeeXRCharacter::OnHandGrabing);
 		//EnhancedInputComponent->BindAction(IA_GraspLeft, ETriggerEvent::Completed, this, &ALeeXRCharacter::OnHandRelease);
@@ -262,6 +450,62 @@ void ALeeXRCharacter::OnHandGrabing(const FInputActionInstance& ActionInstance)
 	}
 }
 
+void ALeeXRCharacter::OnResetOrientation()
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+	//UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
+	//Menu
+
+	LeeScreenLog("Reset Orientation", FColor::Green);
+}
+
+void ALeeXRCharacter::OnTurn(const FInputActionInstance& ActionInstance)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	float ActValue = ActionInstance.GetValue().Get<float>();
+
+	//LeeScreenLog("Turn : %f", FColor::Green,ActValue);
+
+
+	OnSnapTurn(ActValue);
+
+}
+
+void ALeeXRCharacter::OnSnapTurn(float inValue)
+{
+	float Yaw = inValue > 0 ? RotateSpd : -RotateSpd;
+	//FRotator NewRotation = CurrentRotation + FRotator(0.0f, Yaw, 0.0f);
+
+	FVector ActorLoc = GetActorLocation();
+	FRotator ActorRot = LeeXROrigin->GetRelativeRotation();// GetActorRotation();
+
+	FRotator Combine = UKismetMathLibrary::ComposeRotators(ActorRot, FRotator(0.0f, Yaw, 0.0f));
+
+	FVector CamLoc = LeeXRGetWorldLocation(Camera);
+	FTransform RelativeTransform = Camera->GetRelativeTransform();
+
+	FTransform NewTransform = UKismetMathLibrary::MakeTransform(ActorLoc, Combine, FVector::OneVector);
+
+	AddActorWorldRotation(FRotator(0.0f, Yaw, 0.0f));
+
+	FTransform NewTrans = UKismetMathLibrary::ComposeTransforms(RelativeTransform, NewTransform);
+	FVector Minus = CamLoc - NewTrans.GetLocation();
+	FRotator Result = FRotator(ActorRot) + FRotator(0,Yaw,0);
+	//SetActorLocation(Minus + ActorLoc);
+	//FRotator Result= UKismetMathLibrary::MakeRotFromZ(Minus - ActorLoc);
+	LeeXROrigin->SetRelativeRotation(Result);
+}
+
+void ALeeXRCharacter::TestCmd(const FInputActionInstance& ActionInstance)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	float gValue = ActionInstance.GetValue().Get<float>();
+	OnLeeXRTest.Broadcast(gValue);
+
+}
+
 // Initialize the hands
 ALeeXRHandBase* ALeeXRCharacter::HandInitialize(ELeeXRHandType inType,bool isLeft)
 {
@@ -273,23 +517,60 @@ ALeeXRHandBase* ALeeXRCharacter::HandInitialize(ELeeXRHandType inType,bool isLef
 	}
 	
 	ULeeXRHandDataAsset* Data = isLeft ? DataLeft : DataRight;
-
+	USkeletalMeshComponent* HandPhysics = isLeft ? HandPhysicsLeft : HandPhysicsRight;
+	FName HandName = isLeft ? "hand_l" : "hand_r";
 	// Initialize the hand actor
 	switch (inType)
 	{
 		case ELeeXRHandType::LeeXRController: {
-			return InitializeHandActor<ALeeXRHandController>(Data->Assets.Controller);
+			InitializeHandActor<ALeeXRHandController>(Data->Assets.Controller);
+			break;
 		}
 		case ELeeXRHandType::LeeXRHandTracking: {
-			return InitializeHandActor<ALeeXRHandTracking>(Data->Assets.Tracking);
+			InitializeHandActor<ALeeXRHandTracking>(Data->Assets.Tracking);
+			break;
 		}
 		case ELeeXRHandType::LeeXRHandPhysics: {
-			return InitializeHandActor<ALeeXRHandPhysics>(Data->Assets.Physics);
+			InitializeHandActor<ALeeXRHandPhysics>(Data->Assets.Physics);
+			break;
 		}
 	}
+
+	//FTimerHandle StackTimeHander;
+	//GetWorld()->GetTimerManager().SetTimer(StackTimeHander, 
+	//	[this,isLeft,HandPhysics,HandName]() {
+	//		InitPhysicsContraints(isLeft);
+
+	//		HandPhysics->SetAllBodiesBelowSimulatePhysics(HandName, true);
+
+	//		InitPhysicsAnimation(isLeft);
+
+	//		GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
+	//	},
+	//	1.0f, false,1.f);
+
 	return nullptr;
 
 }
 
+void ALeeXRCharacter::InitSpawnLocation()
+{
+
+}
+
+void ALeeXRCharacter::InitVRTrackingOrigin()
+{
+	//Set Tracking Origin to FLoor
+	bool isEnable = UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled();
+
+	if (isEnable)
+	{
+		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::LocalFloor);
+		UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), TEXT("vr.PixelDensity 1.0"));
+
+	}
+
+}
 
 
+#undef LOCTEXT_NAMESPACE

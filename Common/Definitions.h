@@ -7,6 +7,7 @@
 #include "Stats/StatsMisc.h"
 
 
+// Level Macro 
 #if UE_BUILD_SHIPPING
 #define DEBUG_LOG 0
 #define LEE_PROFILE_LEVEL 0
@@ -18,28 +19,21 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LeeXRMacro, Log, All);
 
-#if WITH_EDITOR
-#define LEE_CHECK(expr) checkSlow((expr))
-#else
-#define LEE_CHECK(expr) check((expr)) 
-#endif
-
-
-
 #define TAU 6.2831855
 
 extern int64 allocatedSize;
 
-
+// Memory Stat
 #define REGISTER_LEESTAT(StatName,GroupId,StatId)	\
 DECLARE_STATS_GROUP(TEXT(StatName), GroupId,StatId) \
 DECLARE_CYCLE_STAT(TEXT(StatName), STAT_constant, GroupId);
 
-
+//Global Stat Group
 #if LEE_PROFILE_LEVEL
 REGISTER_LEESTAT("LeeXR_Profiling", STATGROUP_ICTUMV, STATCAT_ICTUMV);
 #endif
 
+//Stat Group
 #if STATS 
 
 #define LEE_SCOPE_CYCLE_COUNTER(STATNAME)									\
@@ -71,13 +65,18 @@ FPlatformMemory::EMemoryCounterRegion::MCR_Invalid);
 
 extern float  MemoriesSize;
 
-DECLARE_MEMORY_STAT_EXTERN(TEXT("ICTUMV_TotalMemories"), STAT_ICTUMV_TotalMemories, STATGROUP_ICTUMV, );
-DEFINE_STAT(STAT_ICTUMV_TotalMemories);
+DECLARE_MEMORY_STAT_POOL_EXTERN(TEXT("ICTUMV_TotalMemories"), STAT_ICTUMV_TotalMemories, STATGROUP_ICTUMV, FPlatformMemory::MCR_Physical, );
 
+// Memory Stat
 
 #define ADDMEMORYSTAT(inObject,ClassStat)	\
 	float ResourceSize = inObject->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal);	\
-	MemoriesSize += ResourceSize;	\
 	INC_MEMORY_STAT_BY(ClassStat, ResourceSize);\
+	MemoriesSize += ResourceSize;	\
 	INC_MEMORY_STAT_BY(STAT_ICTUMV_TotalMemories, MemoriesSize);
 
+#define REMOVEMEMORYSTAT(inObject,ClassStat)	\
+	float ResourceSize = inObject->GetResourceSizeBytes(EResourceSizeMode::EstimatedTotal);	\
+	DEC_MEMORY_STAT_BY(ClassStat, ResourceSize);\
+	MemoriesSize -= ResourceSize;	\
+	DEC_MEMORY_STAT_BY(STAT_ICTUMV_TotalMemories, ResourceSize);

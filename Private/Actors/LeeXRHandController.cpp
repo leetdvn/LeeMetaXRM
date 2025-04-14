@@ -15,16 +15,9 @@ ALeeXRHandController::ALeeXRHandController(const FObjectInitializer& ObjectIniti
 	HandSkeletal = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandSkeletal"));
 	HandSkeletal->SetupAttachment(MotionController);
 
-	HandDebug = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandDebug"));
-	HandDebug->SetupAttachment(MotionController);
 	//GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphereCollison"));
 	//GrabSphere->SetupAttachment(HandSkeletal);
 	//Set Init Hand Left or Right
-	
-	CubeConstraint = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CubeConstraint"));
-	CubeConstraint->SetupAttachment(MotionController);
-	CubeConstraint->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-
 	GrabsContraint = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("GrabsContraint"));
 	GrabsContraint->SetupAttachment(MotionController);
 
@@ -49,20 +42,6 @@ void ALeeXRHandController::SetPhysicsAllBodyBlendWeight(float inWeight)
 
 
 	}
-}
-
-void ALeeXRHandController::OnGrabOneHand()
-{
-	Super::OnGrabOneHand();
-	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
-
-}
-
-void ALeeXRHandController::OnGrabOneHandRelease()
-{
-	Super::OnGrabOneHandRelease();
-	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
-
 }
 
 void ALeeXRHandController::OnGrabObject()
@@ -138,7 +117,9 @@ void ALeeXRHandController::OnInputActionMove(const FInputActionInstance& ActionI
 
 void ALeeXRHandController::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, const FInputActionInstance ActionInstance)
 {
+	Super::SetFingerAnimationPose(inComponet, ActionInstance);
 
+	LEE_SCOPE_CYCLE_COUNTER(ICTUController);
 }
 
 /// <summary>
@@ -147,10 +128,6 @@ void ALeeXRHandController::SetFingerAnimationPose(USkeletalMeshComponent* inComp
 void ALeeXRHandController::InittializeSetup()
 {
 	Super::InittializeSetup();
-
-	//if(HandSkeletal->DoesSocketExist(TEXT("palm_r")))
-	//	GrabSphere->AttachToComponent(HandSkeletal, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "palm_r");
-	//GrabSphere->SetRelativeLocation(FVector(0.0f, 2.5f, -2.5f));
 
 	if(HandSkeletal->DoesSocketExist(TEXT("Index3")))
 		WidgetInteraction->SetupAttachment(HandSkeletal,TEXT("Index3"));
