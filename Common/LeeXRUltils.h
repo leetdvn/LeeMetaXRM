@@ -49,9 +49,17 @@ public:
 	}
 };
 
+
+
+
 namespace LeeXRUltils
 {
-
+	/// <summary>
+	/// String to Enum
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="enumStr"></param>
+	/// <returns></returns>
 	template<class T>
 	inline T LeeXRGetEnumValueByString(const FString& enumStr) {
 		int32 Index = StaticEnum<T>()->GetValueByName(*enumStr);
@@ -59,6 +67,15 @@ namespace LeeXRUltils
 		return result;
 	}
 
+	/// <summary>
+	/// Spawn Actor
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="inContextObject"></param>
+	/// <param name="inPath"></param>
+	/// <param name="Location"></param>
+	/// <param name="Rotation"></param>
+	/// <returns></returns>
 	template<class T>
 	inline T* LeeXRSPawnActorBP(UObject* inContextObject, const FString inPath, FVector Location=FVector::ZeroVector, FRotator Rotation= FRotator::ZeroRotator) {
 		
@@ -74,6 +91,15 @@ namespace LeeXRUltils
 		return nullptr;
 	}
 
+	/// <summary>
+	/// Spawn Actor
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="inContextObject"></param>
+	/// <param name="inClass"></param>
+	/// <param name="Location"></param>
+	/// <param name="Rotation"></param>
+	/// <returns></returns>
 	template<class T>
 	FORCEINLINE T* LeeXRSPawnActorBP(UObject* inContextObject, TSubclassOf<T> inClass, FVector Location = FVector::ZeroVector, FRotator Rotation = FRotator::ZeroRotator) 
 	{
@@ -90,11 +116,23 @@ namespace LeeXRUltils
 		return nullptr;
 	}
 
+	/// <summary>
+	/// Base Class
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="inObject"></param>
+	/// <returns></returns>
 	template<class T>
 	FORCEINLINE T* LeeXRGetBaseClass(UObject* inObject) {
 		return Cast<T>(inObject);
 	}
 
+	/// <summary>
+	/// Mapping Context
+	/// </summary>
+	/// <param name="inContextObject"></param>
+	/// <param name="inContext"></param>
+	/// <param name="inPriority"></param>
 	FORCEINLINE void LeeXRInitMappingContext(const UObject* inContextObject,const UInputMappingContext* inContext,int32 inPriority=0) {
 
 		UWorld* ContextObject = GEngine->GetWorldFromContextObject(inContextObject, EGetWorldErrorMode::LogAndReturnNull);
@@ -107,6 +145,11 @@ namespace LeeXRUltils
 		}
 	}
 
+	/// <summary>
+	/// Get Custom Player Controller
+	/// </summary>
+	/// <param name="inContextObject"></param>
+	/// <returns></returns>
 	FORCEINLINE APlayerController* LeeXRGetPlayerController(const UObject* inContextObject) {
 		UWorld* ContextObject = GEngine->GetWorldFromContextObject(inContextObject, EGetWorldErrorMode::LogAndReturnNull);
 		if (ContextObject) {
@@ -116,6 +159,12 @@ namespace LeeXRUltils
 	}
 
 
+	/// <summary>
+	/// Get Custom Character
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="inContextObject"></param>
+	/// <returns></returns>
 	template<typename T>
 	FORCEINLINE T* LeeXRGetCustomCharacter(const UObject* inContextObject) {
 		UWorld* ContextObject = GEngine->GetWorldFromContextObject(inContextObject, EGetWorldErrorMode::LogAndReturnNull);
@@ -225,7 +274,7 @@ namespace LeeXRUltils
 		Instance->UpdateOverridableBaseProperties();
 	}
 
-	//Dont Know if this is the right way to do it
+	//Tick Until
 	static void TickUntil(const UObject* WorldContextObject, ELeeTickUntilInputPin InputPin, struct FLatentActionInfo LatentInfo)
 	{
 		if (auto World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
@@ -249,6 +298,11 @@ namespace LeeXRUltils
 		}
 	}
 
+	/// <summary>
+	/// Get World Location Component
+	/// </summary>
+	/// <param name="inComponent"></param>
+	/// <returns></returns>
 	FORCEINLINE FVector LeeXRGetWorldLocation(const USceneComponent* inComponent) {
 		return inComponent->GetComponentToWorld().GetLocation();
 	}
@@ -260,7 +314,13 @@ namespace LeeXRUltils
 		}
 	}
 
-
+	/// <summary>
+	/// Look at component
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <param name="inContextObject"></param>
+	/// <param name="TargetComponent"></param>
+	/// <param name="isYawOnly"></param>
 	template<typename T>
 	FORCEINLINE void LookAtComponent(const UObject* inContextObject,T* TargetComponent, bool isYawOnly)
 	{
@@ -288,6 +348,12 @@ namespace LeeXRUltils
 		}
 	}
 
+	/// <summary>
+	/// Get Game Config
+	/// </summary>
+	/// <param name="ConfigName"></param>
+	/// <param name="ClassName"></param>
+	/// <param name="inValue"></param>
 	FORCEINLINE void LeeXRSetGameConfigStr(const FString ConfigName,const FString ClassName,const FString inValue) {
 		if (GConfig)
 		{
@@ -304,6 +370,12 @@ namespace LeeXRUltils
 		}
 	}
 
+	/// <summary>
+	/// Set Game Config
+	/// </summary>
+	/// <param name="ConfigName"></param>
+	/// <param name="ClassName"></param>
+	/// <param name="inValue"></param>
 	FORCEINLINE void LeeXRSetGameConfigInt(const FString ConfigName, const FString ClassName, int32 inValue) {
 		if (GConfig)
 		{

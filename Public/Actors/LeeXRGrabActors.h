@@ -53,6 +53,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Components", meta = (AllowPrivateAccess = "true", DisplayName = "AbilitySystem"))
 	UAbilitySystemComponent* AbilityComponent;
 
+#pragma region Virtual Functions
 
 	virtual void OnGrabObjects(UMotionControllerComponent* inComponent) override;
 
@@ -64,6 +65,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+#pragma endregion
+
 
 private:
 
