@@ -138,7 +138,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FLeeXROnPoseMesh OnPoseMesh;
 
-	void InitPhysicsContraints(bool isLeft=true);
+	void InitPhysicsContraints(ALeeXRHandBase* inHand);
 
 	void InitPhysicsAnimation(bool isLeft = true);
 
