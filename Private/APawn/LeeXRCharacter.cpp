@@ -109,7 +109,7 @@ void ALeeXRCharacter::CalculateMotionControllerVelocities()
 void ALeeXRCharacter::UpdateClimbing()
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
-
+	
 	FVector AccumulatedClimbVelocity = FVector::ZeroVector;
 
 	if (IsValid(HeldLeftObject.Get()))
@@ -184,6 +184,18 @@ void ALeeXRCharacter::InitPhysicsAnimation(bool isLeft)
 		Anim->SetStrengthMultiplyer(1.0f);
 		//LEE_LOG()
 		Anim->ApplyPhysicalAnimationSettingsBelow(SideName, *AnimData);
+	}
+}
+
+void ALeeXRCharacter::SetPhysicsEnable(bool isLeft, bool inOnOff)
+{
+	USkeletalMeshComponent* HandPhysics = isLeft ? HandPhysicsLeft : HandPhysicsRight;
+
+	if (HandPhysics)
+	{
+		FString HandName = isLeft ? "hand_l" : "hand_r";
+		HandPhysics->SetAllBodiesBelowSimulatePhysics(*HandName, inOnOff);
+
 	}
 }
 
@@ -278,7 +290,20 @@ void ALeeXRCharacter::BeginPlay()
 	Super::BeginPlay();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
-
+	//Trace Grabable Actor Enable
+	if (bIsTraceGrabable)
+	{
+		GetWorld()->GetTimerManager().SetTimer(
+			TimeTraceGrabableHandle,
+			[this]() {
+				if (ALeeXRCharacter::TraceForwardGrabableActor()) {
+					LeeScreenLog("Trace Grabable Actor", FColor::Green);
+				}
+			},
+			0.5f,
+			true
+		);
+	}
 	///Initialize Hand Location Motion controller
 	XRHandLeft = HandInitialize(HandType, true);
 	XRHandRight = HandInitialize(HandType, false);
@@ -332,6 +357,15 @@ void ALeeXRCharacter::BeginPlay()
 	//HandPhysicsRight->SetAllBodiesBelowPhysicsBlendWeight(TEXT("hand_r"), .15f);
 }
 
+void ALeeXRCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	if (!bIsTraceGrabable) return;
+
+}
+
 void ALeeXRCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
@@ -348,7 +382,7 @@ void ALeeXRCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ALeeXRCharacter::OnHMDOrientReset()
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
-	//UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
+	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
 }
 
 void ALeeXRCharacter::OnHMDLevelChanged_Implementation(const FString& NewLevelName)
@@ -359,7 +393,41 @@ void ALeeXRCharacter::OnHMDLevelChanged_Implementation(const FString& NewLevelNa
 
 }
 
+bool ALeeXRCharacter::TraceForwardGrabableActor()
+{
+	FVector Start = Camera->GetComponentLocation(); // Start from the camera location
+	FVector ForwardVector = Camera->GetForwardVector(); // Get the forward direction
+	FVector End = Start + (ForwardVector * bTraceDistance); // Trace 1000 units forward
+
+	FHitResult HitResult;
+	FCollisionQueryParams TraceParams(FName(TEXT("Grabable")), true, this);
+	TraceParams.bTraceComplex = false;
+	TraceParams.bReturnPhysicalMaterial = false;
+
+	// Perform the line trace
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECC_Visibility, // Trace channel
+		TraceParams
+	);
+
+	if (!bHit) return bHit;
+	else
+	{
+		// Log the hit location
+		UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *HitResult.Location.ToString());
+	}
+
+	// Optional: Draw debug line
+	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 3.0f, 0, 1.0f);
+
+	return bHit;
+}
+
 #if WITH_EDITOR
+
 void ALeeXRCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -379,18 +447,6 @@ void ALeeXRCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChan
 	}
 }
 #endif
-// Called every frame
-void ALeeXRCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
-	///Climbing Option
-	/*{
-		CalculateMotionControllerVelocities();
-		UpdateClimbing();
-	}*/
-}
 
 // Called to bind functionality to input
 void ALeeXRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

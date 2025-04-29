@@ -142,6 +142,8 @@ public:
 
 	void InitPhysicsAnimation(bool isLeft = true);
 
+	void SetPhysicsEnable(bool isLeft = true,bool inOnOff=false);
+
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	UAnimInstance* GetPhysicsAnimInstance(bool isLeft);
 
@@ -167,10 +169,25 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	/// <summary>
+	/// Called every frame
+	/// </summary>
+	/// <param name="DeltaTime"></param>
+	virtual void Tick(float DeltaTime) override;
+
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	virtual void OnHMDOrientReset() override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Trace")
+	bool bIsTraceGrabable = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Trace")
+	float bTraceDistance = 1000.f;
+
+	FTimerHandle TimeTraceGrabableHandle;
+
+	bool TraceForwardGrabableActor();
 
 
 #if WITH_EDITOR
@@ -252,8 +269,6 @@ protected:
 #pragma endregion Input
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
