@@ -24,6 +24,7 @@
 #include <PoseableMeshComponent.h>
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include <GameInstance/LeeXRGameInstance.h>
+#include <Actors/LeeXRGrabActors.h>
 
 using namespace LeeXRUltils;
 
@@ -296,8 +297,25 @@ void ALeeXRCharacter::BeginPlay()
 		GetWorld()->GetTimerManager().SetTimer(
 			TimeTraceGrabableHandle,
 			[this]() {
-				if (ALeeXRCharacter::TraceForwardGrabableActor()) {
-					LeeScreenLog("Trace Grabable Actor", FColor::Green);
+
+				TArray<ALeeXRGrabActors*> GrabableActors= TArray<ALeeXRGrabActors*>();
+				bool InCameraView = DetectGrabaleActorInCameraView<ALeeXRGrabActors>(GrabableActors);
+				if (InCameraView && GrabableActors.Num() > 0) {
+					LeeScreenLog("Detected Grabable %d", FColor::Green, GrabableActors.Num());
+
+					//Set the Custom Depth Stencil Value
+					#pragma omp parallel for
+					{
+						for (auto GrabableActor : GrabableActors)
+						{
+							if (auto MeshComp = GrabableActor->GetActorMesh())
+							{
+								MeshComp->SetRenderCustomDepth(true);
+								MeshComp->SetCustomDepthStencilValue(1);
+
+							}
+						}
+					}
 				}
 			},
 			0.5f,
@@ -362,7 +380,6 @@ void ALeeXRCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
-	if (!bIsTraceGrabable) return;
 
 }
 
@@ -413,15 +430,22 @@ bool ALeeXRCharacter::TraceForwardGrabableActor()
 		TraceParams
 	);
 
-	if (!bHit) return bHit;
-	else
+	if (!bHit) {
+		// Log the miss
+
+
+		return bHit;
+	}
+
+	// Check if the hit actor is a grabbable actor
 	{
 		// Log the hit location
 		UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *HitResult.Location.ToString());
+		// Optional: Draw debug line
+		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 3.0f, 0,1.f);
+
 	}
 
-	// Optional: Draw debug line
-	DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 3.0f, 0, 1.0f);
 
 	return bHit;
 }

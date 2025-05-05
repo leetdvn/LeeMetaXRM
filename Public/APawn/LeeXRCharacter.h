@@ -185,10 +185,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Trace")
 	float bTraceDistance = 1000.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Trace")
+	float bTraceRadius = 400.f;
+
+
 	FTimerHandle TimeTraceGrabableHandle;
 
 	bool TraceForwardGrabableActor();
 
+	template<typename T>
+	bool DetectGrabaleActorInCameraView(TArray<T*> & OutStaticMeshes);
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -326,6 +332,56 @@ private:
 	//Init VR Tracking
 	void InitVRTrackingOrigin();
 };
+
+template<typename T>
+inline bool ALeeXRCharacter::DetectGrabaleActorInCameraView(TArray<T*>& OutTargets)
+{
+	if (!Camera) return false;
+
+	// Camera location and forward vector
+	FVector CameraLocation = Camera->GetComponentLocation();
+	FVector CameraForward = Camera->GetForwardVector();
+
+	// Define the trace end point
+	FVector TraceEnd = CameraLocation + (CameraForward * bTraceDistance);
+
+	// Perform a sphere trace to detect objects in front of the camera
+	TArray<FHitResult> HitResults;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this); // Ignore self
+
+	if (auto* World = GetWorld())
+	{
+		bool bHit = World->SweepMultiByChannel(
+			HitResults,
+			CameraLocation,
+			TraceEnd,
+			FQuat::Identity,
+			ECC_Visibility, // Collision channel
+			FCollisionShape::MakeSphere(bTraceRadius), // Adjust radius as needed
+			QueryParams
+		);
+
+		if (bHit)
+		{
+			//Parallel for each hit result
+			#pragma omp parallel for
+			{
+				for (const FHitResult& Hit : HitResults)
+				{
+					// Check if the hit object
+					T* Object = Cast<T>(Hit.GetActor());
+					if (Object)
+					{
+						OutTargets.Add(Object);
+						// Optional: Draw debug sphere at the hit location
+					}
+				}
+			}
+		}
+	}
+	return OutTargets.Num() > 0;
+}
 
 template<typename T>
 inline ALeeXRHandBase* ALeeXRCharacter::InitializeHandActor(const FString inHandPath)
