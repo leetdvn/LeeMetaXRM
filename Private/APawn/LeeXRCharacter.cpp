@@ -291,7 +291,7 @@ void ALeeXRCharacter::BeginPlay()
 	Super::BeginPlay();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
 
-	//Trace Grabable Actor Enable
+	// Runtime Trace Grabable Actor Enable  Timer by Event
 	if (bIsTraceGrabable)
 	{
 		GetWorld()->GetTimerManager().SetTimer(
@@ -312,13 +312,12 @@ void ALeeXRCharacter::BeginPlay()
 							{
 								MeshComp->SetRenderCustomDepth(true);
 								MeshComp->SetCustomDepthStencilValue(1);
-
 							}
 						}
 					}
 				}
 			},
-			0.5f,
+			bTraceRate,
 			true
 		);
 	}

@@ -179,14 +179,17 @@ protected:
 
 	virtual void OnHMDOrientReset() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Trace")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Trace", meta = (DisplayName = "TraceEnable"))
 	bool bIsTraceGrabable = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Trace")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Trace", meta = (DisplayName = "TraceDistance"))
 	float bTraceDistance = 1000.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Trace")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Trace", meta = (DisplayName = "TraceRadius"))
 	float bTraceRadius = 400.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Trace", meta = (DisplayName = "TraceRate", ClampMax = "1.0", ClampMin = "0.1"))
+	float bTraceRate = .5f;
 
 
 	FTimerHandle TimeTraceGrabableHandle;
