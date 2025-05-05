@@ -239,14 +239,15 @@ void ALeeXRHandBase::SetFingerAnimationPose(USkeletalMeshComponent* inComponet, 
 		if (ActName == this->IA_FingerPoint->GetName())
 		{
 			AnimIns->PoseAlphaPoint = PoseValueStartCancel;
+			//LeeScreenLog("Point %f", FColor::Green, PoseValueStartCancel);
 		}
-		else if (ActName == this->IA_CurlIndex->GetName())
-		{
+		else if (ActName == this->IA_CurlIndex->GetName()) {
 			AnimIns->PoseAlphaIndexCurl = PoseValueCancelCompleted;
+			//LeeScreenLog("Curl Index %f", FColor::Green, PoseValueCancelCompleted);
 		}
 		else if (ActName == this->IA_HandThumpUp->GetName())
 		{
-			AnimIns->CurrentPoseAlphaThumbUp = PoseValueStartCancel;
+			AnimIns->PoseAlphaThumbUp = PoseValueStartCancel;
 		}
 		else if (ActName == this->IA_Grasp->GetName())
 		{
@@ -385,6 +386,7 @@ void ALeeXRHandBase::OnGrabObject()
 					bIsHeld = true;
 					OnHandGrabledEvent.Broadcast();
 					CurrentGrabObject->OnGrabObjects(MotionController);
+					XRCharacter->SetPhysicsEnable(IsHandLeft(), true);
 					//LeeScreenLog("Grabbing 2 %s", FColor::Green, *Actor->GetName());
 					break;
 				}
@@ -414,6 +416,8 @@ void ALeeXRHandBase::OnReleaseObject()
 	CurrentGrabObject = nullptr;
 	bIsHeld = false;
 
+	if(XRCharacter != nullptr)
+		XRCharacter->SetPhysicsEnable(IsHandLeft(), false);
 }
 
 void ALeeXRHandBase::ToogleWidgetInteraction(bool isEnable)

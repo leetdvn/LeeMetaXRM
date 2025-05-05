@@ -24,6 +24,7 @@
 #include <PoseableMeshComponent.h>
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include <GameInstance/LeeXRGameInstance.h>
+#include <Actors/LeeXRGrabActors.h>
 
 using namespace LeeXRUltils;
 
@@ -109,7 +110,7 @@ void ALeeXRCharacter::CalculateMotionControllerVelocities()
 void ALeeXRCharacter::UpdateClimbing()
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
-
+	
 	FVector AccumulatedClimbVelocity = FVector::ZeroVector;
 
 	if (IsValid(HeldLeftObject.Get()))
@@ -146,19 +147,21 @@ void ALeeXRCharacter::UpdateClimbing()
 
 }
 
-void ALeeXRCharacter::InitPhysicsContraints(bool isLeft)
+void ALeeXRCharacter::InitPhysicsContraints(ALeeXRHandBase* inHand)
 {
-	if (!IsValid(XRHandLeft) || !IsValid(XRHandRight)) return;
-
-	if (auto Hand = isLeft ? XRHandLeft : XRHandRight)
+	if (inHand)
 	{
-		if (IsValid(Hand)) {
-			if (UPhysicsConstraintComponent* PhysicContraint = Hand->GetPhysicsContraint()) {
-				USkeletalMeshComponent* HandPhys = Hand->IsHandLeft() ? HandPhysicsLeft : HandPhysicsRight;
-				FString BoneName = Hand->IsHandLeft() ? "hand_l" : "hand_r";
-				PhysicContraint->SetConstrainedComponents(Hand->GetHandSkeletal(), *BoneName, HandPhys, *BoneName);
-			}
+		if (UPhysicsConstraintComponent* PhysicContraint = inHand->GetPhysicsContraint()) {
+			USkeletalMeshComponent* HandPhys = inHand->IsHandLeft() ? HandPhysicsLeft : HandPhysicsRight;
+			FString BoneName = inHand->IsHandLeft() ? "hand_l" : "hand_r";
+			PhysicContraint->SetConstrainedComponents(inHand->GetHandSkeletal(), *BoneName, HandPhys, *BoneName);
+
+			LEE_LOG(LogLeeXRHandController, Warning, "Init Physics Contraint Complted..");
 		}
+	}
+	else
+	{
+		LEE_LOG(LogLeeXRHandController, Warning, "Init Physics Contraint Failed..");
 	}
 }
 
@@ -182,6 +185,18 @@ void ALeeXRCharacter::InitPhysicsAnimation(bool isLeft)
 		Anim->SetStrengthMultiplyer(1.0f);
 		//LEE_LOG()
 		Anim->ApplyPhysicalAnimationSettingsBelow(SideName, *AnimData);
+	}
+}
+
+void ALeeXRCharacter::SetPhysicsEnable(bool isLeft, bool inOnOff)
+{
+	USkeletalMeshComponent* HandPhysics = isLeft ? HandPhysicsLeft : HandPhysicsRight;
+
+	if (HandPhysics)
+	{
+		FString HandName = isLeft ? "hand_l" : "hand_r";
+		HandPhysics->SetAllBodiesBelowSimulatePhysics(*HandName, inOnOff);
+
 	}
 }
 
@@ -253,6 +268,7 @@ EICTUActionType ALeeXRCharacter::GetCurrentActionType() const
 // Called when the game starts or when spawned
 void ALeeXRCharacter::BeginPlay()
 {
+	FVector StartSpawnLocation;
 
 	//Int Player Spawn Location
 	if (auto GameIns = GetGameInstance<ULeeXRGameInstance>())
@@ -265,14 +281,59 @@ void ALeeXRCharacter::BeginPlay()
 
 		if (NextLoc.SpawnLevel.IsValidIndex(LevelIdx))
 		{
-			FVector StartSpawnLocation = NextLoc.SpawnLevel[LevelIdx-1];
+			StartSpawnLocation = NextLoc.SpawnLevel[LevelIdx-1];
 			SetActorLocation(StartSpawnLocation);
 			LeeXROrigin->SetRelativeRotation(NextLoc.ZRotations[LevelIdx-1]);
+
 		}
 	}
 
 	Super::BeginPlay();
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	// Runtime Trace Grabable Actor Enable  Timer by Event
+	if (bIsTraceGrabable)
+	{
+		GetWorld()->GetTimerManager().SetTimer(
+			TimeTraceGrabableHandle,
+			[this]() {
+
+				TArray<ALeeXRGrabActors*> GrabableActors= TArray<ALeeXRGrabActors*>();
+				bool InCameraView = DetectGrabaleActorInCameraView<ALeeXRGrabActors>(GrabableActors);
+				if (InCameraView && GrabableActors.Num() > 0) {
+					LeeScreenLog("Detected Grabable %d", FColor::Green, GrabableActors.Num());
+
+					//Set the Custom Depth Stencil Value
+					#pragma omp parallel for
+					{
+						for (auto GrabableActor : GrabableActors)
+						{
+							if (auto MeshComp = GrabableActor->GetActorMesh())
+							{
+								MeshComp->SetRenderCustomDepth(true);
+								MeshComp->SetCustomDepthStencilValue(1);
+							}
+						}
+					}
+				}
+			},
+			bTraceRate,
+			true
+		);
+	}
+	///Initialize Hand Location Motion controller
+	XRHandLeft = HandInitialize(HandType, true);
+	XRHandRight = HandInitialize(HandType, false);
+	//if (HandPhysicsLeft || HandPhysicsRight)
+	//{
+	//	InitPhysicsContraints(XRHandLeft);
+	//	InitPhysicsContraints(XRHandRight);
+
+	//	HandPhysics->SetAllBodiesBelowSimulatePhysics(HandName, true);
+
+	//	//		InitPhysicsAnimation(isLeft);
+	//}
+
 
 	FString CurrentLevel = GetWorld()->GetMapName();
 
@@ -280,8 +341,8 @@ void ALeeXRCharacter::BeginPlay()
 	bool IsHome = CurrentLevel.EndsWith("HomeMenu");
 
 
-	XRHandLeft = HandInitialize(HandType, true);
-	XRHandRight = HandInitialize(HandType, false);
+
+
 
 	//Camera->bLockToHmd = !IsHome;
 
@@ -313,6 +374,14 @@ void ALeeXRCharacter::BeginPlay()
 	//HandPhysicsRight->SetAllBodiesBelowPhysicsBlendWeight(TEXT("hand_r"), .15f);
 }
 
+void ALeeXRCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+
+}
+
 void ALeeXRCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
@@ -329,7 +398,7 @@ void ALeeXRCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ALeeXRCharacter::OnHMDOrientReset()
 {
 	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
-	//UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
+	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
 }
 
 void ALeeXRCharacter::OnHMDLevelChanged_Implementation(const FString& NewLevelName)
@@ -340,7 +409,48 @@ void ALeeXRCharacter::OnHMDLevelChanged_Implementation(const FString& NewLevelNa
 
 }
 
+bool ALeeXRCharacter::TraceForwardGrabableActor()
+{
+	FVector Start = Camera->GetComponentLocation(); // Start from the camera location
+	FVector ForwardVector = Camera->GetForwardVector(); // Get the forward direction
+	FVector End = Start + (ForwardVector * bTraceDistance); // Trace 1000 units forward
+
+	FHitResult HitResult;
+	FCollisionQueryParams TraceParams(FName(TEXT("Grabable")), true, this);
+	TraceParams.bTraceComplex = false;
+	TraceParams.bReturnPhysicalMaterial = false;
+
+	// Perform the line trace
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECC_Visibility, // Trace channel
+		TraceParams
+	);
+
+	if (!bHit) {
+		// Log the miss
+
+
+		return bHit;
+	}
+
+	// Check if the hit actor is a grabbable actor
+	{
+		// Log the hit location
+		UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *HitResult.Location.ToString());
+		// Optional: Draw debug line
+		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 3.0f, 0,1.f);
+
+	}
+
+
+	return bHit;
+}
+
 #if WITH_EDITOR
+
 void ALeeXRCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -360,18 +470,6 @@ void ALeeXRCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChan
 	}
 }
 #endif
-// Called every frame
-void ALeeXRCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
-	///Climbing Option
-	/*{
-		CalculateMotionControllerVelocities();
-		UpdateClimbing();
-	}*/
-}
 
 // Called to bind functionality to input
 void ALeeXRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -516,6 +614,7 @@ ALeeXRHandBase* ALeeXRCharacter::HandInitialize(ELeeXRHandType inType,bool isLef
 		return nullptr;
 	}
 	
+	ALeeXRHandBase* HandResult = nullptr;
 	ULeeXRHandDataAsset* Data = isLeft ? DataLeft : DataRight;
 	USkeletalMeshComponent* HandPhysics = isLeft ? HandPhysicsLeft : HandPhysicsRight;
 	FName HandName = isLeft ? "hand_l" : "hand_r";
@@ -523,23 +622,26 @@ ALeeXRHandBase* ALeeXRCharacter::HandInitialize(ELeeXRHandType inType,bool isLef
 	switch (inType)
 	{
 		case ELeeXRHandType::LeeXRController: {
-			InitializeHandActor<ALeeXRHandController>(Data->Assets.Controller);
+			HandResult = InitializeHandActor<ALeeXRHandController>(Data->Assets.Controller);
 			break;
 		}
 		case ELeeXRHandType::LeeXRHandTracking: {
-			InitializeHandActor<ALeeXRHandTracking>(Data->Assets.Tracking);
+			HandResult= InitializeHandActor<ALeeXRHandTracking>(Data->Assets.Tracking);
 			break;
 		}
 		case ELeeXRHandType::LeeXRHandPhysics: {
-			InitializeHandActor<ALeeXRHandPhysics>(Data->Assets.Physics);
+			HandResult = InitializeHandActor<ALeeXRHandPhysics>(Data->Assets.Physics);
 			break;
 		}
 	}
 
+	InitPhysicsContraints(HandResult);
+	HandPhysics->SetAllBodiesBelowSimulatePhysics(HandName, true);
+	InitPhysicsAnimation(isLeft);
 	//FTimerHandle StackTimeHander;
 	//GetWorld()->GetTimerManager().SetTimer(StackTimeHander, 
-	//	[this,isLeft,HandPhysics,HandName]() {
-	//		InitPhysicsContraints(isLeft);
+	//	[this,isLeft,HandPhysics,HandName,HandResult]() {
+	//		InitPhysicsContraints(HandResult);
 
 	//		HandPhysics->SetAllBodiesBelowSimulatePhysics(HandName, true);
 
@@ -549,7 +651,7 @@ ALeeXRHandBase* ALeeXRCharacter::HandInitialize(ELeeXRHandType inType,bool isLef
 	//	},
 	//	1.0f, false,1.f);
 
-	return nullptr;
+	return HandResult;
 
 }
 

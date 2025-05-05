@@ -138,9 +138,11 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FLeeXROnPoseMesh OnPoseMesh;
 
-	void InitPhysicsContraints(bool isLeft=true);
+	void InitPhysicsContraints(ALeeXRHandBase* inHand);
 
 	void InitPhysicsAnimation(bool isLeft = true);
+
+	void SetPhysicsEnable(bool isLeft = true,bool inOnOff=false);
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	UAnimInstance* GetPhysicsAnimInstance(bool isLeft);
@@ -167,11 +169,35 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	/// <summary>
+	/// Called every frame
+	/// </summary>
+	/// <param name="DeltaTime"></param>
+	virtual void Tick(float DeltaTime) override;
+
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	virtual void OnHMDOrientReset() override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Trace", meta = (DisplayName = "TraceEnable"))
+	bool bIsTraceGrabable = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Trace", meta = (DisplayName = "TraceDistance"))
+	float bTraceDistance = 1000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Trace", meta = (DisplayName = "TraceRadius"))
+	float bTraceRadius = 400.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Trace", meta = (DisplayName = "TraceRate", ClampMax = "1.0", ClampMin = "0.1"))
+	float bTraceRate = .5f;
+
+
+	FTimerHandle TimeTraceGrabableHandle;
+
+	bool TraceForwardGrabableActor();
+
+	template<typename T>
+	bool DetectGrabaleActorInCameraView(TArray<T*> & OutStaticMeshes);
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -252,8 +278,6 @@ protected:
 #pragma endregion Input
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -311,6 +335,56 @@ private:
 	//Init VR Tracking
 	void InitVRTrackingOrigin();
 };
+
+template<typename T>
+inline bool ALeeXRCharacter::DetectGrabaleActorInCameraView(TArray<T*>& OutTargets)
+{
+	if (!Camera) return false;
+
+	// Camera location and forward vector
+	FVector CameraLocation = Camera->GetComponentLocation();
+	FVector CameraForward = Camera->GetForwardVector();
+
+	// Define the trace end point
+	FVector TraceEnd = CameraLocation + (CameraForward * bTraceDistance);
+
+	// Perform a sphere trace to detect objects in front of the camera
+	TArray<FHitResult> HitResults;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this); // Ignore self
+
+	if (auto* World = GetWorld())
+	{
+		bool bHit = World->SweepMultiByChannel(
+			HitResults,
+			CameraLocation,
+			TraceEnd,
+			FQuat::Identity,
+			ECC_Visibility, // Collision channel
+			FCollisionShape::MakeSphere(bTraceRadius), // Adjust radius as needed
+			QueryParams
+		);
+
+		if (bHit)
+		{
+			//Parallel for each hit result
+			#pragma omp parallel for
+			{
+				for (const FHitResult& Hit : HitResults)
+				{
+					// Check if the hit object
+					T* Object = Cast<T>(Hit.GetActor());
+					if (Object)
+					{
+						OutTargets.Add(Object);
+						// Optional: Draw debug sphere at the hit location
+					}
+				}
+			}
+		}
+	}
+	return OutTargets.Num() > 0;
+}
 
 template<typename T>
 inline ALeeXRHandBase* ALeeXRCharacter::InitializeHandActor(const FString inHandPath)
