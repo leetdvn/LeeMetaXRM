@@ -34,6 +34,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetSimulation(bool bSimulate) { ActorMesh->SetSimulatePhysics(bSimulate); }
 
+	UFUNCTION(BlueprintCallable)
+	void SetCustomDepthStencilValue(int32 inValue) { ActorMesh->SetCustomDepthStencilValue(inValue); }
+
+
+	UFUNCTION(BlueprintCallable)
+	void SetCustomDepth(bool bEnable);
+
+	UFUNCTION(BlueprintCallable)
+	bool IsCustomDepth() { return bIsCustomDepth; }
+
 	UStaticMeshComponent* GetActorMesh() { return ActorMesh; }
 
 protected:
@@ -45,6 +55,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	TObjectPtr<class UStaticMeshComponent> ActorMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
+	bool bIsCustomDepth = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Properties")
 	TObjectPtr<class UBoxComponent> GrabRegion;

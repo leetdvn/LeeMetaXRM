@@ -386,6 +386,7 @@ void ALeeXRHandBase::OnGrabObject()
 					bIsHeld = true;
 					OnHandGrabledEvent.Broadcast();
 					CurrentGrabObject->OnGrabObjects(MotionController);
+
 					XRCharacter->SetPhysicsEnable(IsHandLeft(), true);
 					//LeeScreenLog("Grabbing 2 %s", FColor::Green, *Actor->GetName());
 					break;

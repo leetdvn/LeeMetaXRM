@@ -26,9 +26,18 @@ ALeeXRPhysicsGrabableObject::ALeeXRPhysicsGrabableObject()
 void ALeeXRPhysicsGrabableObject::ConstructionEditor()
 {
 	if (!ShapePhysicsMesh->GetStaticMesh()) return;
-	MaterialIns = UKismetMaterialLibrary::CreateDynamicMaterialInstance(0, ShapePhysicsMesh->GetMaterial(0), TEXT("LeeXRMaterialDynamic"));
-	if (MaterialIns) {
-		//UKismetMaterialLibrary::SetMaterialInstanceScalarParameterValue(MaterialIns, TEXT("OnOff"), 1.f);
+	if (MaterialIns = ShapePhysicsMesh->CreateAndSetMaterialInstanceDynamic(0))
+	{
+		SetDisplayColor(StartColor);
+	}
+
+}
+
+void ALeeXRPhysicsGrabableObject::SetDisplayColor(FColor inColor)
+{
+	if (MaterialIns)
+	{
+		MaterialIns->SetVectorParameterValue(FName(*MaterialParamName), inColor);
 	}
 }
 
@@ -45,12 +54,16 @@ void ALeeXRPhysicsGrabableObject::BeginPlay()
 void ALeeXRPhysicsGrabableObject::OnGrabObjects(UMotionControllerComponent* inComponent)
 {
 	Super::OnGrabObjects(inComponent);
+
+	SetDisplayColor(FColor::Green);
 }
 
 void ALeeXRPhysicsGrabableObject::OnReleaseObjects(UMotionControllerComponent* inComponent)
 {
 	Super::OnReleaseObjects(inComponent);
 	LeeScreenLog("Release %s", FColor::Green, *inComponent->GetName());
+
+	//SetDisplayColor(StartColor);
 }
 
 void ALeeXRPhysicsGrabableObject::InitSettings()
@@ -58,9 +71,22 @@ void ALeeXRPhysicsGrabableObject::InitSettings()
 	Super::InitSettings();
 	//Set the Collision Profile
 	//ShapeCollisionMesh->SetCollisionProfileName(TEXT("Grabbable"));
+	ConstructionEditor();
 }
 
 
+
+void ALeeXRPhysicsGrabableObject::InitDynamicMaterial()
+{
+	if (MaterialIns == nullptr) {
+		MaterialIns = ShapePhysicsMesh->CreateAndSetMaterialInstanceDynamic(0);
+	}
+
+	MaterialIns->SetVectorParameterValue(FName(*MaterialParamName), StartColor);
+		//MaterialIns->SetVectorParameterValue(FName(*MaterialParamName), StartColor);
+
+	LeeScreenLog("Material %s", FColor::Green, *MaterialParamName);
+}
 
 // Called every frame
 void ALeeXRPhysicsGrabableObject::Tick(float DeltaTime)

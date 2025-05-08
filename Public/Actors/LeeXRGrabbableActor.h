@@ -94,6 +94,10 @@ public:
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties", meta = (DisplayName = "PhysicThreshold",ClampMin=50,ClampMax=100,DefaultsValue=75))
 	float PhysicsGrabThreshold=75.f;
 
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
+	bool bIsPhysicSimulate;
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Required")
 	TSubclassOf<UAnimInstance> AnimLayerClimb;
 

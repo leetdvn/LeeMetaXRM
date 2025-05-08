@@ -147,6 +147,27 @@ void ALeeXRCharacter::UpdateClimbing()
 
 }
 
+void ALeeXRCharacter::Spawn3DWidgetActor(TSubclassOf<AActor> inActor)
+{
+	LEE_SCOPE_CYCLE_COUNTER(ICTUCharacter);
+
+	{
+		FVector Start = Camera->GetComponentLocation(); // Start from the camera location
+		FVector ForwardVector = Camera->GetForwardVector(); // Get the forward direction
+		FVector SpawLocation = Start + (ForwardVector * 40.f); // Trace 1000 units forward
+		
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		if(auto World = GetWorld())
+		{
+			// Spawn the actor at the end location
+			Widget3DActor = World->SpawnActor<AActor>(inActor, SpawLocation, FRotator::ZeroRotator, SpawnParams);
+
+		}
+	}
+}
+
 void ALeeXRCharacter::InitPhysicsContraints(ALeeXRHandBase* inHand)
 {
 	if (inHand)
@@ -294,6 +315,7 @@ void ALeeXRCharacter::BeginPlay()
 	// Runtime Trace Grabable Actor Enable  Timer by Event
 	if (bIsTraceGrabable)
 	{
+		//Set Timer to detect grabable actor
 		GetWorld()->GetTimerManager().SetTimer(
 			TimeTraceGrabableHandle,
 			[this]() {
@@ -301,17 +323,19 @@ void ALeeXRCharacter::BeginPlay()
 				TArray<ALeeXRGrabActors*> GrabableActors= TArray<ALeeXRGrabActors*>();
 				bool InCameraView = DetectGrabaleActorInCameraView<ALeeXRGrabActors>(GrabableActors);
 				if (InCameraView && GrabableActors.Num() > 0) {
-					LeeScreenLog("Detected Grabable %d", FColor::Green, GrabableActors.Num());
+					
+					LEE_LOG(LogLeeXRCharacter, Log, "Grabable Actor Found %d", GrabableActors.Num());
 
 					//Set the Custom Depth Stencil Value
 					#pragma omp parallel for
 					{
 						for (auto GrabableActor : GrabableActors)
 						{
-							if (auto MeshComp = GrabableActor->GetActorMesh())
+							if (!GrabableActor->IsCustomDepth())
 							{
-								MeshComp->SetRenderCustomDepth(true);
-								MeshComp->SetCustomDepthStencilValue(1);
+								// Set the custom depth stencil value
+								GrabableActor->SetCustomDepth(true);
+
 							}
 						}
 					}

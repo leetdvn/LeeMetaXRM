@@ -32,6 +32,11 @@ public:
 	UPROPERTY(Transient, EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	TObjectPtr<UMaterialInstanceDynamic> MaterialIns;
 
+
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void SetDisplayColor(FColor inColor);
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -45,6 +50,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LeeXR Settings|Components")
 	TObjectPtr<class UStaticMeshComponent> ShapePhysicsMesh;
 
+	void InitDynamicMaterial();
 
 public:	
 	// Called every frame

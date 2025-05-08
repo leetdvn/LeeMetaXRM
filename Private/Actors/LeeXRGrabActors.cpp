@@ -24,6 +24,17 @@ ALeeXRGrabActors::ALeeXRGrabActors()
 	AbilityComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
+void ALeeXRGrabActors::SetCustomDepth(bool bEnable)
+{
+	if (ActorMesh) {
+		ActorMesh->SetRenderCustomDepth(bEnable);
+
+		int32 StencilValue = bEnable ? 1 : 0;
+		ActorMesh->SetCustomDepthStencilValue(StencilValue);
+		bIsCustomDepth = bEnable;
+	}
+}
+
 // Called when the game starts or when spawned
 void ALeeXRGrabActors::BeginPlay()
 {

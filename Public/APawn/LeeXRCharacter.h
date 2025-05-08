@@ -135,8 +135,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	USkeletalMeshComponent* GetHandPhysics(bool isLeft) const { return isLeft ? HandPhysicsLeft : HandPhysicsRight; }
 
+	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
+	void Spawn3DWidgetActor(TSubclassOf<AActor> inActor);
+
 	UPROPERTY(BlueprintAssignable)
 	FLeeXROnPoseMesh OnPoseMesh;
+
+	UPROPERTY(Transient)
+	TObjectPtr<AActor> Widget3DActor;
 
 	void InitPhysicsContraints(ALeeXRHandBase* inHand);
 

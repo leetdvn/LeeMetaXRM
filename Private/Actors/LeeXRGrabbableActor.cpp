@@ -354,10 +354,12 @@ void ALeeXRGrabbableActor::OnReleaseObjects(UMotionControllerComponent* inCompon
 				DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 				bIsheld = false;
 				if (auto* PrimitiveComp = FindComponentByClass<UStaticMeshComponent>())
-					PrimitiveComp->SetSimulatePhysics(true);
+					if(bIsPhysicSimulate)
+						PrimitiveComp->SetSimulatePhysics(true);
 
 				if (auto Skeletal = FindComponentByClass<USkeletalMeshComponent>()) {
-					Skeletal->SetSimulatePhysics(true);
+					if (bIsPhysicSimulate)
+						Skeletal->SetSimulatePhysics(true);
 				}
 				break;
 			}
@@ -406,6 +408,12 @@ void ALeeXRGrabbableActor::OnReleaseObjects(UMotionControllerComponent* inCompon
 void ALeeXRGrabbableActor::InitSettings()
 {
 	//Do Nothing
+
+	if (auto StaticMeshComp = FindComponentByClass<UStaticMeshComponent>())
+	{
+		StaticMeshComp->SetSimulatePhysics(bIsPhysicSimulate);
+	}
+
 }
 
 
