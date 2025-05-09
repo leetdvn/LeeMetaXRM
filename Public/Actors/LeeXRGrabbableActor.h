@@ -77,6 +77,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsTag(const FGameplayTag inObjectTag, bool isObject = true) const;
 
+	UFUNCTION()
+	bool IsTagString(const FString inObjectTag, bool isObject = true) const
+	{
+		return IsTag(FGameplayTag::RequestGameplayTag(FName(*inObjectTag)), isObject);
+	}
 	/// <summary>
 	/// Get Tag
 	/// </summary>
@@ -138,6 +143,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	UStaticMeshComponent* FindStaticMeshComponent(FString inName) const;
+
+	FGameplayTag GetTagElemental() const { return TagElemental; }
+
+	FGameplayTag GetTagObject() const { return TagObject; }
 #pragma endregion Functions
 	
 protected:

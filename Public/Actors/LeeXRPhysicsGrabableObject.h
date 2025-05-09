@@ -32,9 +32,19 @@ public:
 	UPROPERTY(Transient, EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties")
 	TObjectPtr<UMaterialInstanceDynamic> MaterialIns;
 
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Rotation", meta = (DisplayName = "RotationAble"))
+	bool bMoveable=false;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Rotation", meta = (DisplayName = "Rotation Inverse"))
+	bool bInverseRotation=false;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "LeeXR Settings|Properties|Rotation", meta = (DisplayName = "Rotation Speed"))
+	float RotationSpeed = 100.f;
 
 	UFUNCTION(BlueprintCallable, Category = "LeeXR|Func")
 	void SetDisplayColor(FColor inColor);
+
+	void TurnOffRotation();
 
 
 protected:
@@ -51,6 +61,9 @@ protected:
 	TObjectPtr<class UStaticMeshComponent> ShapePhysicsMesh;
 
 	void InitDynamicMaterial();
+
+	FTimerHandle MeshRotationTimer;
+	float RotationAngle = 0.f;
 
 public:	
 	// Called every frame

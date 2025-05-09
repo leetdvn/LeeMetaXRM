@@ -41,6 +41,15 @@ void ALeeXRPhysicsGrabableObject::SetDisplayColor(FColor inColor)
 	}
 }
 
+void ALeeXRPhysicsGrabableObject::TurnOffRotation()
+{
+	if (auto World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(MeshRotationTimer);
+	}
+
+}
+
 // Called when the game starts or when spawned
 void ALeeXRPhysicsGrabableObject::BeginPlay()
 {
@@ -48,7 +57,21 @@ void ALeeXRPhysicsGrabableObject::BeginPlay()
 	
 
 	//MaterialIns = ShapePhysicsMesh->CreateAndSetMaterialInstanceDynamic(0);
-
+	
+	if (bMoveable) {
+		if (auto World = GetWorld())
+		{
+			World->GetTimerManager().SetTimer(
+				MeshRotationTimer,
+				[this, World]() {
+					//Rotate the mesh
+					FRotator NewRot = ShapePhysicsMesh->GetComponentRotation();
+					RotationAngle += RotationSpeed * World->GetDeltaSeconds();
+					ShapePhysicsMesh->SetRelativeRotation(FRotator(NewRot.Pitch, bInverseRotation ? RotationAngle * -1 : RotationAngle ,NewRot.Roll));
+				},
+				0.1f, true);
+		}
+	}
 }
 
 void ALeeXRPhysicsGrabableObject::OnGrabObjects(UMotionControllerComponent* inComponent)
